@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import { CreateSubscriptionDialog } from "./CreateSubscriptionDialog";
 import { SubscriptionsDialogs } from "./SubscriptionsDialogs";
@@ -97,7 +98,7 @@ export default function SubscriptionsContent() {
         setOrganizations(data.organizations || []);
       }
     } catch (err) {
-      console.error("Error fetching organizations:", err);
+      appLogger.error("Error fetching organizations:", err);
     }
   };
 
@@ -195,10 +196,10 @@ export default function SubscriptionsContent() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Button
+            className="text-white hover:bg-white/10"
             size="icon"
             title="Volver al dashboard"
             variant="ghost"
-            className="text-white hover:bg-white/10"
             onClick={() => router.push("/admin/saas-management/dashboard")}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -221,9 +222,9 @@ export default function SubscriptionsContent() {
         </Button>
         <CreateSubscriptionDialog
           open={createOpen}
-          onOpenChange={setCreateOpen}
           organizations={organizations}
           onCreated={fetchSubscriptions}
+          onOpenChange={setCreateOpen}
         />
       </div>
 
@@ -244,28 +245,28 @@ export default function SubscriptionsContent() {
 
       <SubscriptionsFilterBar
         organizationFilter={organizationFilter}
+        organizations={organizations}
         statusFilter={statusFilter}
         tierFilter={tierFilter}
-        organizations={organizations}
         onOrganizationFilterChange={setOrganizationFilter}
         onStatusFilterChange={setStatusFilter}
         onTierFilterChange={setTierFilter}
       />
 
       <SubscriptionsTable
-        subscriptions={subscriptions}
-        loading={loading}
-        error={error}
-        totalCount={totalCount}
         currentPage={currentPage}
+        error={error}
+        loading={loading}
+        subscriptions={subscriptions}
+        totalCount={totalCount}
         totalPages={totalPages}
+        onCancelClick={setCancelConfirmId}
+        onDeleteClick={setDeleteConfirmId}
         onPageChange={setCurrentPage}
+        onReactivate={(id) => handleAction(id, "reactivate")}
         onViewDetails={(id) =>
           router.push(`/admin/saas-management/subscriptions/${id}`)
         }
-        onCancelClick={setCancelConfirmId}
-        onReactivate={(id) => handleAction(id, "reactivate")}
-        onDeleteClick={setDeleteConfirmId}
       />
 
       <SubscriptionsDialogs
@@ -273,10 +274,10 @@ export default function SubscriptionsContent() {
         deleteConfirmId={deleteConfirmId}
         deleteId={deleteId}
         deleteLoading={deleteLoading}
-        onCancelConfirmIdChange={setCancelConfirmId}
         onCancel={(id) => handleAction(id, "cancel")}
-        onDeleteConfirmIdChange={setDeleteConfirmId}
+        onCancelConfirmIdChange={setCancelConfirmId}
         onDelete={handleDelete}
+        onDeleteConfirmIdChange={setDeleteConfirmId}
       />
     </div>
   );

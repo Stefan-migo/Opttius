@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { quoteService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
-import { toast } from "sonner";
 
 import type { QuoteFormData } from "./CreateQuoteForm.types";
 
@@ -259,7 +260,7 @@ export function useQuoteSubmit(
       toast.success("Presupuesto creado exitosamente");
       onSuccess();
     } catch (error: unknown) {
-      console.error("Error creating quote:", error);
+      appLogger.error("Error creating quote:", error);
       toast.error(
         (error as Error).message || "Error al crear presupuesto",
       );

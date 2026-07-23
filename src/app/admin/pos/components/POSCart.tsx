@@ -1,12 +1,12 @@
 "use client";
 
+import { Minus, Percent, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import { memo, useCallback, useState } from "react";
-
-import { Minus, Plus, ShoppingCart, Trash2, Percent, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,12 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/utils";
 
-import type { POSCartItem } from "../types";
 import type { DiscountType } from "../hooks/usePOSDiscount";
+import type { POSCartItem } from "../types";
 
 interface POSCartProps {
   items: POSCartItem[];
@@ -166,10 +164,10 @@ export const POSCart = memo(function POSCart({
           <div className="space-y-2 p-2">
             {items.map((item, index) => (
               <CartItemRow
-                key={`${item.product.id}-${index}`}
                 item={item}
-                onUpdateQuantity={onUpdateQuantity}
+                key={`${item.product.id}-${index}`}
                 onRemove={onRemove}
+                onUpdateQuantity={onUpdateQuantity}
               />
             ))}
           </div>
@@ -198,10 +196,10 @@ export const POSCart = memo(function POSCart({
             <div className="flex justify-between text-sm">
               {!showDiscountInput ? (
                 <Button
+                  className="h-6 text-xs text-gray-500 -ml-2"
+                  size="sm"
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs text-gray-500 -ml-2"
                   onClick={() => setShowDiscountInput(true)}
                 >
                   <Percent className="h-3 w-3 mr-1" />
@@ -224,29 +222,29 @@ export const POSCart = memo(function POSCart({
                     </SelectContent>
                   </Select>
                   <Input
-                    type="number"
                     className="h-7 w-20 text-xs"
+                    max={discountType === "percentage" ? 100 : undefined}
+                    min={0}
                     placeholder={
                       discountType === "percentage" ? "0-100" : "Monto"
                     }
+                    type="number"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    min={0}
-                    max={discountType === "percentage" ? 100 : undefined}
                   />
                   <Button
-                    type="button"
-                    size="sm"
                     className="h-7"
+                    size="sm"
+                    type="button"
                     onClick={handleApplyDiscount}
                   >
                     OK
                   </Button>
                   <Button
+                    className="h-7"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="h-7"
                     onClick={() => setShowDiscountInput(false)}
                   >
                     <X className="h-3 w-3" />
@@ -258,10 +256,10 @@ export const POSCart = memo(function POSCart({
             {/* Clear discount button */}
             {hasDiscount && !showDiscountInput && (
               <Button
+                className="h-6 text-xs text-red-600 -ml-2"
+                size="sm"
                 type="button"
                 variant="ghost"
-                size="sm"
-                className="h-6 text-xs text-red-600 -ml-2"
                 onClick={handleClearDiscount}
               >
                 <X className="h-3 w-3 mr-1" />

@@ -9,44 +9,40 @@
  * - welcome.ts: account welcome, contact form, birthday promo
  */
 
-export {
-  sendAppointmentConfirmation,
-  sendAppointmentReminder,
-  sendAppointmentReminder2h,
-  sendAppointmentCancellation,
-  sendAppointmentRescheduled,
-  sendAppointmentFollowUpReminder,
-} from "./appointments";
 export type {
   AppointmentData,
-  AppointmentRescheduleData,
   AppointmentFollowUpData,
+  AppointmentRescheduleData,
 } from "./appointments";
-
-export { sendPrescriptionReady, sendPrescriptionExpiring } from "./prescriptions";
-export type { PrescriptionData } from "./prescriptions";
-
-export { sendWorkOrderReady } from "./workOrders";
-export type { WorkOrderData } from "./workOrders";
-
-export { sendQuoteSent, sendQuoteExpiring } from "./quotes";
-export type { QuoteData } from "./quotes";
-
-export { sendAccountWelcomeEmail, sendContactFormNotification, sendBirthdayPromo } from "./welcome";
-export type { CustomerData, ContactFormData, BirthdayPromoData } from "./welcome";
-
-import {
+export {
+  sendAppointmentCancellation,
   sendAppointmentConfirmation,
+  sendAppointmentFollowUpReminder,
   sendAppointmentReminder,
   sendAppointmentReminder2h,
-  sendAppointmentCancellation,
   sendAppointmentRescheduled,
-  sendAppointmentFollowUpReminder,
 } from "./appointments";
-import { sendPrescriptionReady, sendPrescriptionExpiring } from "./prescriptions";
+export type { PrescriptionData } from "./prescriptions";
+export { sendPrescriptionExpiring,sendPrescriptionReady } from "./prescriptions";
+export type { QuoteData } from "./quotes";
+export { sendQuoteExpiring,sendQuoteSent } from "./quotes";
+export type { BirthdayPromoData,ContactFormData, CustomerData } from "./welcome";
+export { sendAccountWelcomeEmail, sendBirthdayPromo,sendContactFormNotification } from "./welcome";
+export type { WorkOrderData } from "./workOrders";
+export { sendWorkOrderReady } from "./workOrders";
+
+import {
+  sendAppointmentCancellation,
+  sendAppointmentConfirmation,
+  sendAppointmentFollowUpReminder,
+  sendAppointmentReminder,
+  sendAppointmentReminder2h,
+  sendAppointmentRescheduled,
+} from "./appointments";
+import { sendPrescriptionExpiring,sendPrescriptionReady } from "./prescriptions";
+import { sendQuoteExpiring,sendQuoteSent } from "./quotes";
+import { sendAccountWelcomeEmail, sendBirthdayPromo,sendContactFormNotification } from "./welcome";
 import { sendWorkOrderReady } from "./workOrders";
-import { sendQuoteSent, sendQuoteExpiring } from "./quotes";
-import { sendAccountWelcomeEmail, sendContactFormNotification, sendBirthdayPromo } from "./welcome";
 
 export const opticaEmailTemplates = {
   sendAppointmentConfirmation,

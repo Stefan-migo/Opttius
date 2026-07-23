@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { appLogger } from "@/lib/logger";
+import { appLogger } from '@/lib/logger';
 
 import { resolveBranchByName } from "../resolvers";
 import type { ToolDefinition, ToolResult } from "../types";

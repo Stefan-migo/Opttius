@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { AuthenticationError, RateLimitError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createApiErrorResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 import { handleCreateCustomer } from "./customersCreateService";

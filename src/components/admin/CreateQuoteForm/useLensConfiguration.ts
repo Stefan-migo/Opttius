@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type React from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { useLensPriceCalculation } from "@/hooks/useLensPriceCalculation";
 import {
@@ -9,6 +10,7 @@ import {
   contactLensMatrixService,
   lensFamilyService,
 } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import {
   getCylinder,
   getDefaultPresbyopiaSolution,
@@ -18,7 +20,6 @@ import {
   hasAddition,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
-import { toast } from "sonner";
 
 import { MATERIAL_INDICES } from "./CreateQuoteForm.constants";
 import type { QuoteFormData } from "./CreateQuoteForm.types";
@@ -58,7 +59,7 @@ export function useLensConfiguration(
       const families = await lensFamilyService.getAll();
       setLensFamilies(families || []);
     } catch (error) {
-      console.error("Error fetching lens families:", error);
+      appLogger.error("Error fetching lens families:", error);
     } finally {
       setLoadingFamilies(false);
     }
@@ -70,7 +71,7 @@ export function useLensConfiguration(
       const families = await contactLensFamilyService.getAll();
       setContactLensFamilies(families || []);
     } catch (error) {
-      console.error("Error fetching contact lens families:", error);
+      appLogger.error("Error fetching contact lens families:", error);
     } finally {
       setLoadingContactLensFamilies(false);
     }

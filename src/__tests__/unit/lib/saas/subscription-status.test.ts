@@ -12,9 +12,10 @@ vi.mock("@/utils/supabase/service-role", () => ({
   createServiceRoleClient: vi.fn(),
 }));
 
+import type { Mock } from "vitest";
+
 import { getSubscriptionStatus, isTrialExpired } from "@/lib/saas/subscription-status";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import type { Mock } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface BillingSettings {
@@ -74,7 +75,7 @@ export default function BillingSettingsPage() {
         toast.error(error.error || "Error al cargar configuración");
       }
     } catch (error: unknown) {
-      console.error("Error fetching settings:", error);
+      appLogger.error("Error fetching settings:", error);
       toast.error("Error al cargar configuración");
     } finally {
       setLoading(false);
@@ -109,7 +110,7 @@ export default function BillingSettingsPage() {
         toast.error(error.error || "Error al guardar configuración");
       }
     } catch (error: unknown) {
-      console.error("Error saving settings:", error);
+      appLogger.error("Error saving settings:", error);
       toast.error("Error al guardar configuración");
     } finally {
       setSaving(false);
@@ -132,7 +133,7 @@ export default function BillingSettingsPage() {
         }
       }
     } catch (error) {
-      console.error("Error fetching main logo:", error);
+      appLogger.error("Error fetching main logo:", error);
       toast.error("Error al obtener el logo de la óptica");
     }
   };

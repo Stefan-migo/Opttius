@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { appointmentTools } from "../appointments";
-import { createMockBuilder, createMockSupabase, UUID, makeContext } from "./helpers";
+import { createMockBuilder, createMockSupabase, makeContext,UUID } from "./helpers";
 
 // ponytail: vi.mock hoisting means factories can't use imported variables (UUID here)
 vi.mock("../resolvers", () => ({

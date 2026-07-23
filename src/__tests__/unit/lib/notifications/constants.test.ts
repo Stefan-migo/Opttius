@@ -5,15 +5,15 @@
  * PRIORITY_COLORS, PRIORITY_BADGE_COLORS, and formatTimeSince.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  formatTimeSince,
   NOTIFICATION_ICONS,
   NOTIFICATION_TYPE_LABELS,
-  PRIORITY_LABELS,
-  PRIORITY_COLORS,
   PRIORITY_BADGE_COLORS,
-  formatTimeSince,
+  PRIORITY_COLORS,
+  PRIORITY_LABELS,
 } from "@/lib/notifications/constants";
 
 describe("NOTIFICATION_ICONS", () => {

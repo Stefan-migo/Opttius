@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from "uuid";
 
-import type { AgentScreenContext, AgentRole } from "../types";
+import type { AgentRole,AgentScreenContext } from "../types";
 
 export interface AgentSession {
   /** The user's message text */

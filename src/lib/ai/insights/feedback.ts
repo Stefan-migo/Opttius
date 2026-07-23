@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import { DatabaseInsight, InsightFeedback, InsightSection } from "./schemas";
 
 export class InsightFeedbackSystem {
@@ -23,7 +26,7 @@ export class InsightFeedbackSystem {
       .eq("id", insightId);
 
     if (error) {
-      console.error("Error collecting feedback:", error);
+      appLogger.error("Error collecting feedback:", error);
       throw error;
     }
 
@@ -53,7 +56,7 @@ export class InsightFeedbackSystem {
       .limit(20);
 
     if (error) {
-      console.error("Error fetching insights:", error);
+      appLogger.error("Error fetching insights:", error);
       throw error;
     }
 

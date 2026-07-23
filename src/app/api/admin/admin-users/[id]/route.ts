@@ -21,17 +21,17 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const { data: profile } = await supabase.from("profiles").select("first_name, last_name, phone").eq("id", params.id).single();
     const branchAccess = adminUser.admin_branch_access || [];
-    const branches = branchAccess.filter((a: any) => a.branch_id !== null).map((a: any) => ({ id: a.branch_id, name: a.branches?.name || "N/A", code: a.branches?.code || "N/A", is_primary: a.is_primary }));
+    const branches = branchAccess.filter((a: unknown) => a.branch_id !== null).map((a: unknown) => ({ id: a.branch_id, name: a.branches?.name || "N/A", code: a.branches?.code || "N/A", is_primary: a.is_primary }));
 
     const { data: activityHistory } = await supabase.from("admin_activity_log").select("action, resource_type, resource_id, details, created_at").eq("admin_user_id", params.id).order("created_at", { ascending: false }).limit(50);
 
     const now = new Date();
-    const recentActivity = (activityHistory || []).filter((a: any) => new Date(a.created_at) >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
-    const weeklyActivity = (activityHistory || []).filter((a: any) => new Date(a.created_at) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000));
+    const recentActivity = (activityHistory || []).filter((a: unknown) => new Date(a.created_at) >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
+    const weeklyActivity = (activityHistory || []).filter((a: unknown) => new Date(a.created_at) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000));
 
     return NextResponse.json({
       adminUser: {
-        ...adminUser, profiles: profile || null, is_super_admin: branchAccess.some((a: any) => a.branch_id === null), branches,
+        ...adminUser, profiles: profile || null, is_super_admin: branchAccess.some((a: unknown) => a.branch_id === null), branches,
         activityHistory: activityHistory || [],
         analytics: { totalActions: activityHistory?.length || 0, actionsLast30Days: recentActivity.length, actionsLast7Days: weeklyActivity.length, lastActivity: adminUser.last_login, activityByDay: getActivityByDay(recentActivity, now), mostFrequentActions: getMostFrequentActions(recentActivity), activityCount30Days: recentActivity.length, fullName: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || adminUser.email : adminUser.email },
       },
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const { data: requester } = await supabase.from("admin_users").select("organization_id, role").eq("id", auth.user!.id).single();
     if (!["root", "dev"].includes(requester?.role || "") && requester?.organization_id !== currentAdmin.organization_id) return NextResponse.json({ error: "No tienes permiso para modificar usuarios de otra organización" }, { status: 403 });
 
-    const updateData: any = { updated_at: new Date().toISOString() };
+    const updateData: unknown = { updated_at: new Date().toISOString() };
     if (role !== undefined) updateData.role = role;
     if (permissions !== undefined) updateData.permissions = permissions;
     if (is_active !== undefined) updateData.is_active = is_active;

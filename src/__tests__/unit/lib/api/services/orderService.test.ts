@@ -6,7 +6,7 @@
  * isSuccess and unwrapData are re-implemented inline as pure functions.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -50,19 +50,19 @@ function getMockClient() {
 
 // Import AFTER mocks
 import {
-  orderService,
-  getOrders,
-  getOrder,
-  createOrder,
+  addOrderItem,
   createManualOrder,
-  updateOrder,
+  createOrder,
   deleteOrder,
+  getOrder,
+  getOrders,
+  orderService,
+  processRefund,
+  removeOrderItem,
+  updateOrder,
+  updateOrderItem,
   updateOrderStatus,
   updatePaymentStatus,
-  addOrderItem,
-  updateOrderItem,
-  removeOrderItem,
-  processRefund,
 } from "@/lib/api/services/orderService";
 
 const mockOrder = {

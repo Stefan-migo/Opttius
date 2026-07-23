@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
+import { appLogger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/client";
 
 export interface AdminNotification {
@@ -72,7 +73,7 @@ export function useNotifications() {
       setUnreadCount(data.unreadCount || 0);
       setTotalCount(data.count || 0);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      appLogger.error("Error fetching notifications:", error);
       toast.error("Error al cargar las notificaciones");
     } finally {
       setLoading(false);
@@ -129,7 +130,7 @@ export function useNotifications() {
       setUnreadCount(Math.max(0, unreadCount - 1));
       if (actionUrl) router.push(actionUrl);
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      appLogger.error("Error marking notification as read:", error);
       toast.error("Error al marcar la notificación");
     } finally {
       setMarkingAsRead(null);
@@ -149,7 +150,7 @@ export function useNotifications() {
       setUnreadCount(0);
       toast.success("Todas las notificaciones marcadas como leídas");
     } catch (error) {
-      console.error("Error marking all as read:", error);
+      appLogger.error("Error marking all as read:", error);
       toast.error("Error al marcar todas como leídas");
     } finally {
       setLoading(false);

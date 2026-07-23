@@ -59,16 +59,16 @@ export function UsersFilters({
             </SelectTrigger>
             <SelectContent className="bg-[#0D1117] border-white/10">
               <SelectItem
-                value="all"
                 className="text-white focus:bg-white/10"
+                value="all"
               >
                 Todas las organizaciones
               </SelectItem>
               {organizations.map((org) => (
                 <SelectItem
+                  className="text-white focus:bg-white/10"
                   key={org.id}
                   value={org.id}
-                  className="text-white focus:bg-white/10"
                 >
                   {org.name}
                 </SelectItem>
@@ -81,44 +81,44 @@ export function UsersFilters({
             </SelectTrigger>
             <SelectContent className="bg-[#0D1117] border-white/10">
               <SelectItem
-                value="all"
                 className="text-white focus:bg-white/10"
+                value="all"
               >
                 Todos los roles
               </SelectItem>
               <SelectItem
-                value="root"
                 className="text-white focus:bg-white/10"
+                value="root"
               >
                 Root
               </SelectItem>
               <SelectItem
-                value="dev"
                 className="text-white focus:bg-white/10"
+                value="dev"
               >
                 Dev
               </SelectItem>
               <SelectItem
-                value="super_admin"
                 className="text-white focus:bg-white/10"
+                value="super_admin"
               >
                 Super Admin
               </SelectItem>
               <SelectItem
-                value="admin"
                 className="text-white focus:bg-white/10"
+                value="admin"
               >
                 Admin
               </SelectItem>
               <SelectItem
-                value="vendedor"
                 className="text-white focus:bg-white/10"
+                value="vendedor"
               >
                 Vendedor
               </SelectItem>
               <SelectItem
-                value="employee"
                 className="text-white focus:bg-white/10"
+                value="employee"
               >
                 Empleado
               </SelectItem>
@@ -130,20 +130,20 @@ export function UsersFilters({
             </SelectTrigger>
             <SelectContent className="bg-[#0D1117] border-white/10">
               <SelectItem
-                value="all"
                 className="text-white focus:bg-white/10"
+                value="all"
               >
                 Todos los estados
               </SelectItem>
               <SelectItem
-                value="active"
                 className="text-white focus:bg-white/10"
+                value="active"
               >
                 Activo
               </SelectItem>
               <SelectItem
-                value="inactive"
                 className="text-white focus:bg-white/10"
+                value="inactive"
               >
                 Inactivo
               </SelectItem>

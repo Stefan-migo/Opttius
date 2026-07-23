@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useBranch } from "@/hooks/useBranch";
 import { useChatConfig } from "@/hooks/useChatConfig";
 import { useChatSession } from "@/hooks/useChatSession";
+import { appLogger } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -71,7 +72,7 @@ export function useChatMessages(currentSection: string | null) {
         setMessages(uniqueMessages);
       }
     } catch (error) {
-      console.error("Error loading messages:", error);
+      appLogger.error("Error loading messages:", error);
     }
   }, []);
 
@@ -101,7 +102,7 @@ export function useChatMessages(currentSection: string | null) {
         }
 
         if (!provider || !model || model.trim() === "") {
-          console.error("Invalid provider or model:", {
+          appLogger.error("Invalid provider or model:", {
             provider,
             model,
             config,
@@ -122,11 +123,11 @@ export function useChatMessages(currentSection: string | null) {
             apiConfig as unknown,
           );
           if (!sessionToUse) {
-            console.error("Failed to create session - no session returned");
+            appLogger.error("Failed to create session - no session returned");
             return;
           }
         } catch (error: unknown) {
-          console.error("Error creating session:", error);
+          appLogger.error("Error creating session:", error);
           return;
         }
       }
@@ -206,7 +207,7 @@ export function useChatMessages(currentSection: string | null) {
                 const data = JSON.parse(line.slice(6));
 
                 if (data.error) {
-                  console.error("SSE error:", data.error);
+                  appLogger.error("SSE error:", data.error);
                   setMessages((prev) => {
                     const updated = [...prev];
                     const index = updated.findIndex(
@@ -273,7 +274,7 @@ export function useChatMessages(currentSection: string | null) {
                   streamingMessageIdRef.current = null;
                 }
               } catch (e) {
-                console.error("Error parsing SSE line:", e, "Line:", line);
+                appLogger.error("Error parsing SSE line:", e, "Line:", line);
                 // Skip invalid JSON
               }
             }

@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleClosureError } from "@/lib/cash-register/_helpers/closure-types";
+import {
+  alignDateWithSession,
+  calculateCashInflowsOutflows,
+  calculateOrderTotals,
+} from "@/lib/cash-register/_helpers/closure-utils";
 import {
   aggregateClosurePayments,
   getClosureContext,
@@ -9,12 +15,6 @@ import {
   getSessionPayments,
   resolveGetSession,
 } from "@/lib/cash-register/closure-service";
-import {
-  alignDateWithSession,
-  calculateCashInflowsOutflows,
-  calculateOrderTotals,
-} from "@/lib/cash-register/_helpers/closure-utils";
-import { handleClosureError } from "@/lib/cash-register/_helpers/closure-types";
 import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import { appLogger as logger } from "@/lib/logger";
 

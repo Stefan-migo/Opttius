@@ -4,7 +4,6 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CONTACT_LENS_DEFAULT_MATRICES } from "@/lib/lens-matrices/constants";
 import { CONTACT_LENS_MATRIX_SUGGESTION_DESCRIPTION, CONTACT_LENS_MATRIX_SUGGESTION_ROWS, CONTACT_LENS_MATRIX_SUGGESTION_TITLE } from "@/lib/lens-matrices/suggestion-text";
 
 interface MatrixSuggestionSectionProps {

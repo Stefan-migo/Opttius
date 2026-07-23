@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import { createApiErrorResponse } from "@/lib/api/response";
-import { appLogger as logger } from "@/lib/logger";
 import {
-  listAppointments,
   createAppointment,
+  listAppointments,
 } from "@/lib/api/services/adminAppointmentService";
+import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 

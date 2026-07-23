@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 export function BranchSelector() {
@@ -30,7 +31,7 @@ export function BranchSelector() {
     try {
       await setCurrentBranch(value === "global" ? "global" : value);
     } catch (error) {
-      console.error("Error changing branch:", error);
+      appLogger.error("Error changing branch:", error);
     } finally {
       setIsChanging(false);
     }

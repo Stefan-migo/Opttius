@@ -8,13 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
+import {  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { appLogger } from '@/lib/logger';
 
 interface Branch {
   id: string;
@@ -42,6 +42,7 @@ export default function BranchAccessManager({
   canEdit,
 }: BranchAccessManagerProps) {
   const [branchAccess, setBranchAccess] = useState<BranchAccess[]>([]);
+
   const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,7 +69,7 @@ export default function BranchAccessManager({
         setIsSuperAdmin(hasSuperAdmin);
       }
     } catch (error) {
-      console.error("Error fetching branch access:", error);
+      appLogger.error("Error fetching branch access:", error);
       toast.error("Error al cargar acceso a sucursales");
     } finally {
       setLoading(false);
@@ -83,7 +84,7 @@ export default function BranchAccessManager({
         setAvailableBranches(data.branches || []);
       }
     } catch (error) {
-      console.error("Error fetching branches:", error);
+      appLogger.error("Error fetching branches:", error);
     }
   };
 
@@ -118,7 +119,7 @@ export default function BranchAccessManager({
       toast.success("Super administrador asignado exitosamente");
       fetchBranchAccess();
     } catch (error) {
-      console.error("Error assigning super admin:", error);
+      appLogger.error("Error assigning super admin:", error);
       toast.error(
         error instanceof Error
           ? error.message
@@ -158,7 +159,7 @@ export default function BranchAccessManager({
       setSelectedBranchId("");
       fetchBranchAccess();
     } catch (error) {
-      console.error("Error assigning branch:", error);
+      appLogger.error("Error assigning branch:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al asignar sucursal",
       );
@@ -195,7 +196,7 @@ export default function BranchAccessManager({
       toast.success("Acceso removido exitosamente");
       fetchBranchAccess();
     } catch (error) {
-      console.error("Error removing branch access:", error);
+      appLogger.error("Error removing branch access:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al remover acceso",
       );

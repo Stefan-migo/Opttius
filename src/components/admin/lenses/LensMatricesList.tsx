@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase/client";
 
-import { MatrixDialog } from "./_components/MatrixDialog";
-import type { MatrixFormData } from "./_components/MatrixDialog";
 import { MatricesTable, SearchBar } from "./_components/LensMatricesListComponents";
-import type { LensPriceMatrix, LensFamily } from "./types";
+import type { MatrixFormData } from "./_components/MatrixDialog";
+import { MatrixDialog } from "./_components/MatrixDialog";
+import type { LensFamily,LensPriceMatrix } from "./types";
 
 export default function LensMatricesList() {
   const [matrices, setMatrices] = useState<LensPriceMatrix[]>([]);
@@ -109,23 +109,23 @@ export default function LensMatricesList() {
       </CardHeader>
       <CardContent>
         <SearchBar
-          searchTerm={searchTerm} familyFilter={familyFilter}
-          families={families} onSearchChange={setSearchTerm} onFamilyFilterChange={setFamilyFilter}
+          families={families} familyFilter={familyFilter}
+          searchTerm={searchTerm} onFamilyFilterChange={setFamilyFilter} onSearchChange={setSearchTerm}
         />
 
         <MatricesTable
-          matrices={filteredMatrices} loading={loading}
           currentPage={currentPage} itemsPerPage={itemsPerPage}
+          loading={loading} matrices={filteredMatrices}
           totalCount={filteredMatrices.length}
-          onEdit={openEditDialog} onDelete={handleDelete} onToggleActive={handleToggleActive}
-          onPageChange={setCurrentPage} onItemsPerPageChange={setItemsPerPage}
+          onDelete={handleDelete} onEdit={openEditDialog} onItemsPerPageChange={setItemsPerPage}
+          onPageChange={setCurrentPage} onToggleActive={handleToggleActive}
         />
 
         <MatrixDialog
-          open={showDialog} editingMatrix={!!editingMatrix}
-          formData={formData} families={families}
-          onClose={() => { setShowDialog(false); resetForm(); }}
-          onSubmit={handleSubmit} onChange={(d) => setFormData({ ...formData, ...d })}
+          editingMatrix={!!editingMatrix} families={families}
+          formData={formData} open={showDialog}
+          onChange={(d) => setFormData({ ...formData, ...d })}
+          onClose={() => { setShowDialog(false); resetForm(); }} onSubmit={handleSubmit}
         />
       </CardContent>
     </Card>

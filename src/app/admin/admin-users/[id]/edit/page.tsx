@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 interface AdminUser {
   id: string;
@@ -82,7 +83,7 @@ export default function EditAdminUserPage() {
       });
       setError(null);
     } catch (err) {
-      console.error("Error fetching admin user:", err);
+      appLogger.error("Error fetching admin user:", err);
       setError(err instanceof Error ? err.message : "Error desconocido");
       toast.error(
         err instanceof Error ? err.message : "Error al cargar el administrador",
@@ -117,7 +118,7 @@ export default function EditAdminUserPage() {
       toast.success("Administrador actualizado exitosamente");
       router.push(`/admin/admin-users/${adminId}`);
     } catch (err) {
-      console.error("Error updating admin user:", err);
+      appLogger.error("Error updating admin user:", err);
       toast.error(
         err instanceof Error
           ? err.message

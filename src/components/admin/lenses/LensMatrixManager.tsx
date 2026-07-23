@@ -114,27 +114,27 @@ export function LensMatrixManager({
       {!readOnly && (
         <MatrixSuggestionPanel
           open={suggestionOpen}
-          onToggle={() => setSuggestionOpen(!suggestionOpen)}
           onApplyTemplate={handleApplyTemplate}
+          onToggle={() => setSuggestionOpen(!suggestionOpen)}
         />
       )}
 
       <MatrixTable
         matrices={matrices}
         readOnly={readOnly}
-        onEdit={handleOpenDialog}
-        onDelete={handleDelete}
         onAdd={() => handleOpenDialog()}
+        onDelete={handleDelete}
+        onEdit={handleOpenDialog}
       />
 
       <LensMatrixDialog
-        open={showDialog}
         editingId={editingId}
         formData={formData}
         isMonofocal={isMonofocal}
+        open={showDialog}
+        onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
         onClose={() => setShowDialog(false)}
         onSubmit={handleSubmit}
-        onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
       />
     </div>
   );

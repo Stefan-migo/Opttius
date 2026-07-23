@@ -4,8 +4,8 @@ import { MapPin, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import FormField from "@/components/ui/FormField";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
 import { CustomerAddressFields } from "../../_components/CustomerAddressFields";
 import { CustomerPersonalInfoFields } from "../../_components/CustomerPersonalInfoFields";
 
@@ -40,11 +40,11 @@ export function NewCustomerForm({
           <CardContent className="space-y-4">
             <CustomerPersonalInfoFields
               errors={errors}
+              size="large"
+              values={values as unknown}
               onRUTBlur={handleRUTBlur}
               onRUTChange={handleRUTChange}
               onValueChange={setValue}
-              size="large"
-              values={values as any}
             />
           </CardContent>
         </Card>
@@ -60,9 +60,9 @@ export function NewCustomerForm({
           <CardContent className="space-y-4">
             <CustomerAddressFields
               errors={errors}
-              onValueChange={setValue}
               size="large"
-              values={values as any}
+              values={values as unknown}
+              onValueChange={setValue}
             />
           </CardContent>
         </Card>

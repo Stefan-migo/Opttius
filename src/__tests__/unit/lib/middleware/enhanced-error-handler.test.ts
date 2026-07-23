@@ -7,9 +7,9 @@
  * @module __tests__/unit/lib/middleware/enhanced-error-handler.test
  */
 
-import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 // --- Mocks ---
 
@@ -84,7 +84,6 @@ vi.mock("@/lib/errors/comprehensive-handler", () => ({
 import { reportApiError } from "@/lib/error-reporting";
 import {
   handleApiError,
-  ValidationError,
 } from "@/lib/errors/comprehensive-handler";
 import {
   RateLimitError,

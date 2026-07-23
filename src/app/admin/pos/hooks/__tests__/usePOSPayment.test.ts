@@ -16,8 +16,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { usePOSPayment } from "../usePOSPayment";
 import type { POSCartItem } from "../../types";
+import { usePOSPayment } from "../usePOSPayment";
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
 

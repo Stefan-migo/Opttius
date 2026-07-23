@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import FieldOperationsContent from "./_components/FieldOperationsContent";
 
 export const dynamic = "force-dynamic";

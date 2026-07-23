@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { appLogger } from '@/lib/logger';
+
 import type { MemoryManager } from "../memory";
 import type { OrganizationalMemory } from "../memory/organizational";
 
@@ -32,7 +34,7 @@ export async function initializeMemoryManager(
       },
     );
   } catch (error) {
-    console.error("Failed to initialize memory manager:", error);
+    appLogger.error("Failed to initialize memory manager:", error);
     return null;
   }
 }
@@ -55,7 +57,7 @@ export async function initializeOrganizationalMemory(
 
     return createOrganizationalMemory(organizationId, client);
   } catch (error) {
-    console.error("Failed to initialize organizational memory:", error);
+    appLogger.error("Failed to initialize organizational memory:", error);
     return null;
   }
 }

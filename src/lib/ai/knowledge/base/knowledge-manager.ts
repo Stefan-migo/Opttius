@@ -1,5 +1,7 @@
 import { join } from "path";
 
+import { appLogger } from '@/lib/logger';
+
 import {
   KnowledgeIndexer,
   SearchQuery,
@@ -40,11 +42,11 @@ export class KnowledgeBaseManager {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log("Knowledge base already initialized");
+      appLogger.info("Knowledge base already initialized");
       return;
     }
 
-    console.log("Initializing knowledge base...");
+    appLogger.info("Initializing knowledge base...");
 
     try {
       // Load existing index
@@ -61,9 +63,9 @@ export class KnowledgeBaseManager {
       }
 
       this.isInitialized = true;
-      console.log("Knowledge base initialized successfully");
+      appLogger.info("Knowledge base initialized successfully");
     } catch (error) {
-      console.error("Failed to initialize knowledge base:", error);
+      appLogger.error("Failed to initialize knowledge base:", error);
       throw error;
     }
   }
@@ -72,7 +74,7 @@ export class KnowledgeBaseManager {
    * Index all content in the knowledge base
    */
   async indexContent(): Promise<void> {
-    console.log("Indexing knowledge base content...");
+    appLogger.info("Indexing knowledge base content...");
 
     const contentPath = join(process.cwd(), this.config.contentPath);
 
@@ -92,13 +94,13 @@ export class KnowledgeBaseManager {
         const categoryPath = join(contentPath, category);
         const indexed = await this.indexer.indexDirectory(categoryPath);
         totalIndexed += indexed;
-        console.log(`Indexed ${indexed} documents from ${category}`);
+        appLogger.info(`Indexed ${indexed} documents from ${category}`);
       } catch (error) {
-        console.warn(`Failed to index category ${category}:`, error);
+        appLogger.warn(`Failed to index category ${category}:`, error);
       }
     }
 
-    console.log(`Total documents indexed: ${totalIndexed}`);
+    appLogger.info(`Total documents indexed: ${totalIndexed}`);
   }
 
   /**
@@ -185,7 +187,7 @@ export class KnowledgeBaseManager {
    * Update specific documents
    */
   async updateDocuments(documentIds: string[]): Promise<void> {
-    console.log(`Updating ${documentIds.length} documents...`);
+    appLogger.info(`Updating ${documentIds.length} documents...`);
 
     const contentPath = join(process.cwd(), this.config.contentPath);
 
@@ -201,10 +203,10 @@ export class KnowledgeBaseManager {
         const docToUpdate = documents.find((doc) => doc.id === docId);
         if (docToUpdate) {
           await this.indexer.indexDocument(docToUpdate);
-          console.log(`✓ Updated document: ${docToUpdate.title}`);
+          appLogger.info(`✓ Updated document: ${docToUpdate.title}`);
         }
       } catch (error) {
-        console.warn(`✗ Failed to update document ${docId}:`, error);
+        appLogger.warn(`✗ Failed to update document ${docId}:`, error);
       }
     }
 
@@ -215,7 +217,7 @@ export class KnowledgeBaseManager {
    * Shutdown the knowledge base manager
    */
   async shutdown(): Promise<void> {
-    console.log("Shutting down knowledge base manager...");
+    appLogger.info("Shutting down knowledge base manager...");
 
     if (this.updateTimer) {
       clearInterval(this.updateTimer);
@@ -225,7 +227,7 @@ export class KnowledgeBaseManager {
     await this.indexer.saveIndex();
     this.isInitialized = false;
 
-    console.log("Knowledge base manager shut down");
+    appLogger.info("Knowledge base manager shut down");
   }
 
   /**
@@ -238,14 +240,14 @@ export class KnowledgeBaseManager {
 
     this.updateTimer = setInterval(async () => {
       try {
-        console.log("Running periodic knowledge base update...");
+        appLogger.info("Running periodic knowledge base update...");
         await this.indexContent();
       } catch (error) {
-        console.error("Periodic update failed:", error);
+        appLogger.error("Periodic update failed:", error);
       }
     }, intervalMs);
 
-    console.log(
+    appLogger.info(
       `Periodic updates scheduled every ${this.config.updateInterval} minutes`,
     );
   }

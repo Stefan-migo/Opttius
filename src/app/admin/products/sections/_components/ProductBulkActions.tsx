@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { bulkProductOperations } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 import { BulkOperationFormRenderer } from "./_components/BulkOperationFormRenderer";
@@ -67,7 +68,7 @@ export default function ProductBulkActions({
       onClearSelection();
       onSuccess();
     } catch (error) {
-      console.error("Error performing bulk operation:", error);
+      appLogger.error("Error performing bulk operation:", error);
       const errorMessage =
         error instanceof Error
           ? error.message

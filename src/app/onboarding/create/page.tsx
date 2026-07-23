@@ -32,6 +32,7 @@ import {
   type CreateOrganizationInput,
   createOrganizationSchema,
 } from "@/lib/api/validation/organization-schemas";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 import { generateSlug } from "@/lib/utils/slug-generator";
 
@@ -93,7 +94,7 @@ export default function CreateOrganizationPage() {
 
         setHasOrganization(data.organization?.hasOrganization || false);
       } catch (err) {
-        console.error("Error checking organization status:", err);
+        appLogger.error("Error checking organization status:", err);
         setHasOrganization(false);
       }
     };
@@ -137,7 +138,7 @@ export default function CreateOrganizationPage() {
           ? `${result.error}: ${result.details}`
           : result.error || "Error al crear la organización";
 
-        console.error("❌ Error creating organization:", {
+        appLogger.error("❌ Error creating organization:", {
           status: response.status,
           error: result.error,
           details: result.details,

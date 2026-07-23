@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 
+import { appLogger } from '@/lib/logger';
 import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface TelemetryProviderProps {
@@ -30,7 +31,7 @@ export function TelemetryProvider({
         }
       })
       .catch((err) => {
-        console.warn("Could not fetch global telemetry status");
+        appLogger.warn("Could not fetch global telemetry status");
       });
 
     // Track app initialization

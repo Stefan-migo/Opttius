@@ -19,8 +19,8 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 import { sendEmail } from "@/lib/email/client";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import { sendQuoteEmailToClient } from "@/lib/email/send-quote-email";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const ORG_ID = "org-1";
 const QUOTE_ID = "quote-1";

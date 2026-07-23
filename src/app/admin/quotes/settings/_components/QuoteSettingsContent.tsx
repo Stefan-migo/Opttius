@@ -20,18 +20,16 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
 import { QuoteSettings, quoteSettingsService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
-import { QuoteGeneralTab } from "./QuoteGeneralTab";
-import { QuoteTreatmentsTab } from "./QuoteTreatmentsTab";
 import { QuoteDiscountsTab } from "./QuoteDiscountsTab";
+import { QuoteGeneralTab } from "./QuoteGeneralTab";
 import { QuoteTermsTab } from "./QuoteTermsTab";
+import { QuoteTreatmentsTab } from "./QuoteTreatmentsTab";
 
 interface TreatmentPrice {
   price: number;
@@ -84,7 +82,7 @@ export default function QuoteSettingsContent() {
       }
       setHasChanges(false);
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      appLogger.error("Error fetching settings:", error);
       toast.error("Error al cargar configuración");
     } finally {
       setLoading(false);
@@ -132,7 +130,7 @@ export default function QuoteSettingsContent() {
         });
       }
     } catch (error) {
-      console.error("Error saving settings:", error);
+      appLogger.error("Error saving settings:", error);
       toast.error("Error al guardar configuración");
     } finally {
       setSaving(false);
@@ -368,9 +366,9 @@ export default function QuoteSettingsContent() {
         {/* Tab 1: General Settings */}
         <TabsContent className="space-y-6" value="general">
           <QuoteGeneralTab
+            defaultExpirationDays={settings.default_expiration_days}
             defaultLaborCost={settings.default_labor_cost}
             defaultTaxPercentage={settings.default_tax_percentage}
-            defaultExpirationDays={settings.default_expiration_days}
             laborCostIncludesTax={settings.labor_cost_includes_tax ?? true}
             lensCostIncludesTax={settings.lens_cost_includes_tax ?? true}
             treatmentsCostIncludesTax={settings.treatments_cost_includes_tax ?? true}
@@ -381,14 +379,14 @@ export default function QuoteSettingsContent() {
         {/* Tab 2: Treatments */}
         <TabsContent className="space-y-6" value="treatments">
           <QuoteTreatmentsTab
-            treatmentPrices={settings.treatment_prices as Record<string, TreatmentPrice | number>}
+            getTreatmentEnabled={getTreatmentEnabled}
+            getTreatmentPrice={getTreatmentPrice}
             TREATMENT_KEYS={TREATMENT_KEYS}
             treatmentLabels={treatmentLabels}
-            getTreatmentPrice={getTreatmentPrice}
-            getTreatmentEnabled={getTreatmentEnabled}
-            updateTreatmentPrice={updateTreatmentPrice}
-            updateTreatmentEnabled={updateTreatmentEnabled}
+            treatmentPrices={settings.treatment_prices as Record<string, TreatmentPrice | number>}
             updateNestedSetting={updateNestedSetting as (key: string, nestedKey: string, value: unknown) => void}
+            updateTreatmentEnabled={updateTreatmentEnabled}
+            updateTreatmentPrice={updateTreatmentPrice}
           />
         </TabsContent>
 
@@ -397,16 +395,16 @@ export default function QuoteSettingsContent() {
           <QuoteDiscountsTab
             volumeDiscounts={settings.volume_discounts ?? []}
             onAddDiscount={addVolumeDiscount}
-            onUpdateDiscount={updateVolumeDiscount}
             onRemoveDiscount={removeVolumeDiscount}
+            onUpdateDiscount={updateVolumeDiscount}
           />
         </TabsContent>
 
         {/* Tab 4: Terms and Conditions */}
         <TabsContent className="space-y-6" value="terms">
           <QuoteTermsTab
-            termsAndConditions={settings.terms_and_conditions || ""}
             notesTemplate={settings.notes_template || ""}
+            termsAndConditions={settings.terms_and_conditions || ""}
             onUpdateSetting={updateSetting}
           />
         </TabsContent>

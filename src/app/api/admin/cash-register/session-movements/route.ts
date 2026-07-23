@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     const orderIds = (creditNoteMovements || [])
       .map((cnm: unknown) => cnm.credit_notes?.order_id)
       .filter(Boolean);
-    let ordersMap: Record<string, any> = {};
+    let ordersMap: Record<string, unknown> = {};
     if (orderIds.length > 0) {
       const { data: orders } = await supabase
         .from("orders")

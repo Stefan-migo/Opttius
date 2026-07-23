@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 import type {
@@ -49,7 +50,7 @@ export default function ScheduleSettingsPage() {
       const data = await response.json();
       setSettings(data.data ?? data.settings);
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      appLogger.error("Error fetching settings:", error);
       toast.error("Error al cargar configuración");
     } finally {
       setLoading(false);
@@ -138,7 +139,7 @@ export default function ScheduleSettingsPage() {
       toast.success("Configuración guardada exitosamente");
       router.push("/admin/appointments");
     } catch (error: unknown) {
-      console.error("Error saving settings:", error);
+      appLogger.error("Error saving settings:", error);
       const errorMessage =
         error instanceof Error
           ? error.message

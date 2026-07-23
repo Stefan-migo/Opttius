@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { FamilyInfoStep } from "./_components/FamilyInfoStep";
-import { ContactLensMatrixManager } from "./ContactLensMatrixManager";
 import { useContactLensFamilyWizard } from "./_hooks/useContactLensFamilyWizard";
+import { ContactLensMatrixManager } from "./ContactLensMatrixManager";
 
 interface ContactLensFamilyWizardProps { familyId?: string; }
 
@@ -37,7 +37,7 @@ export function ContactLensFamilyWizard({ familyId }: ContactLensFamilyWizardPro
           <CardTitle>{step === 1 ? "Información de la Familia" : "Configuración de Matrices"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {step === 1 && <FamilyInfoStep data={data} errors={errors} categories={categories} onChange={(d) => setData((prev) => ({ ...prev, ...d }))} />}
+          {step === 1 && <FamilyInfoStep categories={categories} data={data} errors={errors} onChange={(d) => setData((prev) => ({ ...prev, ...d }))} />}
           {step === 2 && <ContactLensMatrixManager matrices={data.matrices} onChange={(matrices) => setData((prev) => ({ ...prev, matrices }))} />}
           <div className="flex justify-between pt-4">
             <Button type="button" variant="outline" onClick={step === 1 ? () => window.history.back() : handleBack}>

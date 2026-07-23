@@ -8,6 +8,9 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { appLogger } from '@/lib/logger';
+
 import type { DailySummary, Movement } from "./cashRegister.types";
 
 export function useCashRegisterMovements(effectiveHeaders: Record<string, string>) {
@@ -44,7 +47,7 @@ export function useCashRegisterMovements(effectiveHeaders: Record<string, string
         toast.error(error.error || "Error al cargar resumen del día");
       }
     } catch (error: unknown) {
-      console.error("Error fetching daily summary:", error);
+      appLogger.error("Error fetching daily summary:", error);
       toast.error("Error al cargar resumen del día");
     } finally {
       setLoadingSummary(false);
@@ -67,10 +70,10 @@ export function useCashRegisterMovements(effectiveHeaders: Record<string, string
         setMovements(data.movements || []);
       } else {
         const errorData = await response.json();
-        console.error("Error fetching movements:", errorData);
+        appLogger.error("Error fetching movements:", errorData);
       }
     } catch (error: unknown) {
-      console.error("Error fetching movements:", error);
+      appLogger.error("Error fetching movements:", error);
     } finally {
       setLoadingMovements(false);
     }
@@ -90,7 +93,7 @@ export function useCashRegisterMovements(effectiveHeaders: Record<string, string
         setCreditNotes(data.credit_notes || []);
       }
     } catch (err) {
-      console.error("Error fetching credit notes:", err);
+      appLogger.error("Error fetching credit notes:", err);
     } finally {
       setLoadingCreditNotes(false);
     }

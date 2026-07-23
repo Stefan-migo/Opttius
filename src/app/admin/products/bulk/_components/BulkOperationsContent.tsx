@@ -13,6 +13,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import type { Product } from "@/lib/api/services";
 import { productService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 import { BulkActionDialog } from "./_components/BulkActionDialog";
 import { BulkFiltersBar } from "./_components/BulkFiltersBar";
@@ -56,7 +57,7 @@ export default function BulkOperationsContent() {
       });
       setProducts(result.data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      appLogger.error("Error fetching products:", error);
       toast.error("Error al cargar productos");
     } finally {
       setLoading(false);
@@ -71,7 +72,7 @@ export default function BulkOperationsContent() {
         setCategories(extractDataFromResponse(data));
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      appLogger.error("Error fetching categories:", error);
     }
   };
 
@@ -142,7 +143,7 @@ export default function BulkOperationsContent() {
       setBulkUpdates({});
       fetchProducts();
     } catch (error) {
-      console.error("Error performing bulk operation:", error);
+      appLogger.error("Error performing bulk operation:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -171,7 +172,7 @@ export default function BulkOperationsContent() {
 
       toast.success("Productos exportados exitosamente");
     } catch (error) {
-      console.error("Error exporting products:", error);
+      appLogger.error("Error exporting products:", error);
       toast.error("Error al exportar productos");
     }
   };

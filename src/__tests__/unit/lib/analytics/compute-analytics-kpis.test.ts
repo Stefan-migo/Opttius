@@ -5,8 +5,8 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { MvKpiRow } from "@/lib/analytics/compute-dashboard-kpis";
 import { computeAnalyticsMvData } from "@/lib/analytics/compute-analytics-kpis";
+import type { MvKpiRow } from "@/lib/analytics/compute-dashboard-kpis";
 
 const makeRow = (
   day: string,

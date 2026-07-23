@@ -38,9 +38,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
-import { BranchFormDialog } from "./BranchFormDialog";
 import { BranchDeleteDialog } from "./BranchDeleteDialog";
+import { BranchFormDialog } from "./BranchFormDialog";
 
 interface Branch {
   id: string;
@@ -100,7 +101,7 @@ export default function BranchesContent() {
       const data = await response.json();
       setBranches(data.branches || []);
     } catch (error: unknown) {
-      console.error("Error fetching branches:", error);
+      appLogger.error("Error fetching branches:", error);
       toast.error("Error al cargar sucursales");
     } finally {
       setIsLoading(false);
@@ -189,7 +190,7 @@ export default function BranchesContent() {
         await refreshBranches();
       }
     } catch (error: unknown) {
-      console.error("Error saving branch:", error);
+      appLogger.error("Error saving branch:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error al guardar sucursal";
       toast.error(errorMessage);
@@ -221,7 +222,7 @@ export default function BranchesContent() {
         await refreshBranches();
       }
     } catch (error: unknown) {
-      console.error("Error deleting branch:", error);
+      appLogger.error("Error deleting branch:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error al eliminar sucursal";
       toast.error(errorMessage);
@@ -274,12 +275,12 @@ export default function BranchesContent() {
             </DialogTrigger>
             <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
               <BranchFormDialog
-                isEditing={!!selectedBranch}
                 formData={formData}
+                isEditing={!!selectedBranch}
                 isSubmitting={isSubmitting}
+                onCancel={handleCloseDialog}
                 onFormDataChange={setFormData}
                 onSubmit={handleSubmit}
-                onCancel={handleCloseDialog}
               />
             </DialogContent>
           </Dialog>
@@ -437,15 +438,15 @@ export default function BranchesContent() {
       </Card>
 
       <BranchDeleteDialog
-        open={isDeleteDialogOpen}
-        branchName={selectedBranch?.name || ""}
         branchCode={selectedBranch?.code || ""}
+        branchName={selectedBranch?.name || ""}
         isSubmitting={isSubmitting}
+        open={isDeleteDialogOpen}
+        onDelete={handleDelete}
         onOpenChange={(open) => {
           setIsDeleteDialogOpen(open);
           if (!open) setSelectedBranch(null);
         }}
-        onDelete={handleDelete}
       />
     </div>
   );

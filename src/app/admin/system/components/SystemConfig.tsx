@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import { SystemConfig as SystemConfigType } from "../hooks/useSystemConfig";
 import ConfigItem from "./_components/ConfigItem";
@@ -115,7 +116,7 @@ export default function SystemConfig({
       await onUpdateConfig(configKey, value);
       toast.success("Configuración guardada correctamente");
     } catch (error) {
-      console.error("Error saving config:", error);
+      appLogger.error("Error saving config:", error);
       toast.error("Error al guardar la configuración");
     } finally {
       setSavingConfigKeys((prev) => {

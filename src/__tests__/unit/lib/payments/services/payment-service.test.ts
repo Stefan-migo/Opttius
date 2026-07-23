@@ -10,7 +10,8 @@
  * insert/update calls without .single()).
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
+
 import type { Payment, WebhookEvent } from "@/types/payment";
 
 // ---------------------------------------------------------------------------
@@ -26,8 +27,8 @@ vi.mock("@/lib/logger", () => ({
   appLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import { PaymentService } from "@/lib/payments/services/payment-service";
 import { sendSaaSNotification } from "@/lib/email/notifications";
+import { PaymentService } from "@/lib/payments/services/payment-service";
 import { recordTierChange } from "@/lib/saas/tier-change-audit";
 
 // ---------------------------------------------------------------------------

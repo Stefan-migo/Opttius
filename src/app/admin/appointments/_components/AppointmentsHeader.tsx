@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Plus, Settings } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";

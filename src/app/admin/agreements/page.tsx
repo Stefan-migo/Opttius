@@ -36,6 +36,7 @@ import {
   agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/api/services/errorService";
+import { appLogger } from '@/lib/logger';
 import { formatDate } from "@/lib/utils";
 
 export default function AgreementsPage() {
@@ -77,7 +78,7 @@ export default function AgreementsPage() {
       setTotal(result.pagination.total || 0);
       setError(null);
     } catch (err) {
-      console.error("Error fetching agreements:", err);
+      appLogger.error("Error fetching agreements:", err);
       const errorObj = handleApiError(err, "Convenios");
       setError(errorObj?.message || "Error al cargar convenios");
     } finally {

@@ -8,8 +8,9 @@
  * @module lib/api/services/errorService
  */
 
-import { appLogger as logger } from "@/lib/logger";
 import { toast } from "sonner";
+
+import { appLogger as logger } from "@/lib/logger";
 
 /**
  * Tipos de error conocidos

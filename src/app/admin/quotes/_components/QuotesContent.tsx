@@ -28,6 +28,7 @@ const CreateQuoteForm = dynamic(() => import("@/components/admin/CreateQuoteForm
 
 import { quoteService } from "@/lib/api/services";
 import type { Quote, UpdateQuoteData } from "@/lib/api/services/quoteService";
+import { appLogger } from '@/lib/logger';
 
 import { DeleteQuoteDialog } from "./_components/DeleteQuoteDialog";
 import { QuotesTable } from "./_components/QuotesTable";
@@ -104,7 +105,7 @@ export default function QuotesContent() {
       setTotalPages(result.pagination.totalPages || 1);
       setTotalQuotes(result.pagination.total || 0);
     } catch (error) {
-      console.error("Error fetching quotes:", error);
+      appLogger.error("Error fetching quotes:", error);
       toast.error("Error al cargar presupuestos");
     } finally {
       setLoading(false);
@@ -148,7 +149,7 @@ export default function QuotesContent() {
       setQuoteToDelete(null);
       fetchQuotes();
     } catch (error: unknown) {
-      console.error("Error deleting quote:", error);
+      appLogger.error("Error deleting quote:", error);
       toast.error(error instanceof Error ? error.message : "Error al eliminar presupuesto");
     } finally {
       setDeleting(false);

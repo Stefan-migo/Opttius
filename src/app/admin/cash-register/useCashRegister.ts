@@ -1,16 +1,16 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-import { useSearchParams } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 
-import { useCashRegisterSession } from "./useCashRegisterSession";
+import { computeCashDifference, resolveClosureStatus } from "./cashPaymentUtils";
 import { useCashRegisterMovements } from "./useCashRegisterMovements";
 import { useCashRegisterOrders } from "./useCashRegisterOrders";
-import { computeCashDifference, resolveClosureStatus } from "./cashPaymentUtils";
+import { useCashRegisterSession } from "./useCashRegisterSession";
 
 export function useCashRegister() {
   const searchParams = useSearchParams();

@@ -6,15 +6,15 @@
 
 import { describe, expect, it } from "vitest";
 
+import type { SubscriptionTier, TierFeature, TierLimits } from "@/lib/saas/tier-config";
 import {
-  TIER_LIMITS,
   canUpgrade,
   getNextTier,
   getTierConfig,
   hasFeature,
   isUnlimited,
+  TIER_LIMITS,
 } from "@/lib/saas/tier-config";
-import type { SubscriptionTier, TierFeature, TierLimits } from "@/lib/saas/tier-config";
 
 // ---------------------------------------------------------------------------
 // TIER_LIMITS structure

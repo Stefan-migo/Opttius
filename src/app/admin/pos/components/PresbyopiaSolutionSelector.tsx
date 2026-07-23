@@ -26,12 +26,12 @@ export function PresbyopiaSolutionSelector({
       <div className="space-y-2">
         {solutions.map((sol) => (
           <div
-            key={sol.id}
             className={`p-3 border rounded-lg cursor-pointer transition-colors ${
               value === sol.id
                 ? "border-primary bg-primary/5"
                 : "hover:border-muted-foreground"
             }`}
+            key={sol.id}
             onClick={() => onChange(sol.id)}
           >
             <div className="font-medium">{sol.title}</div>

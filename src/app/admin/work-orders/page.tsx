@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import WorkOrdersContent from "./_components/WorkOrdersContent";
 
 export const dynamic = "force-dynamic";

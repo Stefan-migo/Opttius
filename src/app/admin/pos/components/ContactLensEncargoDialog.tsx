@@ -54,9 +54,9 @@ export function ContactLensEncargoDialog({
           <div>
             <Label>Notas adicionales</Label>
             <Input
+              placeholder="Instrucciones..."
               value={encargoNotes}
               onChange={(e) => setEncargoNotes(e.target.value)}
-              placeholder="Instrucciones..."
             />
           </div>
         </div>
@@ -68,8 +68,8 @@ export function ContactLensEncargoDialog({
             Cancelar
           </Button>
           <Button
-            onClick={() => onConfirm(encargoNotes)}
             disabled={submitting}
+            onClick={() => onConfirm(encargoNotes)}
           >
             {submitting ? "Enviando..." : "Confirmar"}
           </Button>

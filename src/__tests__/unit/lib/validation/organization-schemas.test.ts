@@ -10,12 +10,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  organizationSlugSchema,
-  organizationNameSchema,
-  subscriptionTierSchema,
+  activateRealOrgSchema,
   branchNameSchema,
   createOrganizationSchema,
-  activateRealOrgSchema,
+  organizationNameSchema,
+  organizationSlugSchema,
+  subscriptionTierSchema,
 } from "@/lib/validation/organization-schemas";
 
 // ============================================================================

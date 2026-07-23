@@ -114,25 +114,27 @@ export function CashRegisterOrdersSection(props: OrdersSectionProps) {
         </CardHeader>
         <CardContent>
           <OrderFilters
-            orderSearchTerm={orderSearchTerm}
-            orderFilters={orderFilters}
-            orderProductFilter={orderProductFilter}
-            orderFiltersExpanded={orderFiltersExpanded}
-            setOrderSearchTerm={setOrderSearchTerm}
-            setOrderFilters={setOrderFilters}
-            setOrderProductFilter={setOrderProductFilter}
-            setOrderFiltersExpanded={setOrderFiltersExpanded}
             fetchOrders={fetchOrders}
+            orderFilters={orderFilters}
+            orderFiltersExpanded={orderFiltersExpanded}
+            orderProductFilter={orderProductFilter}
+            orderSearchTerm={orderSearchTerm}
+            setOrderFilters={setOrderFilters}
+            setOrderFiltersExpanded={setOrderFiltersExpanded}
+            setOrderProductFilter={setOrderProductFilter}
+            setOrderSearchTerm={setOrderSearchTerm}
           />
 
           <OrdersTable
-            orders={orders}
+            isGlobalView={isGlobalView}
+            isSuperAdmin={isSuperAdmin}
             loadingOrders={loadingOrders}
+            orders={orders}
             ordersCurrentPage={ordersCurrentPage}
             ordersItemsPerPage={ordersItemsPerPage}
             ordersTotalCount={ordersTotalCount}
-            isGlobalView={isGlobalView}
-            isSuperAdmin={isSuperAdmin}
+            setOrdersCurrentPage={setOrdersCurrentPage}
+            setOrdersItemsPerPage={setOrdersItemsPerPage}
             onCancelOrder={(order) => {
               setSelectedOrderForAction(order);
               setOrderActionDialog("cancel");
@@ -141,8 +143,6 @@ export function CashRegisterOrdersSection(props: OrdersSectionProps) {
               setSelectedOrderForAction(order);
               setOrderActionDialog("delete");
             }}
-            setOrdersCurrentPage={setOrdersCurrentPage}
-            setOrdersItemsPerPage={setOrdersItemsPerPage}
           />
         </CardContent>
       </Card>

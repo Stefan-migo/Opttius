@@ -80,13 +80,13 @@ export default function CashRegisterPage() {
           </p>
         </div>
         <CashRegisterActionsSection
-          isOperativoMode={h.isOperativoMode}
-          fieldOperationIdFromUrl={h.fieldOperationIdFromUrl}
-          effectiveBranchId={h.effectiveBranchId}
-          isSuperAdmin={h.isSuperAdmin}
           closing={h.closing}
           closingEnabled={!!h.dailySummary}
+          effectiveBranchId={h.effectiveBranchId}
+          fieldOperationIdFromUrl={h.fieldOperationIdFromUrl}
           handleCloseCashRegister={h.handleCloseCashRegister}
+          isOperativoMode={h.isOperativoMode}
+          isSuperAdmin={h.isSuperAdmin}
           setShowCloseDialog={h.setShowCloseDialog}
         />
       </div>
@@ -259,17 +259,17 @@ export default function CashRegisterPage() {
 
         <TabsContent value="closures">
           <CashRegisterClosureSection
-            loading={h.loading}
             closures={h.closures}
             closuresCurrentPage={h.closuresCurrentPage}
             closuresItemsPerPage={h.closuresItemsPerPage}
             closuresTotalCount={h.closuresTotalCount}
             effectiveBranchId={h.effectiveBranchId}
-            isOperativoMode={h.isOperativoMode}
-            isSuperAdmin={h.isSuperAdmin}
-            reopening={h.reopening}
             getStatusBadge={h.getStatusBadge}
             handleReopenCash={h.handleReopenCash}
+            isOperativoMode={h.isOperativoMode}
+            isSuperAdmin={h.isSuperAdmin}
+            loading={h.loading}
+            reopening={h.reopening}
             setClosuresCurrentPage={h.setClosuresCurrentPage}
             setClosuresItemsPerPage={h.setClosuresItemsPerPage}
           />
@@ -277,67 +277,67 @@ export default function CashRegisterPage() {
 
         <TabsContent value="orders">
           <CashRegisterOrdersSection
-            orders={h.orders}
-            loadingOrders={h.loadingOrders}
-            ordersCurrentPage={h.ordersCurrentPage}
-            ordersItemsPerPage={h.ordersItemsPerPage}
-            ordersTotalCount={h.ordersTotalCount}
-            orderFilters={h.orderFilters}
-            orderSearchTerm={h.orderSearchTerm}
-            orderProductFilter={h.orderProductFilter}
-            isGlobalView={h.isGlobalView}
-            isSuperAdmin={h.isSuperAdmin}
             creditNotes={h.creditNotes}
-            loadingCreditNotes={h.loadingCreditNotes}
-            orderFiltersExpanded={h.orderFiltersExpanded}
-            fetchOrders={h.fetchOrders}
             fetchCreditNotes={h.fetchCreditNotes}
+            fetchOrders={h.fetchOrders}
             handleCancelOrder={h.handleCancelOrder}
             handleDeleteOrder={h.handleDeleteOrder}
-            setOrdersTab={h.setOrdersTab}
-            setOrderFilters={h.setOrderFilters}
-            setOrderSearchTerm={h.setOrderSearchTerm}
-            setOrderProductFilter={h.setOrderProductFilter}
-            setOrdersCurrentPage={h.setOrdersCurrentPage}
-            setOrdersItemsPerPage={h.setOrdersItemsPerPage}
-            setOrderFiltersExpanded={h.setOrderFiltersExpanded}
-            setSelectedOrderForAction={h.setSelectedOrderForAction}
+            isGlobalView={h.isGlobalView}
+            isSuperAdmin={h.isSuperAdmin}
+            loadingCreditNotes={h.loadingCreditNotes}
+            loadingOrders={h.loadingOrders}
+            orderFilters={h.orderFilters}
+            orderFiltersExpanded={h.orderFiltersExpanded}
+            orderProductFilter={h.orderProductFilter}
+            orders={h.orders}
+            ordersCurrentPage={h.ordersCurrentPage}
+            orderSearchTerm={h.orderSearchTerm}
+            ordersItemsPerPage={h.ordersItemsPerPage}
+            ordersTotalCount={h.ordersTotalCount}
             setOrderActionDialog={h.setOrderActionDialog}
             setOrderActionReason={h.setOrderActionReason}
+            setOrderFilters={h.setOrderFilters}
+            setOrderFiltersExpanded={h.setOrderFiltersExpanded}
+            setOrderProductFilter={h.setOrderProductFilter}
+            setOrdersCurrentPage={h.setOrdersCurrentPage}
+            setOrderSearchTerm={h.setOrderSearchTerm}
+            setOrdersItemsPerPage={h.setOrdersItemsPerPage}
+            setOrdersTab={h.setOrdersTab}
             setRefundMethod={h.setRefundMethod}
+            setSelectedOrderForAction={h.setSelectedOrderForAction}
           />
         </TabsContent>
 
         <TabsContent value="credit_notes">
           <CashRegisterOrdersSection
-            orders={h.orders}
-            loadingOrders={h.loadingOrders}
-            ordersCurrentPage={h.ordersCurrentPage}
-            ordersItemsPerPage={h.ordersItemsPerPage}
-            ordersTotalCount={h.ordersTotalCount}
-            orderFilters={h.orderFilters}
-            orderSearchTerm={h.orderSearchTerm}
-            orderProductFilter={h.orderProductFilter}
-            isGlobalView={h.isGlobalView}
-            isSuperAdmin={h.isSuperAdmin}
             creditNotes={h.creditNotes}
-            loadingCreditNotes={h.loadingCreditNotes}
-            orderFiltersExpanded={h.orderFiltersExpanded}
-            fetchOrders={h.fetchOrders}
             fetchCreditNotes={h.fetchCreditNotes}
+            fetchOrders={h.fetchOrders}
             handleCancelOrder={h.handleCancelOrder}
             handleDeleteOrder={h.handleDeleteOrder}
-            setOrdersTab={h.setOrdersTab}
-            setOrderFilters={h.setOrderFilters}
-            setOrderSearchTerm={h.setOrderSearchTerm}
-            setOrderProductFilter={h.setOrderProductFilter}
-            setOrdersCurrentPage={h.setOrdersCurrentPage}
-            setOrdersItemsPerPage={h.setOrdersItemsPerPage}
-            setOrderFiltersExpanded={h.setOrderFiltersExpanded}
-            setSelectedOrderForAction={h.setSelectedOrderForAction}
+            isGlobalView={h.isGlobalView}
+            isSuperAdmin={h.isSuperAdmin}
+            loadingCreditNotes={h.loadingCreditNotes}
+            loadingOrders={h.loadingOrders}
+            orderFilters={h.orderFilters}
+            orderFiltersExpanded={h.orderFiltersExpanded}
+            orderProductFilter={h.orderProductFilter}
+            orders={h.orders}
+            ordersCurrentPage={h.ordersCurrentPage}
+            orderSearchTerm={h.orderSearchTerm}
+            ordersItemsPerPage={h.ordersItemsPerPage}
+            ordersTotalCount={h.ordersTotalCount}
             setOrderActionDialog={h.setOrderActionDialog}
             setOrderActionReason={h.setOrderActionReason}
+            setOrderFilters={h.setOrderFilters}
+            setOrderFiltersExpanded={h.setOrderFiltersExpanded}
+            setOrderProductFilter={h.setOrderProductFilter}
+            setOrdersCurrentPage={h.setOrdersCurrentPage}
+            setOrderSearchTerm={h.setOrderSearchTerm}
+            setOrdersItemsPerPage={h.setOrdersItemsPerPage}
+            setOrdersTab={h.setOrdersTab}
             setRefundMethod={h.setRefundMethod}
+            setSelectedOrderForAction={h.setSelectedOrderForAction}
           />
         </TabsContent>
       </Tabs>
@@ -355,41 +355,41 @@ export default function CashRegisterPage() {
           </DialogHeader>
 
           <CashRegisterPaymentSection
-            loadingSummary={h.loadingSummary}
-            dailySummary={h.dailySummary}
-            movements={h.movements}
-            loadingMovements={h.loadingMovements}
-            movementFilter={h.movementFilter}
-            movementTypeFilter={h.movementTypeFilter}
-            openingCash={h.openingCash}
             actualCash={h.actualCash}
-            cardMachineDebit={h.cardMachineDebit}
             cardMachineCredit={h.cardMachineCredit}
-            transferTotal={h.transferTotal}
-            notes={h.notes}
-            discrepancies={h.discrepancies}
+            cardMachineDebit={h.cardMachineDebit}
             cashDifference={h.cashDifference}
-            isOperativoMode={h.isOperativoMode}
+            dailySummary={h.dailySummary}
+            discrepancies={h.discrepancies}
             fieldOperationIdFromUrl={h.fieldOperationIdFromUrl}
-            setOpeningCash={h.setOpeningCash}
+            isOperativoMode={h.isOperativoMode}
+            loadingMovements={h.loadingMovements}
+            loadingSummary={h.loadingSummary}
+            movementFilter={h.movementFilter}
+            movements={h.movements}
+            movementTypeFilter={h.movementTypeFilter}
+            notes={h.notes}
+            openingCash={h.openingCash}
             setActualCash={h.setActualCash}
-            setCardMachineDebit={h.setCardMachineDebit}
             setCardMachineCredit={h.setCardMachineCredit}
-            setTransferTotal={h.setTransferTotal}
-            setNotes={h.setNotes}
+            setCardMachineDebit={h.setCardMachineDebit}
             setDiscrepancies={h.setDiscrepancies}
             setMovementFilter={h.setMovementFilter}
             setMovementTypeFilter={h.setMovementTypeFilter}
+            setNotes={h.setNotes}
+            setOpeningCash={h.setOpeningCash}
+            setTransferTotal={h.setTransferTotal}
+            transferTotal={h.transferTotal}
           />
 
           <CashRegisterActionsSection
-            isOperativoMode={h.isOperativoMode}
-            fieldOperationIdFromUrl={h.fieldOperationIdFromUrl}
-            effectiveBranchId={h.effectiveBranchId}
-            isSuperAdmin={h.isSuperAdmin}
             closing={h.closing}
             closingEnabled={!!h.dailySummary}
+            effectiveBranchId={h.effectiveBranchId}
+            fieldOperationIdFromUrl={h.fieldOperationIdFromUrl}
             handleCloseCashRegister={h.handleCloseCashRegister}
+            isOperativoMode={h.isOperativoMode}
+            isSuperAdmin={h.isSuperAdmin}
             setShowCloseDialog={h.setShowCloseDialog}
           />
         </DialogContent>
@@ -397,17 +397,17 @@ export default function CashRegisterPage() {
 
       {/* Order Action Dialog (cancel/delete) — sibling to Close Dialog */}
       <CashRegisterOrderDialog
-        orderActionDialog={h.orderActionDialog}
-        selectedOrderForAction={h.selectedOrderForAction}
-        orderActionReason={h.orderActionReason}
-        refundMethod={h.refundMethod}
-        processingOrderAction={h.processingOrderAction}
-        setOrderActionDialog={h.setOrderActionDialog}
-        setSelectedOrderForAction={h.setSelectedOrderForAction}
-        setOrderActionReason={h.setOrderActionReason}
-        setRefundMethod={h.setRefundMethod}
         handleCancelOrder={h.handleCancelOrder}
         handleDeleteOrder={h.handleDeleteOrder}
+        orderActionDialog={h.orderActionDialog}
+        orderActionReason={h.orderActionReason}
+        processingOrderAction={h.processingOrderAction}
+        refundMethod={h.refundMethod}
+        selectedOrderForAction={h.selectedOrderForAction}
+        setOrderActionDialog={h.setOrderActionDialog}
+        setOrderActionReason={h.setOrderActionReason}
+        setRefundMethod={h.setRefundMethod}
+        setSelectedOrderForAction={h.setSelectedOrderForAction}
       />
     </div>
   );

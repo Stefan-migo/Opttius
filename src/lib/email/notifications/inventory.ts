@@ -1,8 +1,9 @@
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -14,6 +15,7 @@ export async function sendLowStockAlert(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+
     const template = await loadEmailTemplate(
       "low_stock_alert",
       true,
@@ -21,7 +23,7 @@ export async function sendLowStockAlert(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active low_stock_alert template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -90,7 +92,7 @@ export async function sendLowStockAlert(
         : undefined,
     };
   } catch (error) {
-    console.error("Error sending low stock alert:", error);
+    appLogger.error("Error sending low stock alert:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

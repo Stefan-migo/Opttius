@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface OptionValue {
   id: string;
   value: string;
@@ -53,7 +56,7 @@ export function useProductOptions(): UseProductOptionsReturn {
         setError(data.error || "Error al cargar opciones");
       }
     } catch (err) {
-      console.error("Error fetching product options:", err);
+      appLogger.error("Error fetching product options:", err);
       setError("Error al cargar opciones");
     } finally {
       setLoading(false);

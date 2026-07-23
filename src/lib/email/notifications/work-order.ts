@@ -1,8 +1,9 @@
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -13,6 +14,7 @@ export async function sendWorkOrderReady(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+
     const template = await loadEmailTemplate(
       "work_order_ready",
       true,
@@ -52,7 +54,7 @@ export async function sendWorkOrderReady(
       fromDisplayName: orgInfo?.resolvedDisplayName,
     });
   } catch (error) {
-    console.error("Error sending work order email:", error);
+    appLogger.error("Error sending work order email:", error);
     return { success: false, error: "Error sending email" };
   }
 }

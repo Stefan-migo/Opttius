@@ -7,6 +7,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger } from '@/lib/logger';
 
 import type { Template, Ticket, TicketMessage } from "./types";
 
@@ -69,7 +70,7 @@ export function useTicketDetail() {
         setMessages(data.messages || []);
       }
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      appLogger.error("Error fetching messages:", err);
     }
   }, [ticketId]);
 
@@ -83,7 +84,7 @@ export function useTicketDetail() {
         setTemplates(data.templates || []);
       }
     } catch (err) {
-      console.error("Error fetching templates:", err);
+      appLogger.error("Error fetching templates:", err);
     }
   }, []);
 

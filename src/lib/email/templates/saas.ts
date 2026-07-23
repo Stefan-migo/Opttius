@@ -8,63 +8,60 @@
  * - saas-demo.ts: demo approved, expiring, expired, post-meeting followup
  */
 
-export {
-  sendSaaSWelcome,
-  sendSaaSTrialEnding,
-  sendSaaSSubscriptionSuccess,
-  sendSaaSPaymentFailed,
-  sendSaaSPaymentReminder,
-} from "./saas-subscription";
-export type {
-  SaaSUserData,
-  SaaSSubscriptionData,
-  SaaSTrialData,
-  SaaSPaymentData,
-} from "./saas-subscription";
-
-export { sendSaaSSecurityAlert, sendSaaSOnboardingStep } from "./saas-security";
-export type { SaaSSecurityData, SaaSOnboardingData } from "./saas-security";
-
-export {
-  sendSaaSTermsUpdate,
-  sendSaaSMaintenanceNotice,
-  sendSaaSUsageAlert,
-  sendSaaSFeatureAnnouncement,
-} from "./saas-notifications";
-
-export {
-  sendDemoApprovedEmail,
-  sendDemoExpiringEmail,
-  sendDemoExpiredEmail,
-  sendDemoPostMeetingFollowupEmail,
-} from "./saas-demo";
 export type {
   DemoApprovedData,
-  DemoExpiringData,
   DemoExpiredData,
+  DemoExpiringData,
   DemoPostMeetingFollowupData,
 } from "./saas-demo";
-
-import {
-  sendSaaSWelcome,
-  sendSaaSTrialEnding,
-  sendSaaSSubscriptionSuccess,
-  sendSaaSPaymentFailed,
-  sendSaaSPaymentReminder,
-} from "./saas-subscription";
-import { sendSaaSSecurityAlert, sendSaaSOnboardingStep } from "./saas-security";
-import {
-  sendSaaSTermsUpdate,
-  sendSaaSMaintenanceNotice,
-  sendSaaSUsageAlert,
-  sendSaaSFeatureAnnouncement,
-} from "./saas-notifications";
-import {
+export {
   sendDemoApprovedEmail,
-  sendDemoExpiringEmail,
   sendDemoExpiredEmail,
+  sendDemoExpiringEmail,
   sendDemoPostMeetingFollowupEmail,
 } from "./saas-demo";
+export {
+  sendSaaSFeatureAnnouncement,
+  sendSaaSMaintenanceNotice,
+  sendSaaSTermsUpdate,
+  sendSaaSUsageAlert,
+} from "./saas-notifications";
+export type { SaaSOnboardingData,SaaSSecurityData } from "./saas-security";
+export { sendSaaSOnboardingStep,sendSaaSSecurityAlert } from "./saas-security";
+export type {
+  SaaSPaymentData,
+  SaaSSubscriptionData,
+  SaaSTrialData,
+  SaaSUserData,
+} from "./saas-subscription";
+export {
+  sendSaaSPaymentFailed,
+  sendSaaSPaymentReminder,
+  sendSaaSSubscriptionSuccess,
+  sendSaaSTrialEnding,
+  sendSaaSWelcome,
+} from "./saas-subscription";
+
+import {
+  sendDemoApprovedEmail,
+  sendDemoExpiredEmail,
+  sendDemoExpiringEmail,
+  sendDemoPostMeetingFollowupEmail,
+} from "./saas-demo";
+import {
+  sendSaaSFeatureAnnouncement,
+  sendSaaSMaintenanceNotice,
+  sendSaaSTermsUpdate,
+  sendSaaSUsageAlert,
+} from "./saas-notifications";
+import { sendSaaSOnboardingStep,sendSaaSSecurityAlert } from "./saas-security";
+import {
+  sendSaaSPaymentFailed,
+  sendSaaSPaymentReminder,
+  sendSaaSSubscriptionSuccess,
+  sendSaaSTrialEnding,
+  sendSaaSWelcome,
+} from "./saas-subscription";
 
 export const saasEmailTemplates = {
   sendSaaSWelcome,

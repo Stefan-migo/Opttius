@@ -9,6 +9,7 @@ import PermissionsEditor from "@/components/admin/PermissionsEditor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 import { AdminUsersFilters } from "./AdminUsersFilters";
 import { AdminUsersStats } from "./AdminUsersStats";
@@ -105,7 +106,7 @@ export default function AdminUsersContent() {
       setTotalCount(data.pagination?.total || 0);
       setError(null);
     } catch (err) {
-      console.error("Error fetching admin users:", err);
+      appLogger.error("Error fetching admin users:", err);
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
@@ -147,7 +148,7 @@ export default function AdminUsersContent() {
       toast.success(`Usuario ${!currentStatus ? "activado" : "desactivado"} exitosamente`);
       fetchAdminUsers();
     } catch (error) {
-      console.error("Error updating admin user:", error);
+      appLogger.error("Error updating admin user:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al actualizar usuario",
       );
@@ -176,7 +177,7 @@ export default function AdminUsersContent() {
       toast.success("Usuario administrador eliminado exitosamente");
       fetchAdminUsers();
     } catch (error) {
-      console.error("Error deleting admin user:", error);
+      appLogger.error("Error deleting admin user:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al eliminar usuario",
       );
@@ -265,10 +266,10 @@ export default function AdminUsersContent() {
       </div>
 
       <AdminUsersStats
-        total={adminUsers.length}
-        superAdminCount={superAdminCount}
-        activeCount={activeCount}
         active30dCount={active30dCount}
+        activeCount={activeCount}
+        superAdminCount={superAdminCount}
+        total={adminUsers.length}
       />
 
       <AdminUsersFilters
@@ -280,19 +281,19 @@ export default function AdminUsersContent() {
 
       <AdminUsersTable
         adminUsers={adminUsers}
+        currentPage={currentPage}
+        isSuperAdmin={isSuperAdmin}
+        itemsPerPage={itemsPerPage}
         loading={loading}
         totalCount={totalCount}
-        currentPage={currentPage}
-        itemsPerPage={itemsPerPage}
-        isSuperAdmin={isSuperAdmin}
-        onPageChange={setCurrentPage}
-        onItemsPerPageChange={setItemsPerPage}
-        onToggleStatus={handleToggleStatus}
         onDelete={handleDeleteAdmin}
+        onItemsPerPageChange={setItemsPerPage}
+        onPageChange={setCurrentPage}
         onPermissionsEdit={(user) => {
           setSelectedUserForPermissions(user as AdminUser);
           setShowPermissionsEditor(true);
         }}
+        onToggleStatus={handleToggleStatus}
       />
 
       {/* Permissions Editor Dialog */}

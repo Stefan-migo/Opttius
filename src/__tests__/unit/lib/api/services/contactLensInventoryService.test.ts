@@ -6,7 +6,7 @@
  * match the service's error-checking pattern.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -54,8 +54,8 @@ function getMockClient() {
 // ---------------------------------------------------------------------------
 // Import AFTER mocks
 // ---------------------------------------------------------------------------
-import { contactLensInventoryService } from "@/lib/api/services/contactLensInventoryService";
 import type { ContactLensInventory } from "@/lib/api/services/contactLensInventoryService";
+import { contactLensInventoryService } from "@/lib/api/services/contactLensInventoryService";
 
 // ---------------------------------------------------------------------------
 // Fixtures

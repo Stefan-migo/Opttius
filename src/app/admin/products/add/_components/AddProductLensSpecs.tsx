@@ -83,7 +83,7 @@ export function AddProductLensSpecs({
                 <SelectValue placeholder="Seleccionar tipo" />
               </SelectTrigger>
               <SelectContent>
-                {(lensTypes as any[]).map((type: any) => (
+                {(lensTypes as unknown[]).map((type: unknown) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
                   </SelectItem>
@@ -103,7 +103,7 @@ export function AddProductLensSpecs({
                 <SelectValue placeholder="Seleccionar material" />
               </SelectTrigger>
               <SelectContent>
-                {(lensMaterials as any[]).map((material: any) => (
+                {(lensMaterials as unknown[]).map((material: unknown) => (
                   <SelectItem key={material.value} value={material.value}>
                     {material.label}
                   </SelectItem>
@@ -136,7 +136,7 @@ export function AddProductLensSpecs({
                 <SelectValue placeholder="Seleccionar nivel" />
               </SelectTrigger>
               <SelectContent>
-                {(uvProtectionLevels as any[]).map((level: any) => (
+                {(uvProtectionLevels as unknown[]).map((level: unknown) => (
                   <SelectItem key={level.value} value={level.value}>
                     {level.label}
                   </SelectItem>

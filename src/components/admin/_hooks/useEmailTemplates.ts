@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
 import type { EmailTemplate } from "../_components/EmailTemplatesConstants";
 
 interface UseEmailTemplatesProps {
@@ -47,7 +49,7 @@ export function useEmailTemplates({ mode, organizationId }: UseEmailTemplatesPro
       const data = await response.json();
       setTemplates(data.templates ?? data.data ?? []);
     } catch (error) {
-      console.error("Error fetching templates:", error);
+      appLogger.error("Error fetching templates:", error);
       toast.error("Error al cargar plantillas");
     } finally {
       setLoading(false);
@@ -71,7 +73,7 @@ export function useEmailTemplates({ mode, organizationId }: UseEmailTemplatesPro
       fetchTemplates();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Error al actualizar plantilla";
-      console.error("Error updating template:", error);
+      appLogger.error("Error updating template:", error);
       toast.error(msg);
     }
   };
@@ -93,7 +95,7 @@ export function useEmailTemplates({ mode, organizationId }: UseEmailTemplatesPro
       setTemplateToDelete(null);
       fetchTemplates();
     } catch (error) {
-      console.error("Error deleting template:", error);
+      appLogger.error("Error deleting template:", error);
       toast.error("Error al eliminar plantilla");
     } finally { setDeleting(false); }
   };
@@ -119,7 +121,7 @@ export function useEmailTemplates({ mode, organizationId }: UseEmailTemplatesPro
         toast.error(data.error || "Error al enviar email de prueba");
       }
     } catch (error) {
-      console.error("Error testing email:", error);
+      appLogger.error("Error testing email:", error);
       toast.error("Error al enviar email de prueba");
     } finally { setTesting(null); }
   };

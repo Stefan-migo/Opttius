@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 import type { BillingSettings, POSSettings } from "./types";
@@ -73,7 +74,7 @@ export function usePOSBillingSettings(currentBranchId: string | null) {
         toast.error(error.error || "Error al cargar configuración de boletas");
       }
     } catch (error: unknown) {
-      console.error("Error fetching settings:", error);
+      appLogger.error("Error fetching settings:", error);
       toast.error("Error al cargar configuraciones");
     } finally {
       setLoading(false);
@@ -127,7 +128,7 @@ export function usePOSBillingSettings(currentBranchId: string | null) {
         toast.error(error.error || "Error al guardar configuración POS");
       }
     } catch (error: unknown) {
-      console.error("Error saving POS settings:", error);
+      appLogger.error("Error saving POS settings:", error);
       toast.error("Error al guardar configuración POS");
     } finally {
       setSaving(false);
@@ -172,7 +173,7 @@ export function usePOSBillingSettings(currentBranchId: string | null) {
         toast.error(error.error || "Error al guardar configuración de boletas");
       }
     } catch (error: unknown) {
-      console.error("Error saving billing settings:", error);
+      appLogger.error("Error saving billing settings:", error);
       toast.error("Error al guardar configuración de boletas");
     } finally {
       setSaving(false);
@@ -195,7 +196,7 @@ export function usePOSBillingSettings(currentBranchId: string | null) {
         }
       }
     } catch (error) {
-      console.error("Error fetching main logo:", error);
+      appLogger.error("Error fetching main logo:", error);
       toast.error("Error al obtener el logo de la óptica");
     }
   };

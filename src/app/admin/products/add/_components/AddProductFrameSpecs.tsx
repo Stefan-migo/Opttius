@@ -82,7 +82,7 @@ export function AddProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar tipo" />
               </SelectTrigger>
               <SelectContent>
-                {(frameTypes as any[]).map((type: any) => (
+                {(frameTypes as unknown[]).map((type: unknown) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
                   </SelectItem>
@@ -102,7 +102,7 @@ export function AddProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar material" />
               </SelectTrigger>
               <SelectContent>
-                {(frameMaterials as any[]).map((material: any) => (
+                {(frameMaterials as unknown[]).map((material: unknown) => (
                   <SelectItem key={material.value} value={material.value}>
                     {material.label}
                   </SelectItem>
@@ -122,7 +122,7 @@ export function AddProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar forma" />
               </SelectTrigger>
               <SelectContent>
-                {(frameShapes as any[]).map((shape: any) => (
+                {(frameShapes as unknown[]).map((shape: unknown) => (
                   <SelectItem key={shape.value} value={shape.value}>
                     {shape.label}
                   </SelectItem>
@@ -142,7 +142,7 @@ export function AddProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar género" />
               </SelectTrigger>
               <SelectContent>
-                {(frameGenders as any[]).map((gender: any) => (
+                {(frameGenders as unknown[]).map((gender: unknown) => (
                   <SelectItem key={gender.value} value={gender.value}>
                     {gender.label}
                   </SelectItem>
@@ -162,7 +162,7 @@ export function AddProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar tamaño" />
               </SelectTrigger>
               <SelectContent>
-                {(frameSizes as any[]).map((size: any) => (
+                {(frameSizes as unknown[]).map((size: unknown) => (
                   <SelectItem key={size.value} value={size.value}>
                     {size.label}
                   </SelectItem>

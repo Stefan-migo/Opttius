@@ -6,6 +6,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { agreementService } from "@/lib/api/services/agreementService";
 import { Customer, customerService } from "@/lib/api/services/customerService";
 import { handleApiError } from "@/lib/api/services/errorService";
+import { appLogger } from '@/lib/logger';
 
 interface CustomerStats {
   totalCustomers: number;
@@ -95,7 +96,7 @@ export function useCustomers(initialCustomers: Customer[], fieldOperationIdFromU
       setTotalPages(pagination.totalPages || 1);
       setError(null);
     } catch (err) {
-      console.error("Error fetching customers:", err);
+      appLogger.error("Error fetching customers:", err);
       const errorObj = handleApiError(err, "Customers List");
       setError(errorObj?.message || "Error al cargar clientes");
     } finally {
@@ -112,7 +113,7 @@ export function useCustomers(initialCustomers: Customer[], fieldOperationIdFromU
       );
       setStats(statsData);
     } catch (err) {
-      console.error("Error fetching customer stats:", err);
+      appLogger.error("Error fetching customer stats:", err);
       handleApiError(err, "Customer Stats");
     }
   };

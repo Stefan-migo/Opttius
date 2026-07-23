@@ -36,7 +36,7 @@ export default function WebhookMonitor() {
 
       {status?.urls && (
         <WebhookStatusCards
-          urls={status.urls} mercadopagoStats={mpStats} sanityStats={sanityStats}
+          mercadopagoStats={mpStats} sanityStats={sanityStats} urls={status.urls}
           onCopyUrl={handleCopyUrl} onTestWebhook={handleTestWebhook}
         />
       )}
@@ -67,8 +67,8 @@ export default function WebhookMonitor() {
         </CardContent>
       </Card>
 
-      <WebhookLogsTable logs={logs} loading={loading} onViewDetails={handleViewDetails} />
-      <WebhookDetailsDialog open={showDetailsDialog} log={selectedLog} onOpenChange={setShowDetailsDialog} />
+      <WebhookLogsTable loading={loading} logs={logs} onViewDetails={handleViewDetails} />
+      <WebhookDetailsDialog log={selectedLog} open={showDetailsDialog} onOpenChange={setShowDetailsDialog} />
     </div>
   );
 }

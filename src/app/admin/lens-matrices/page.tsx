@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import LensMatricesContent from "./_components/LensMatricesContent";
 
 export const dynamic = "force-dynamic";

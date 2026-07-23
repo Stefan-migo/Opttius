@@ -2,13 +2,15 @@
  * Lens matrix calculations, pricing formulas, treatment pricing utilities.
  * Extracted from CreateQuoteForm.tsx — pure-ish functions for quote pricing.
  */
+import { appLogger } from '@/lib/logger';
+import { calculatePriceWithTax } from "@/lib/utils/tax";
+
+import { MATERIAL_INDICES, UUID_REGEX } from "./CreateQuoteForm.constants";
 import type {
   QuoteFormData,
   QuoteSettings,
   TreatmentOption,
 } from "./CreateQuoteForm.types";
-import { MATERIAL_INDICES, UUID_REGEX } from "./CreateQuoteForm.constants";
-import { calculatePriceWithTax } from "@/lib/utils/tax";
 
 // ─── Treatment helpers ───────────────────────────────────────────────────────
 
@@ -365,7 +367,7 @@ export async function calculateLensPriceFromApi(
       return result.price;
     }
   } catch {
-    console.warn("Could not calculate lens price from matrix");
+    appLogger.warn("Could not calculate lens price from matrix");
   }
   return null;
 }

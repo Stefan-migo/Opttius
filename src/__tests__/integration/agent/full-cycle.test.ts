@@ -53,7 +53,7 @@ describe("full agent cycle", () => {
     it("logTokenUsage calls from('chat_messages') and from('chat_sessions')", async () => {
       const supabase = buildFluentMock();
 
-      await logTokenUsage(supabase as any, {
+      await logTokenUsage(supabase as unknown, {
         sessionId: "session-1",
         messageId: "msg-1",
         promptTokens: 150,
@@ -74,7 +74,7 @@ describe("full agent cycle", () => {
       };
 
       await expect(
-        logTokenUsage(throwingSupabase as any, {
+        logTokenUsage(throwingSupabase as unknown, {
           sessionId: "session-err",
           messageId: "msg-err",
           promptTokens: 100,

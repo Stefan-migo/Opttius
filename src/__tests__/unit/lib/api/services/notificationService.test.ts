@@ -5,7 +5,7 @@
  * call the correct toast method with merged options.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock sonner
@@ -23,22 +23,23 @@ vi.mock("sonner", () => {
 
 // Import AFTER mocks
 import { toast as sonnerToast } from "sonner";
+
 import {
-  success,
-  error,
-  info,
-  warning,
-  loading,
-  promise,
   custom,
-  dismissAll,
   dismiss,
-  successWithAction,
+  dismissAll,
+  error,
   errorWithAction,
+  info,
   infoWithAction,
-  warningWithAction,
+  loading,
   NotificationService,
+  promise,
+  success,
+  successWithAction,
   toast as reExportedToast,
+  warning,
+  warningWithAction,
 } from "@/lib/api/services/notificationService";
 
 // ---------------------------------------------------------------------------

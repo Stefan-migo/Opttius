@@ -5,12 +5,12 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -36,11 +36,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
+import {  type ContactLensInventory,
   contactLensInventoryService,
-  type ContactLensInventory,
 } from "@/lib/api/services/contactLensInventoryService";
-import { formatCurrency } from "@/lib/utils";
+import { appLogger } from '@/lib/logger';
 
 interface ContactLensFamily {
   id: string;
@@ -58,6 +57,7 @@ export default function ContactLensInventoryManager({
   branchId,
 }: ContactLensInventoryManagerProps) {
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>("");
+
   const [inventory, setInventory] = useState<ContactLensInventory[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -94,7 +94,7 @@ export default function ContactLensInventoryManager({
       );
       setInventory(data);
     } catch (error) {
-      console.error("Error loading inventory:", error);
+      appLogger.error("Error loading inventory:", error);
     } finally {
       setLoading(false);
     }
@@ -146,7 +146,7 @@ export default function ContactLensInventoryManager({
       setShowAddDialog(false);
       loadInventory();
     } catch (error) {
-      console.error("Error saving inventory:", error);
+      appLogger.error("Error saving inventory:", error);
       toast.error("Error al guardar inventario");
     }
   };
@@ -179,7 +179,7 @@ export default function ContactLensInventoryManager({
             </SelectContent>
           </Select>
           {selectedFamilyId && branchId && (
-            <Button onClick={handleAddNew} size="sm">
+            <Button size="sm" onClick={handleAddNew}>
               Agregar Stock
             </Button>
           )}
@@ -198,7 +198,7 @@ export default function ContactLensInventoryManager({
               <p className="text-muted-foreground">
                 No hay inventario registrado para esta familia
               </p>
-              <Button className="mt-4" onClick={handleAddNew} variant="outline">
+              <Button className="mt-4" variant="outline" onClick={handleAddNew}>
                 Agregar primera entrada de inventario
               </Button>
             </CardContent>
@@ -248,8 +248,8 @@ export default function ContactLensInventoryManager({
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        variant="ghost"
                         size="sm"
+                        variant="ghost"
                         onClick={() => handleEdit(item)}
                       >
                         Editar
@@ -288,65 +288,66 @@ export default function ContactLensInventoryManager({
             <div>
               <Label>Esfera Mínima</Label>
               <Input
-                type="number"
+                placeholder="-6.00"
                 step="0.25"
+                type="number"
                 value={formData.sphereMin}
                 onChange={(e) =>
                   setFormData({ ...formData, sphereMin: e.target.value })
                 }
-                placeholder="-6.00"
               />
             </div>
             <div>
               <Label>Esfera Máxima</Label>
               <Input
-                type="number"
+                placeholder="-0.50"
                 step="0.25"
+                type="number"
                 value={formData.sphereMax}
                 onChange={(e) =>
                   setFormData({ ...formData, sphereMax: e.target.value })
                 }
-                placeholder="-0.50"
               />
             </div>
             <div>
               <Label>Cilindro Mínimo</Label>
               <Input
-                type="number"
+                placeholder="0"
                 step="0.25"
+                type="number"
                 value={formData.cylinderMin}
                 onChange={(e) =>
                   setFormData({ ...formData, cylinderMin: e.target.value })
                 }
-                placeholder="0"
               />
             </div>
             <div>
               <Label>Cilindro Máximo</Label>
               <Input
-                type="number"
+                placeholder="0"
                 step="0.25"
+                type="number"
                 value={formData.cylinderMax}
                 onChange={(e) =>
                   setFormData({ ...formData, cylinderMax: e.target.value })
                 }
-                placeholder="0"
               />
             </div>
             <div>
               <Label>Cantidad (Cajas)</Label>
               <Input
+                placeholder="10"
                 type="number"
                 value={formData.quantity}
                 onChange={(e) =>
                   setFormData({ ...formData, quantity: e.target.value })
                 }
-                placeholder="10"
               />
             </div>
             <div>
               <Label>Stock Mínimo</Label>
               <Input
+                placeholder="3"
                 type="number"
                 value={formData.minStockThreshold}
                 onChange={(e) =>
@@ -355,7 +356,6 @@ export default function ContactLensInventoryManager({
                     minStockThreshold: e.target.value,
                   })
                 }
-                placeholder="3"
               />
             </div>
           </div>

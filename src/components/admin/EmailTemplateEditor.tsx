@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Sparkles, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "@/lib/email/template-utils";
+import { appLogger } from '@/lib/logger';
 
 import { EmailTemplateEditorAiDialog } from "./EmailTemplateEditorAiDialog";
 import { EmailTemplateEditorBasicInfo } from "./EmailTemplateEditorBasicInfo";
@@ -233,7 +234,7 @@ export default function EmailTemplateEditor({
       onSave();
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving template:", error);
+      appLogger.error("Error saving template:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al guardar plantilla",
       );
@@ -345,32 +346,32 @@ export default function EmailTemplateEditor({
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <EmailTemplateEditorBasicInfo
-              mode={mode}
               formData={{ name: formData.name, type: formData.type }}
               isSystem={!!template?.is_system}
+              mode={mode}
               onChange={(field, value) =>
                 setFormData((prev) => ({ ...prev, [field]: value }))
               }
             />
 
             <EmailTemplateEditorContent
-              formType={formData.type}
-              subject={formData.subject}
               content={formData.content}
+              formType={formData.type}
+              getPreviewHtml={getPreviewHtml}
+              getPreviewSubject={getPreviewSubject}
               showPreview={showPreview}
-              onSubjectChange={(value) =>
-                setFormData((prev) => ({ ...prev, subject: value }))
-              }
+              subject={formData.subject}
+              onAiAssist={() => setShowAiAssistDialog(true)}
               onContentChange={(value) =>
                 setFormData((prev) => ({ ...prev, content: value }))
               }
-              onTogglePreview={() => setShowPreview(!showPreview)}
+              onSubjectChange={(value) =>
+                setFormData((prev) => ({ ...prev, subject: value }))
+              }
               onTemplateApply={(key) =>
                 applyTemplate(key as keyof typeof emailTemplates)
               }
-              onAiAssist={() => setShowAiAssistDialog(true)}
-              getPreviewSubject={getPreviewSubject}
-              getPreviewHtml={getPreviewHtml}
+              onTogglePreview={() => setShowPreview(!showPreview)}
             />
 
             {/* Active Toggle */}
@@ -410,10 +411,10 @@ export default function EmailTemplateEditor({
       </Dialog>
 
       <EmailTemplateEditorAiDialog
-        open={showAiAssistDialog}
         loading={aiLoading}
-        onOpenChange={setShowAiAssistDialog}
+        open={showAiAssistDialog}
         onGenerate={handleAiAssist}
+        onOpenChange={setShowAiAssistDialog}
       />
     </>
   );

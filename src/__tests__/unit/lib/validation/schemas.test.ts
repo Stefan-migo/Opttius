@@ -10,23 +10,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  emailSchema,
-  emailOptionalSchema,
-  uuidSchema,
-  phoneNumberSchema,
-  phoneNumberOptionalSchema,
-  positiveIntegerSchema,
-  nonNegativeIntegerSchema,
-  percentageSchema,
-  priceSchema,
-  nameSchema,
-  descriptionSchema,
-  slugSchema,
-  paginationSchema,
-  searchQuerySchema,
-  statusSchema,
   booleanStringSchema,
+  descriptionSchema,
+  emailOptionalSchema,
+  emailSchema,
+  nameSchema,
+  nonNegativeIntegerSchema,
+  paginationSchema,
+  percentageSchema,
+  phoneNumberOptionalSchema,
+  phoneNumberSchema,
+  positiveIntegerSchema,
+  priceSchema,
+  searchQuerySchema,
+  slugSchema,
+  statusSchema,
   uuidArraySchema,
+  uuidSchema,
 } from "@/lib/validation/schemas";
 
 // ============================================================================

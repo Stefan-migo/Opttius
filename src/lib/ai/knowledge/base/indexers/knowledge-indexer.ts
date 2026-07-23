@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import { join } from "path";
 
 import { EmbeddingFactory } from "@/lib/ai/embeddings/factory";
+import { appLogger } from '@/lib/logger';
 
 import { DocumentParser, ParsedDocument } from "../parsers/document-parser";
 
@@ -52,7 +53,7 @@ export class KnowledgeIndexer {
    * Index all documents in a directory
    */
   async indexDirectory(directoryPath: string): Promise<number> {
-    console.log(`Indexing documents from: ${directoryPath}`);
+    appLogger.info(`Indexing documents from: ${directoryPath}`);
 
     const documents = await this.parser.parseDirectory(directoryPath, {
       extractMetadata: true,
@@ -66,14 +67,14 @@ export class KnowledgeIndexer {
       try {
         await this.indexDocument(doc);
         indexedCount++;
-        console.log(`✓ Indexed: ${doc.title}`);
+        appLogger.info(`✓ Indexed: ${doc.title}`);
       } catch (error) {
-        console.warn(`✗ Failed to index ${doc.title}:`, error);
+        appLogger.warn(`✗ Failed to index ${doc.title}:`, error);
       }
     }
 
     await this.saveIndex();
-    console.log(`Successfully indexed ${indexedCount} documents`);
+    appLogger.info(`Successfully indexed ${indexedCount} documents`);
 
     return indexedCount;
   }
@@ -203,9 +204,9 @@ export class KnowledgeIndexer {
         "knowledge-index.json",
       );
       await fs.writeFile(indexPath, JSON.stringify(indexData, null, 2));
-      console.log(`Index saved to: ${indexPath}`);
+      appLogger.info(`Index saved to: ${indexPath}`);
     } catch (error) {
-      console.error("Failed to save index:", error);
+      appLogger.error("Failed to save index:", error);
     }
   }
 
@@ -231,9 +232,9 @@ export class KnowledgeIndexer {
         this.index.set(doc.id, doc);
       }
 
-      console.log(`Loaded ${this.index.size} documents from index`);
+      appLogger.info(`Loaded ${this.index.size} documents from index`);
     } catch (error) {
-      console.log("No existing index found, starting fresh");
+      appLogger.info("No existing index found, starting fresh");
     }
   }
 
@@ -288,7 +289,7 @@ export class KnowledgeIndexer {
       const result = await this.embeddingFactory.embed(text);
       return result.vector;
     } catch (error) {
-      console.error("Failed to generate embedding:", error);
+      appLogger.error("Failed to generate embedding:", error);
       // Fallback to simple token-based representation
       return this.simpleTextEmbedding(text);
     }

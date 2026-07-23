@@ -12,10 +12,10 @@ import {
   contactLensFamilyService,
 } from "@/lib/api/services/contactLensFamilyService";
 import { contactLensInventoryService } from "@/lib/api/services/contactLensInventoryService";
-import {
-  type ContactLensMatrixCalculationResult,
+import {  type ContactLensMatrixCalculationResult,
   contactLensMatrixService,
 } from "@/lib/api/services/contactLensMatrixService";
+import { appLogger } from '@/lib/logger';
 
 export interface ContactLensPrescription {
   sphere_od: number;
@@ -63,6 +63,7 @@ export function useContactLensSelector(
   } | null,
 ) {
   const [families, setFamilies] = useState<ContactLensFamily[]>([]);
+
   const [loadingFamilies, setLoadingFamilies] = useState(true);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>("");
   const [manualPrescription, setManualPrescription] =
@@ -102,7 +103,7 @@ export function useContactLensSelector(
       .getAll()
       .then((data) => setFamilies(data || []))
       .catch((err) => {
-        console.error("Error loading families:", err);
+        appLogger.error("Error loading families:", err);
         toast.error("Error al cargar familias");
       })
       .finally(() => setLoadingFamilies(false));
@@ -155,7 +156,7 @@ export function useContactLensSelector(
           });
         }
       } catch (err) {
-        console.error("Error calculating price:", err);
+        appLogger.error("Error calculating price:", err);
         toast.error("Error al calcular precio");
       } finally {
         setLoadingPrice(false);
@@ -275,7 +276,7 @@ export function useContactLensSelector(
       toast.success("Encargo solicitado correctamente");
       setShowEncargoDialog(false);
     } catch (err) {
-      console.error("Error creating encargo:", err);
+      appLogger.error("Error creating encargo:", err);
       toast.error("Error al crear encargo");
     } finally {
       setSubmittingEncargo(false);

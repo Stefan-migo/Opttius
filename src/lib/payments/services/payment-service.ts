@@ -13,13 +13,13 @@ export class PaymentService {
   constructor(supabase: SupabaseClient) { this.supabase = supabase; }
 
   async createPayment(data: PaymentCreationAttributes): Promise<Payment> {
-    const { data: payment, error } = await this.supabase.from("payments").insert(data as any).select().single();
+    const { data: payment, error } = await this.supabase.from("payments").insert(data as unknown).select().single();
     if (error) { logger.error("Failed to create payment in DB", error, { data }); throw new Error(`Error creating payment: ${error.message}`); }
     return payment as Payment;
   }
 
   async updatePaymentStatus(paymentId: string, status: PaymentStatus, gatewayTransactionId?: string | null, metadata?: Record<string, unknown> | null, gatewayPaymentIntentId?: string | null): Promise<Payment> {
-    const update: any = { status, updated_at: new Date().toISOString() };
+    const update: unknown = { status, updated_at: new Date().toISOString() };
     if (gatewayTransactionId != null) update.gateway_transaction_id = gatewayTransactionId;
     if (gatewayPaymentIntentId != null) update.gateway_payment_intent_id = gatewayPaymentIntentId;
     if (metadata != null) update.metadata = metadata;

@@ -6,8 +6,9 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { quoteService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
-import type { POSQuote, POSCustomer } from "../types";
+import type { POSCustomer,POSQuote } from "../types";
 
 interface UsePOSPrescriptionProps {
   customer?: POSCustomer | null;
@@ -31,7 +32,7 @@ export function usePOSPrescription({
 
   // Fetch quotes when customer changes
   useEffect(() => {
-    console.log(
+    appLogger.info(
       "[usePOSPrescription] Fetching quotes - customer:",
       customer?.id,
       "branchId:",
@@ -39,7 +40,7 @@ export function usePOSPrescription({
     );
 
     if (!customer?.id || !branchId) {
-      console.log(
+      appLogger.info(
         "[usePOSPrescription] Skipping - missing customer.id or branchId",
       );
       setQuotes([]);
@@ -66,7 +67,7 @@ export function usePOSPrescription({
       ),
     )
       .then((results) => {
-        console.log(
+        appLogger.info(
           "[usePOSPrescription] getQuotes results by status:",
           results,
         );
@@ -82,7 +83,7 @@ export function usePOSPrescription({
               self.findIndex((q2) => q2.id === q.id) === index,
           );
 
-          console.log(
+          appLogger.info(
             "[usePOSPrescription] All unique active quotes:",
             uniqueQuotes,
           );
@@ -90,7 +91,7 @@ export function usePOSPrescription({
         }
       })
       .catch((error) => {
-        console.error("[usePOSPrescription] Error fetching quotes:", error);
+        appLogger.error("[usePOSPrescription] Error fetching quotes:", error);
         if (!cancelled) setQuotes([]);
       })
       .finally(() => {
@@ -166,7 +167,7 @@ export function usePOSPrescription({
       );
       setQuotes(activeQuotes);
     } catch (error) {
-      console.error("Error refreshing quotes:", error);
+      appLogger.error("Error refreshing quotes:", error);
     } finally {
       setLoadingQuotes(false);
     }

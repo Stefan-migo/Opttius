@@ -1,8 +1,8 @@
 "use client";
 
-import ShippingZoneManager from "./ShippingZoneManager";
-import ShippingRateEditor from "./ShippingRateEditor";
 import ShippingCarrierForm from "./ShippingCarrierForm";
+import ShippingRateEditor from "./ShippingRateEditor";
+import ShippingZoneManager from "./ShippingZoneManager";
 
 export default function ShippingManager() {
   return (

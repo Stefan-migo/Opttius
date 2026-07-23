@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { appLogger } from '@/lib/logger';
 
 import type { Category } from "../hooks/useCategories";
 import { useCategories } from "../hooks/useCategories";
@@ -110,7 +111,7 @@ export default function CategoriesManagementSection() {
       setCategoryDialogOpen(false);
       setCategoryFormData({ name: "", slug: "", description: "" });
     } catch (error) {
-      console.error("Error saving category:", error);
+      appLogger.error("Error saving category:", error);
     } finally {
       setCategoryFormLoading(false);
     }
@@ -128,7 +129,7 @@ export default function CategoriesManagementSection() {
     try {
       await deleteCategory(category.id);
     } catch (error) {
-      console.error("Error deleting category:", error);
+      appLogger.error("Error deleting category:", error);
     }
   };
 

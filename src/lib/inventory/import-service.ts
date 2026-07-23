@@ -4,8 +4,8 @@
  * stock management via the update_product_stock RPC.
  */
 
-import { appLogger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
 import { generateSlug } from "./import-mapping";
 
 // ─── Types ─────────────────────────────────────────────────────────────

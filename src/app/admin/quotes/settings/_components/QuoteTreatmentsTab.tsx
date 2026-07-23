@@ -160,8 +160,8 @@ export function QuoteTreatmentsTab({
                 }}
               />
               <Label
-                htmlFor="custom-service-enabled"
                 className="cursor-pointer"
+                htmlFor="custom-service-enabled"
               >
                 Habilitar
               </Label>
@@ -169,6 +169,10 @@ export function QuoteTreatmentsTab({
             <div className="space-y-2">
               <Label>Nombre del servicio</Label>
               <Input
+                disabled={
+                  !treatmentPrices?.custom_service?.enabled
+                }
+                placeholder="Ej: Tintado especial"
                 value={
                   treatmentPrices?.custom_service?.name || ""
                 }
@@ -185,10 +189,6 @@ export function QuoteTreatmentsTab({
                     },
                   );
                 }}
-                placeholder="Ej: Tintado especial"
-                disabled={
-                  !treatmentPrices?.custom_service?.enabled
-                }
               />
             </div>
             <div className="space-y-2">
@@ -199,6 +199,9 @@ export function QuoteTreatmentsTab({
                 </span>
                 <Input
                   className="pl-12"
+                  disabled={
+                    !treatmentPrices?.custom_service?.enabled
+                  }
                   type="number"
                   value={
                     treatmentPrices?.custom_service?.price || 0
@@ -216,9 +219,6 @@ export function QuoteTreatmentsTab({
                       },
                     );
                   }}
-                  disabled={
-                    !treatmentPrices?.custom_service?.enabled
-                  }
                 />
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import type { ToolCall } from "@/lib/ai/types";
+import { appLogger } from '@/lib/logger';
 
 interface ChatSessionConfig {
   temperature?: number;
@@ -105,7 +106,7 @@ export function useChatSession(): UseChatSessionReturn {
               requestBody.config = cleanConfig;
             }
           } catch (e) {
-            console.warn("Config is not serializable, skipping:", e);
+            appLogger.warn("Config is not serializable, skipping:", e);
           }
         }
 
@@ -123,7 +124,7 @@ export function useChatSession(): UseChatSessionReturn {
             data.error ||
             data.details ||
             `HTTP ${response.status}: Failed to create session`;
-          console.error("Session creation failed:", errorMessage, data);
+          appLogger.error("Session creation failed:", errorMessage, data);
           throw new Error(errorMessage);
         }
 
@@ -139,7 +140,7 @@ export function useChatSession(): UseChatSessionReturn {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to create session";
-        console.error("Error in createSession:", errorMessage, err);
+        appLogger.error("Error in createSession:", errorMessage, err);
         setError(errorMessage);
         return null;
       } finally {
@@ -227,7 +228,7 @@ export function useChatSession(): UseChatSessionReturn {
         const data = await response.json();
         setMessages((prev) => [...prev, data.message]);
       } catch (err) {
-        console.error("Error saving message:", err);
+        appLogger.error("Error saving message:", err);
       }
     },
     [],

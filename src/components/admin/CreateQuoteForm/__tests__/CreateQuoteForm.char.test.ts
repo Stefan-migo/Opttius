@@ -10,11 +10,10 @@
 import { describe, expect, it } from "vitest";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
 import type {
   CreateQuoteFormProps,
-  QuoteFormData,
   PresbyopiaSolution,
+  QuoteFormData,
   QuoteSettings,
   TreatmentOption,
 } from "../CreateQuoteForm.types";
@@ -134,11 +133,11 @@ describe("CreateQuoteForm.types", () => {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 import {
-  MATERIAL_INDICES,
   DEFAULT_QUOTE_SETTINGS,
-  UUID_REGEX,
   formatPrice,
+  MATERIAL_INDICES,
   roundCurrency,
+  UUID_REGEX,
 } from "../CreateQuoteForm.constants";
 
 describe("CreateQuoteForm.constants", () => {
@@ -187,18 +186,17 @@ describe("CreateQuoteForm.constants", () => {
 // ─── Pricing Utils ───────────────────────────────────────────────────────────
 
 import {
-  getTreatmentPrice,
-  isTreatmentEnabled,
   buildAvailableTreatments,
-  toggleTreatment,
   calculateTotal,
-  mapFrameToFormData,
-  mapNearFrameToFormData,
-  inheritFamilyProperties,
-  shouldCalculateLensPrice,
-  isTreatmentDisabled,
   type CalculateTotalInput,
   type FrameData,
+  getTreatmentPrice,
+  inheritFamilyProperties,
+  isTreatmentDisabled,
+  isTreatmentEnabled,
+  mapFrameToFormData,
+  shouldCalculateLensPrice,
+  toggleTreatment,
 } from "../quotePricingUtils";
 
 describe("quotePricingUtils", () => {
@@ -456,10 +454,10 @@ describe("quotePricingUtils", () => {
 // ─── Submit Handler ──────────────────────────────────────────────────────────
 
 import {
-  validateQuoteForm,
   buildNearFramePayload,
   buildQuotePayload,
   type NearFramePayload,
+  validateQuoteForm,
 } from "../quoteSubmitHandler";
 
 describe("quoteSubmitHandler", () => {

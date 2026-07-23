@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { appLogger as logger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
 
 export function buildProductSelectString(branchId?: string): string {
@@ -10,7 +9,7 @@ export function buildProductSelectString(branchId?: string): string {
 }
 
 export function applyProductFilters(
-  query: ReturnType<SupabaseClient<Database>["from"]>, params: Record<string, any>,
+  query: ReturnType<SupabaseClient<Database>["from"]>, params: Record<string, unknown>,
 ): ReturnType<SupabaseClient<Database>["from"]> {
   const { category, skinType, minPrice, maxPrice, featured, status, includeArchived, search, branchId } = params;
   let q = query;
@@ -33,34 +32,34 @@ export function validateSortColumn(sortBy: string): string {
   return valid.includes(sortBy) ? sortBy : "created_at";
 }
 
-export function filterProductsByBranch(products: any[], branchId: string): any[] {
+export function filterProductsByBranch(products: unknown[], branchId: string): unknown[] {
   return products.filter((p) => !p.branch_id || p.branch_id === branchId);
 }
 
-export function filterLowStockProducts(products: any[], branchId?: string | null): any[] {
+export function filterLowStockProducts(products: unknown[], branchId?: string | null): unknown[] {
   return products.filter((p) => {
     if (branchId && p.product_branch_stock) {
-      const bs = p.product_branch_stock.find((s: any) => s.branch_id === branchId);
+      const bs = p.product_branch_stock.find((s: unknown) => s.branch_id === branchId);
       return bs ? bs.quantity <= bs.low_stock_threshold : false;
     }
     return false;
   });
 }
 
-export function filterInStockProducts(products: any[], branchId?: string | null): any[] {
+export function filterInStockProducts(products: unknown[], branchId?: string | null): unknown[] {
   return products.filter((p) => {
     if (branchId && p.product_branch_stock) {
-      const bs = p.product_branch_stock.find((s: any) => s.branch_id === branchId);
+      const bs = p.product_branch_stock.find((s: unknown) => s.branch_id === branchId);
       return bs ? bs.quantity > 0 : false;
     }
     return false;
   });
 }
 
-export function filterOutOfStockProducts(products: any[], branchId?: string | null): any[] {
+export function filterOutOfStockProducts(products: unknown[], branchId?: string | null): unknown[] {
   return products.filter((p) => {
     if (branchId && p.product_branch_stock) {
-      const bs = p.product_branch_stock.find((s: any) => s.branch_id === branchId);
+      const bs = p.product_branch_stock.find((s: unknown) => s.branch_id === branchId);
       return bs ? bs.quantity <= 0 : true;
     }
     return true;

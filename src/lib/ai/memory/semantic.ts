@@ -5,6 +5,8 @@
  * Searches across all indexed content (products, orders, customers, chat messages).
  */
 
+import { appLogger } from '@/lib/logger';
+
 import { getEmbeddingFactory } from "../embeddings";
 import type {
   EmbeddingRecord,
@@ -53,7 +55,7 @@ export class SemanticMemory {
       });
 
       if (error) {
-        console.error("Semantic search error:", error);
+        appLogger.error("Semantic search error:", error);
         throw error;
       }
 
@@ -67,7 +69,7 @@ export class SemanticMemory {
         createdAt: new Date(row.created_at),
       }));
     } catch (error) {
-      console.error("Semantic search failed:", error);
+      appLogger.error("Semantic search failed:", error);
       return [];
     }
   }
@@ -103,13 +105,13 @@ export class SemanticMemory {
         .single();
 
       if (error) {
-        console.error("Failed to store embedding:", error);
+        appLogger.error("Failed to store embedding:", error);
         return null;
       }
 
       return data.id;
     } catch (error) {
-      console.error("Store embedding failed:", error);
+      appLogger.error("Store embedding failed:", error);
       return null;
     }
   }
@@ -150,13 +152,13 @@ export class SemanticMemory {
         .insert(insertData);
 
       if (error) {
-        console.error("Failed to store embedding batch:", error);
+        appLogger.error("Failed to store embedding batch:", error);
         return 0;
       }
 
       return records.length;
     } catch (error) {
-      console.error("Store embedding batch failed:", error);
+      appLogger.error("Store embedding batch failed:", error);
       return 0;
     }
   }
@@ -177,7 +179,7 @@ export class SemanticMemory {
       const id = await this.storeEmbedding(record);
       return id !== null;
     } catch (error) {
-      console.error("Upsert embedding failed:", error);
+      appLogger.error("Upsert embedding failed:", error);
       return false;
     }
   }
@@ -197,13 +199,13 @@ export class SemanticMemory {
         .eq("source_id", sourceId);
 
       if (error) {
-        console.error("Delete embedding failed:", error);
+        appLogger.error("Delete embedding failed:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Delete embedding failed:", error);
+      appLogger.error("Delete embedding failed:", error);
       return false;
     }
   }
@@ -221,13 +223,13 @@ export class SemanticMemory {
         .limit(1);
 
       if (error) {
-        console.error("Check embedding failed:", error);
+        appLogger.error("Check embedding failed:", error);
         return false;
       }
 
       return data && data.length > 0;
     } catch (error) {
-      console.error("Check embedding failed:", error);
+      appLogger.error("Check embedding failed:", error);
       return false;
     }
   }

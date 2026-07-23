@@ -5,6 +5,8 @@
 
 import React, { useMemo } from "react";
 
+import { appLogger } from '@/lib/logger';
+
 import type { POSCartItem, POSCustomer } from "../types";
 import { POSContext, type POSState,usePOS } from "./posProviderTypes";
 import { usePOSCart } from "./usePOSCart";
@@ -59,7 +61,7 @@ export function POSProvider({
     onPaymentSubmit: async (paymentData: PaymentData) => {
       // This will be called when payment is submitted
       // The actual sale processing happens in the page component
-      console.log("Payment submitted:", paymentData);
+      appLogger.info("Payment submitted:", paymentData);
     },
   });
 
@@ -74,11 +76,11 @@ export function POSProvider({
 
   // Debug: log when customer changes
   React.useEffect(() => {
-    console.log(
+    appLogger.info(
       "[usePOSProvider] customerHook.selectedCustomer:",
       customerHook.selectedCustomer,
     );
-    console.log("[usePOSProvider] branchId:", branchId);
+    appLogger.info("[usePOSProvider] branchId:", branchId);
   }, [customerHook.selectedCustomer, branchId]);
 
   // Cash status hook
@@ -130,7 +132,7 @@ export function POSProvider({
     };
 
     // TODO: Call actual API to process sale
-    console.log("Processing sale:", saleData);
+    appLogger.info("Processing sale:", saleData);
 
     // Reset after sale
     setCart([]);

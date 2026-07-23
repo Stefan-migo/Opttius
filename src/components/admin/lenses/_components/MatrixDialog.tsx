@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -133,7 +132,7 @@ export function MatrixDialog({
                 onChange={(e) => onChange({ cost: e.target.value })} />
             </div>
             <div className="flex items-center space-x-2 pt-4">
-              <input type="checkbox" id="is_active" checked={formData.is_active}
+              <input checked={formData.is_active} id="is_active" type="checkbox"
                 onChange={(e) => onChange({ is_active: e.target.checked })} />
               <Label htmlFor="is_active">Matriz Activa</Label>
             </div>

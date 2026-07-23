@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { appLogger } from '@/lib/logger';
 
 interface SystemConfigItem {
   config_key: string;
@@ -57,7 +58,7 @@ export default function EmailConfigCard({
           setReplyTo(metaSupportEmail?.trim() || contactEmailVal || "");
         }
       } catch (error) {
-        console.error("Error fetching organization:", error);
+        appLogger.error("Error fetching organization:", error);
         toast.error("Error al cargar configuración");
       } finally {
         setLoading(false);
@@ -93,7 +94,7 @@ export default function EmailConfigCard({
       }
       toast.success("Configuración de correo guardada correctamente");
     } catch (error) {
-      console.error("Error saving email config:", error);
+      appLogger.error("Error saving email config:", error);
       toast.error(
         error instanceof Error
           ? error.message

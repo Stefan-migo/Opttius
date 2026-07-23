@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 interface Category {
   id: string;
@@ -67,7 +68,7 @@ export default function CategoriesContent() {
       setCategories(extractDataFromResponse<Category>(data));
       setError(null);
     } catch (err) {
-      console.error("Error fetching categories:", err);
+      appLogger.error("Error fetching categories:", err);
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
@@ -166,7 +167,7 @@ export default function CategoriesContent() {
       setIsDialogOpen(false);
       setFormData({ name: "", slug: "", description: "" });
     } catch (error) {
-      console.error("Error saving category:", error);
+      appLogger.error("Error saving category:", error);
       toast.error(
         error instanceof Error
           ? error.message
@@ -211,7 +212,7 @@ export default function CategoriesContent() {
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
     } catch (error) {
-      console.error("Error deleting category:", error);
+      appLogger.error("Error deleting category:", error);
       toast.error(
         error instanceof Error
           ? error.message

@@ -9,6 +9,8 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
 import type { POSProduct } from "../types";
 import { usePOS } from "./usePOSProvider";
 
@@ -147,7 +149,7 @@ export function usePOSPageActions({
         idempotency_key: idempotencyKey,
       };
 
-      console.log("Processing sale:", saleData);
+      appLogger.info("Processing sale:", saleData);
 
       // ponytail: mock implementation, replace with real API call when backend ready
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -163,7 +165,7 @@ export function usePOSPageActions({
       resetPayment();
       setShowPaymentDialog(false);
     } catch (error) {
-      console.error("Payment error:", error);
+      appLogger.error("Payment error:", error);
       toast.error("Error al procesar el pago");
     } finally {
       setProcessingPayment(false);
@@ -236,7 +238,7 @@ export function usePOSPageActions({
           toast.success("Presupuesto cargado al carrito");
         }
       } catch (error) {
-        console.error("Quote load error:", error);
+        appLogger.error("Quote load error:", error);
         toast.error(
           error instanceof Error
             ? error.message

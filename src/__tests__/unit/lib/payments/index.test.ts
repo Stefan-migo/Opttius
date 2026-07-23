@@ -4,7 +4,7 @@
  * @module __tests__/unit/lib/payments/index.test
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // Mock all gateway modules so their imports are never evaluated
 const MockGateway = vi.hoisted(
@@ -32,7 +32,6 @@ vi.mock("@/lib/payments/paypal/gateway", () => ({
   PayPalGateway: MockGateway,
 }));
 
-import type { IPaymentGateway } from "@/lib/payments/interfaces";
 import { PaymentGatewayFactory } from "@/lib/payments/index";
 
 describe("PaymentGatewayFactory", () => {

@@ -1,5 +1,6 @@
-import { appLogger as logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+
+import { appLogger as logger } from "@/lib/logger";
 
 // Re-export all utilities from the comprehensive error handler.
 // Local definitions (below) silently override re-exports with the same name,

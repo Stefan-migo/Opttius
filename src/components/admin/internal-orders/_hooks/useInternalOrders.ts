@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
 import type { Branch, Driver, InternalOrder, Vehicle } from "../_components/types";
 
 export function useInternalOrders() {
@@ -52,7 +54,7 @@ export function useInternalOrders() {
         setOrders(d.orders || []);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      appLogger.error("Error fetching data:", error);
       toast.error("Error al cargar los datos");
     } finally {
       setLoading(false);

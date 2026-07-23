@@ -6,6 +6,8 @@
  * Fallback: Transformers.js (local, offline-capable)
  */
 
+import { appLogger } from '@/lib/logger';
+
 import { GoogleEmbeddingProvider } from "./google";
 import { TransformersEmbeddingProvider } from "./transformers";
 import type {
@@ -116,7 +118,7 @@ export class EmbeddingFactory {
         const result = await primary.embed(text);
         return result;
       } catch (error: unknown) {
-        console.warn(
+        appLogger.warn(
           `Primary embedding provider (${primary.name}) failed:`,
           error.message,
         );
@@ -126,11 +128,11 @@ export class EmbeddingFactory {
           try {
             // Check availability again as it might have changed
             if (fallback.isAvailable()) {
-              console.log(`Falling back to ${fallback.name} for embeddings`);
+              appLogger.info(`Falling back to ${fallback.name} for embeddings`);
               return await fallback.embed(text);
             }
           } catch (fallbackError: unknown) {
-            console.warn(
+            appLogger.warn(
               `Fallback provider (${fallback.name}) also failed:`,
               fallbackError.message,
             );
@@ -146,13 +148,13 @@ export class EmbeddingFactory {
     if (fallback && fallback.name !== primary.name) {
       try {
         if (fallback.isAvailable()) {
-          console.log(
+          appLogger.info(
             `Primary provider (${primary.name}) not available, using ${fallback.name}`,
           );
           return await fallback.embed(text);
         }
       } catch (error: unknown) {
-        console.warn(
+        appLogger.warn(
           `Fallback provider (${fallback.name}) failed:`,
           error.message,
         );
@@ -184,7 +186,7 @@ export class EmbeddingFactory {
       try {
         return await primary.embedBatch(texts);
       } catch (error: unknown) {
-        console.warn(
+        appLogger.warn(
           `Primary embedding provider (${primary.name}) failed:`,
           error.message,
         );
@@ -193,13 +195,13 @@ export class EmbeddingFactory {
         if (fallback && fallback.name !== primary.name) {
           try {
             if (fallback.isAvailable()) {
-              console.log(
+              appLogger.info(
                 `Falling back to ${fallback.name} for batch embeddings`,
               );
               return await fallback.embedBatch(texts);
             }
           } catch (fallbackError: unknown) {
-            console.warn(
+            appLogger.warn(
               `Fallback provider (${fallback.name}) also failed:`,
               fallbackError.message,
             );
@@ -214,13 +216,13 @@ export class EmbeddingFactory {
     if (fallback && fallback.name !== primary.name) {
       try {
         if (fallback.isAvailable()) {
-          console.log(
+          appLogger.info(
             `Primary provider (${primary.name}) not available, using ${fallback.name}`,
           );
           return await fallback.embedBatch(texts);
         }
       } catch (error: unknown) {
-        console.warn(
+        appLogger.warn(
           `Fallback provider (${fallback.name}) failed:`,
           error.message,
         );

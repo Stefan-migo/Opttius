@@ -12,7 +12,6 @@
 import { describe, expect, it } from "vitest";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
 import type { CashClosure, DailySummary, Movement } from "./cashRegister.types";
 
 describe("cashRegister.types", () => {
@@ -202,11 +201,11 @@ describe("cashRegister.types", () => {
 // ─── Payment Utils ───────────────────────────────────────────────────────────
 
 import {
-  PAYMENT_METHOD_FILTER_MAP,
-  STATUS_BADGE_CONFIG,
-  resolveClosureStatus,
-  formatPaymentMethod,
   computeCashDifference,
+  formatPaymentMethod,
+  PAYMENT_METHOD_FILTER_MAP,
+  resolveClosureStatus,
+  STATUS_BADGE_CONFIG,
 } from "./cashPaymentUtils";
 
 describe("cashPaymentUtils", () => {
@@ -367,12 +366,12 @@ describe("cashPaymentUtils", () => {
 // ─── Cash Ops Utils ──────────────────────────────────────────────────────────
 
 import {
-  buildClosureParams,
-  buildOrderParams,
   buildCloseCashBody,
-  getTodayChileDate,
-  extractOrderCustomerName,
+  buildClosureParams,
   buildCreditNotesDateRange,
+  buildOrderParams,
+  extractOrderCustomerName,
+  getTodayChileDate,
 } from "./cashOpsUtils";
 
 describe("cashOpsUtils", () => {

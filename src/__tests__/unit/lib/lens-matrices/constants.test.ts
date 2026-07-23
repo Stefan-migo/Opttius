@@ -9,11 +9,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  OPTICAL_MATRIX_TEMPLATE,
-  getOpticalDefaultMatrices,
   CONTACT_LENS_DEFAULT_MATRICES,
+  getOpticalDefaultMatrices,
   isContactLensFallbackMatrix,
   isOpticalFallbackMatrix,
+  OPTICAL_MATRIX_TEMPLATE,
 } from "@/lib/lens-matrices/constants";
 
 describe("OPTICAL_MATRIX_TEMPLATE", () => {

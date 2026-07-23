@@ -1,5 +1,6 @@
-import type { Order } from "./types";
-import { formatCurrency, getPaymentMethodLabel } from "./types";
+
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
@@ -9,6 +10,8 @@ import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
+import type { Order } from "./types";
+import { formatCurrency, getPaymentMethodLabel } from "./types";
 
 // Send order confirmation email using DB template
 export async function sendOrderConfirmation(
@@ -25,7 +28,7 @@ export async function sendOrderConfirmation(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active order_confirmation template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -100,7 +103,7 @@ export async function sendOrderConfirmation(
 
     return result;
   } catch (error) {
-    console.error("Error sending order confirmation:", error);
+    appLogger.error("Error sending order confirmation:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -123,7 +126,7 @@ export async function sendShippingNotification(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active order_shipped template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -196,7 +199,7 @@ export async function sendShippingNotification(
 
     return result;
   } catch (error) {
-    console.error("Error sending shipping notification:", error);
+    appLogger.error("Error sending shipping notification:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -219,7 +222,7 @@ export async function sendDeliveryConfirmation(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active order_delivered template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -289,7 +292,7 @@ export async function sendDeliveryConfirmation(
 
     return result;
   } catch (error) {
-    console.error("Error sending delivery confirmation:", error);
+    appLogger.error("Error sending delivery confirmation:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

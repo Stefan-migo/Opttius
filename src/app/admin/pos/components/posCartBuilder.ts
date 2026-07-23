@@ -6,10 +6,10 @@
  */
 
 import type {
+  ExternalPrescriptionData,
+  OrderFormData,
   POSProduct,
   Treatment,
-  OrderFormData,
-  ExternalPrescriptionData,
 } from "./POSAdvancedSale.types";
 
 export interface CartItem {

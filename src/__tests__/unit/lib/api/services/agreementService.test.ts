@@ -6,7 +6,7 @@
  * getAgreementAnalytics) are mocked via global.fetch.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -85,20 +85,20 @@ function getMockClient() {
 // ---------------------------------------------------------------------------
 import {
   agreementService,
-  getAgreements,
-  getAgreement,
   createAgreement,
+  createPurchaseOrder,
+  getAgreement,
+  getAgreementAnalytics,
+  getAgreementCustomers,
+  getAgreementInvoice,
+  getAgreementInvoices,
+  getAgreements,
+  getInstitutionalBalances,
+  getPurchaseOrders,
+  reconcileBalances,
   updateAgreement,
   updateAgreementStatus,
-  getPurchaseOrders,
-  createPurchaseOrder,
   updatePurchaseOrder,
-  getInstitutionalBalances,
-  reconcileBalances,
-  getAgreementInvoices,
-  getAgreementInvoice,
-  getAgreementCustomers,
-  getAgreementAnalytics,
 } from "@/lib/api/services/agreementService";
 
 // ---------------------------------------------------------------------------

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
 import PaymentGatewayConfig from "./_components/PaymentGatewayConfig";
 import PaymentMethodToggle from "./_components/PaymentMethodToggle";
 import PaymentTestSection from "./_components/PaymentTestSection";
@@ -106,7 +108,7 @@ export default function PaymentConfig({ configs, onUpdate }: PaymentConfigProps)
         toast.error(data.message || data.error || "Error al conectar con MercadoPago");
       }
     } catch (error) {
-      console.error("Error testing connection:", error);
+      appLogger.error("Error testing connection:", error);
       setConnectionStatus({ status: "error", message: "Error al probar la conexión" });
       toast.error("Error al probar la conexión");
     } finally {
@@ -126,7 +128,7 @@ export default function PaymentConfig({ configs, onUpdate }: PaymentConfigProps)
       setLoading(true);
       await onUpdate(`mercadopago_${key}`, value);
     } catch (error) {
-      console.error("Error updating config:", error);
+      appLogger.error("Error updating config:", error);
     } finally {
       setLoading(false);
     }
@@ -170,28 +172,28 @@ export default function PaymentConfig({ configs, onUpdate }: PaymentConfigProps)
 
       <PaymentGatewayConfig
         configs={configs}
-        loading={loading}
-        testing={testing}
-        showTokens={showTokens}
-        credentialValues={credentialValues}
         connectionStatus={connectionStatus}
+        credentialValues={credentialValues}
         getConfigValue={getConfigValue}
-        handleUpdate={handleUpdate}
-        handleToggleVisibility={handleToggleVisibility}
-        handleCredentialChange={handleCredentialChange}
         handleCredentialBlur={handleCredentialBlur}
+        handleCredentialChange={handleCredentialChange}
         handleTestConnection={handleTestConnection}
+        handleToggleVisibility={handleToggleVisibility}
+        handleUpdate={handleUpdate}
+        loading={loading}
+        showTokens={showTokens}
+        testing={testing}
       />
 
       <PaymentMethodToggle
-        loading={loading}
         getConfigValue={getConfigValue}
         handleUpdate={handleUpdate}
+        loading={loading}
       />
 
       <PaymentTestSection
-        webhookUrl={webhookUrl}
         handleCopyWebhookUrl={handleCopyWebhookUrl}
+        webhookUrl={webhookUrl}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface Customer {
@@ -95,7 +96,7 @@ export function useCustomerSearch({
           setCustomerResults(data.data ?? data.customers ?? []);
         }
       } catch (error) {
-        console.error("Error searching customers:", error);
+        appLogger.error("Error searching customers:", error);
       } finally {
         setSearchingCustomers(false);
       }
@@ -115,7 +116,7 @@ export function useCustomerSearch({
           setSelectedCustomer(data.data);
         }
       } catch (error) {
-        console.error("Error fetching customer:", error);
+        appLogger.error("Error fetching customer:", error);
       }
     };
 

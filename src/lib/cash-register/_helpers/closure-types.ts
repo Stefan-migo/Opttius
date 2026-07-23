@@ -6,9 +6,8 @@
 
 import { NextResponse } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
-import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
 import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 // ─── Error ───────────────────────────────────────────────────────────────────

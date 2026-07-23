@@ -9,6 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { ValidationError } from "@/lib/api/errors";
 import {
   commonSchemas,
   parseAndValidateBody,
@@ -17,7 +18,6 @@ import {
   validateRequestBody,
   type ValidationSchema,
 } from "@/lib/api/validation";
-import { ValidationError } from "@/lib/api/errors";
 
 // ---------------------------------------------------------------------------
 // validateRequestBody

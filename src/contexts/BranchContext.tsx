@@ -10,6 +10,8 @@ import {
   useState,
 } from "react";
 
+import { appLogger } from '@/lib/logger';
+
 import { useAuthContext } from "./AuthContext";
 
 export interface Branch {
@@ -162,7 +164,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
 
       setIsInitialized(true);
     } catch (error) {
-      console.error("Error fetching branches:", error);
+      appLogger.error("Error fetching branches:", error);
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +173,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
   const setCurrentBranch = async (branchId: string | "global" | null) => {
     if (branchId === "global") {
       if (!isSuperAdmin) {
-        console.error("Only super admins can use global view");
+        appLogger.error("Only super admins can use global view");
         return;
       }
       setCurrentBranchState(null);

@@ -16,7 +16,7 @@ import { formatRUT } from "@/lib/utils/rut";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: any) {
+async function getAdminAuth(supabase: unknown) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new AuthenticationError("Unauthorized");
   const { data: isAdmin } = (await supabase.rpc("is_admin", {
@@ -72,10 +72,10 @@ export async function listAppointments(request: NextRequest) {
   }
 
   // Batch fetch related data
-  const customerIds = [...new Set(appointments.map((a: any) => a.customer_id).filter(Boolean))];
-  const staffIds = [...new Set(appointments.map((a: any) => a.assigned_to).filter(Boolean))];
-  const prescriptionIds = [...new Set(appointments.map((a: any) => a.prescription_id).filter(Boolean))];
-  const orderIds = [...new Set(appointments.map((a: any) => a.order_id).filter(Boolean))];
+  const customerIds = [...new Set(appointments.map((a: unknown) => a.customer_id).filter(Boolean))];
+  const staffIds = [...new Set(appointments.map((a: unknown) => a.assigned_to).filter(Boolean))];
+  const prescriptionIds = [...new Set(appointments.map((a: unknown) => a.prescription_id).filter(Boolean))];
+  const orderIds = [...new Set(appointments.map((a: unknown) => a.order_id).filter(Boolean))];
 
   const [{ data: customers }, { data: staff }, { data: prescriptions }, { data: orders }] = await Promise.all([
     customerIds.length > 0 ? supabase.from("customers").select("id, first_name, last_name, email, phone").in("id", customerIds) : Promise.resolve({ data: [] }),
@@ -84,12 +84,12 @@ export async function listAppointments(request: NextRequest) {
     orderIds.length > 0 ? supabase.from("orders").select("id, order_number").in("id", orderIds) : Promise.resolve({ data: [] }),
   ]);
 
-  const appointmentsWithRelations = (appointments as any[]).map((appointment) => ({
+  const appointmentsWithRelations = (appointments as unknown[]).map((appointment) => ({
     ...appointment,
-    customer: (customers as any[])?.find((c) => c.id === appointment.customer_id) || null,
-    assigned_staff: (staff as any[])?.find((s) => s.id === appointment.assigned_to) || null,
-    prescription: (prescriptions as any[])?.find((p) => p.id === appointment.prescription_id) || null,
-    order: (orders as any[])?.find((o) => o.id === appointment.order_id) || null,
+    customer: (customers as unknown[])?.find((c) => c.id === appointment.customer_id) || null,
+    assigned_staff: (staff as unknown[])?.find((s) => s.id === appointment.assigned_to) || null,
+    prescription: (prescriptions as unknown[])?.find((p) => p.id === appointment.prescription_id) || null,
+    order: (orders as unknown[])?.find((o) => o.id === appointment.order_id) || null,
   }));
 
   return createApiSuccessResponse(appointmentsWithRelations, { requestId });
@@ -103,7 +103,7 @@ export async function createAppointment(request: NextRequest) {
 
   const defaultBranchForNonSuperAdmin =
     !branchContext.isSuperAdmin && branchContext.accessibleBranches.length > 0
-      ? branchContext.accessibleBranches.find((b: any) => b.isPrimary)?.id || branchContext.accessibleBranches[0]?.id
+      ? branchContext.accessibleBranches.find((b: unknown) => b.isPrimary)?.id || branchContext.accessibleBranches[0]?.id
       : null;
   const effectiveBranchId = branchContext.branchId || defaultBranchForNonSuperAdmin;
 
@@ -111,12 +111,12 @@ export async function createAppointment(request: NextRequest) {
     return NextResponse.json({ error: "Debe seleccionar una sucursal para crear citas" }, { status: 400 });
   }
 
-  let body: any;
+  let body: unknown;
   try { body = await request.json(); } catch {
     return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
   }
 
-  let validatedBody: any;
+  let validatedBody: unknown;
   try { validatedBody = validateBody(body, createAppointmentSchema); } catch (error) {
     if (error instanceof ValidationError) return validationErrorResponse(error);
     throw error;
@@ -139,14 +139,14 @@ export async function createAppointment(request: NextRequest) {
       p_duration_minutes: durationMinutes,
       p_staff_id: body.assigned_to || null,
       p_branch_id: finalBranchId,
-    })) as any;
+    })) as unknown;
 
     if (slotsError) {
       return NextResponse.json({ error: "Error checking availability", details: slotsError.message }, { status: 500 });
     }
 
     const normalizedTimeForCompare = timeForRPC.substring(0, 5);
-    const matchingSlot = (slots || []).find((slot: any) => {
+    const matchingSlot = (slots || []).find((slot: unknown) => {
       let slotTime = slot.time_slot;
       if (typeof slotTime === "object" && slotTime !== null) {
         if ("hours" in slotTime && "minutes" in slotTime) {
@@ -207,7 +207,7 @@ export async function createAppointment(request: NextRequest) {
   }
 
   // Build appointment data
-  const appointmentData: Record<string, any> = {
+  const appointmentData: Record<string, unknown> = {
     customer_id: customerId,
     appointment_date: validatedBody.appointment_date,
     appointment_time: normalizedTime,

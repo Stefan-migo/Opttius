@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getBranchFilter,
   formatBranchName,
+  getBranchAndOperativoHeaders,
+  getBranchFilter,
   getBranchHeader,
   getBranchQueryParam,
   getOperativoHeader,
-  getBranchAndOperativoHeaders,
 } from "@/lib/utils/branch";
 
 describe("getBranchFilter", () => {

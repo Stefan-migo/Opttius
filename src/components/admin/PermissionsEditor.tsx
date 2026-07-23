@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ACTION_LABELS, PERMISSION_RESOURCES } from "@/lib/admin/permissions";
+import { appLogger } from '@/lib/logger';
 
 interface Permissions {
   [resource: string]: string[];
@@ -97,7 +98,7 @@ export default function PermissionsEditor({
       onSave();
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving permissions:", error);
+      appLogger.error("Error saving permissions:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al guardar permisos",
       );

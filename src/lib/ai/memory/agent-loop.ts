@@ -14,8 +14,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getRedisClient } from "@/lib/redis";
 
-import { getEmbeddingFactory } from "../embeddings";
 import type { MemoryContext } from "../agent/prompt-builder";
+import { getEmbeddingFactory } from "../embeddings";
 
 // ─── Constants ───
 

@@ -16,8 +16,9 @@ import { LeadKanbanBoard } from "@/components/admin/saas-management/leads/LeadKa
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DemoRequest, FunnelStage } from "./types";
+
 import { STAGE_COLORS, STAGE_LABELS } from "./constants";
+import type { DemoRequest, FunnelStage } from "./types";
 
 interface PipelineSectionProps {
   requests: DemoRequest[];
@@ -102,17 +103,17 @@ export function PipelineSection({
           <div className="ml-auto flex gap-1 border rounded-md p-1">
             <Button
               size="sm"
+              title="Vista Kanban"
               variant={viewMode === "kanban" ? "default" : "ghost"}
               onClick={() => onViewModeChange("kanban")}
-              title="Vista Kanban"
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
             <Button
               size="sm"
+              title="Vista Tabla"
               variant={viewMode === "table" ? "default" : "ghost"}
               onClick={() => onViewModeChange("table")}
-              title="Vista Tabla"
             >
               <List className="h-4 w-4" />
             </Button>
@@ -131,11 +132,11 @@ export function PipelineSection({
         ) : viewMode === "kanban" ? (
           <LeadKanbanBoard
             leads={requests}
+            loading={loading}
             onLeadClick={(lead) => onOpenLeadModal(lead as DemoRequest)}
             onStageChange={(leadId, newStage) =>
               onStageChange(leadId, newStage as FunnelStage)
             }
-            loading={loading}
           />
         ) : (
           <div className="overflow-x-auto">

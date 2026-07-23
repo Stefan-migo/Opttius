@@ -5,7 +5,7 @@
  */
 
 import { appLogger as logger } from "@/lib/logger";
-import { handleApiError } from "@/lib/api/services/errorService";
+
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 export interface ContactLensInventory {

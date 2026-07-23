@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 interface SupportTemplate {
   id: string;
@@ -93,7 +94,7 @@ export function useTemplates() {
       setTemplates(data.templates || []);
       setError(null);
     } catch (err) {
-      console.error("Error fetching templates:", err);
+      appLogger.error("Error fetching templates:", err);
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
@@ -108,7 +109,7 @@ export function useTemplates() {
         setCategories(extractDataFromResponse(data));
       }
     } catch (err) {
-      console.error("Error fetching categories:", err);
+      appLogger.error("Error fetching categories:", err);
     }
   }, []);
 
@@ -197,7 +198,7 @@ export function useTemplates() {
       await fetchTemplates();
       setEditDialogOpen(false);
     } catch (err) {
-      console.error("Error saving template:", err);
+      appLogger.error("Error saving template:", err);
       alert("Error al guardar la plantilla. Por favor, inténtalo de nuevo.");
     } finally {
       setSaving(false);
@@ -209,7 +210,7 @@ export function useTemplates() {
       await navigator.clipboard.writeText(template.content);
       alert("Plantilla copiada al portapapeles");
     } catch (err) {
-      console.error("Error copying template:", err);
+      appLogger.error("Error copying template:", err);
       alert("Error al copiar la plantilla");
     }
   };

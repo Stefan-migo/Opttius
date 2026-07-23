@@ -2,12 +2,12 @@ import { z } from "zod";
 
 import {
   emailOptionalSchema,
-  uuidOptionalSchema,
-  rutOptionalSchema,
-  priceSchema,
-  priceOptionalSchema,
   priceNonNegativeSchema,
+  priceOptionalSchema,
+  priceSchema,
   quantitySchema,
+  rutOptionalSchema,
+  uuidOptionalSchema,
   uuidSchema,
 } from "./base";
 

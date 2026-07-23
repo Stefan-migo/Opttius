@@ -48,10 +48,10 @@ export function SupportTicketFilters({
             <label className="text-sm font-medium">Estado</label>
             <Select
               value={filters.status}
+              onOpenChange={() => {}}
               onValueChange={(value) =>
                 onFilterChange({ status: value, ...(value !== filters.status && {} ) })
               }
-              onOpenChange={() => {}}
             >
               <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                 <SelectValue placeholder="Todos los estados" />

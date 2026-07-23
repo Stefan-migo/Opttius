@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { getBranchContext } from "@/lib/api/branch-middleware";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**

@@ -105,19 +105,19 @@ export default function InternalOrderTrackingManager() {
       </Card>
 
       <OrderDialogs
-        showOrderDialog={showOrderDialog}
-        showDeleteDialog={showDeleteDialog}
-        editingOrder={editingOrder}
-        deletingItem={deletingItem}
-        orderForm={orderForm}
         branches={branches}
+        deletingItem={deletingItem}
         drivers={drivers}
+        editingOrder={editingOrder}
+        orderForm={orderForm}
+        showDeleteDialog={showDeleteDialog}
+        showOrderDialog={showOrderDialog}
         vehicles={vehicles}
-        onOrderDialogChange={setShowOrderDialog}
+        onConfirmDelete={handleConfirmDelete}
         onDeleteDialogChange={setShowDeleteDialog}
         onFormChange={setOrderForm}
+        onOrderDialogChange={setShowOrderDialog}
         onSave={handleSaveOrder}
-        onConfirmDelete={handleConfirmDelete}
       />
     </div>
   );

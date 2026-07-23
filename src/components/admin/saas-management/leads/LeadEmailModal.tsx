@@ -161,10 +161,10 @@ export function LeadEmailModal({
               {EMAIL_TEMPLATES.map((template) => (
                 <Button
                   key={template.id}
+                  size="sm"
                   variant={
                     selectedTemplate === template.id ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => handleTemplateSelect(template.id)}
                 >
                   {template.label}
@@ -180,12 +180,12 @@ export function LeadEmailModal({
             </label>
             <div className="flex items-center gap-2">
               <input
+                disabled
                 className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white disabled:opacity-50"
                 value={lead.email}
-                disabled
               />
               {lead.funnel_stage && (
-                <Badge variant="outline" className="text-white border-white/30">
+                <Badge className="text-white border-white/30" variant="outline">
                   {lead.funnel_stage}
                 </Badge>
               )}

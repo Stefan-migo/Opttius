@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { profileUpdateSchema } from "@/lib/api/validation/profile-schemas";
-import { getProfileErrorMessage } from "@/lib/profile/error-messages";
 import { appLogger as logger } from "@/lib/logger";
+import { getProfileErrorMessage } from "@/lib/profile/error-messages";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";

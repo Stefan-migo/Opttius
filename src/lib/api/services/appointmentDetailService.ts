@@ -10,7 +10,7 @@ import { NotificationService } from "@/lib/notifications/notification-service";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: any) {
+async function getAdminAuth(supabase: unknown) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return null;
   const { data: isAdmin } = (await supabase.rpc("is_admin", { user_id: user.id } as IsAdminParams)) as { data: IsAdminResult | null };
@@ -18,22 +18,22 @@ async function getAdminAuth(supabase: any) {
   return user;
 }
 
-async function fetchRelations(supabase: any, supabaseServiceRole: any, appointment: any) {
-  const relations: Record<string, any> = { ...appointment };
+async function fetchRelations(supabase: unknown, supabaseServiceRole: unknown, appointment: unknown) {
+  const relations: Record<string, unknown> = { ...appointment };
   if (appointment.customer_id) {
-    const { data: customer } = await supabase.from("customers").select("id, first_name, last_name, email, phone").eq("id", appointment.customer_id).single() as any;
+    const { data: customer } = await supabase.from("customers").select("id, first_name, last_name, email, phone").eq("id", appointment.customer_id).single() as unknown;
     relations.customer = customer || null;
   }
   if (appointment.assigned_to) {
-    const { data: staff } = await supabase.from("profiles").select("id, first_name, last_name").eq("id", appointment.assigned_to).single() as any;
+    const { data: staff } = await supabase.from("profiles").select("id, first_name, last_name").eq("id", appointment.assigned_to).single() as unknown;
     relations.assigned_staff = staff || null;
   }
   if (appointment.prescription_id) {
-    const { data: prescription } = await supabase.from("prescriptions").select("*").eq("id", appointment.prescription_id).single() as any;
+    const { data: prescription } = await supabase.from("prescriptions").select("*").eq("id", appointment.prescription_id).single() as unknown;
     relations.prescription = prescription || null;
   }
   if (appointment.order_id) {
-    const { data: order } = await supabase.from("orders").select("*").eq("id", appointment.order_id).single() as any;
+    const { data: order } = await supabase.from("orders").select("*").eq("id", appointment.order_id).single() as unknown;
     relations.order = order || null;
   }
   return relations;
@@ -44,7 +44,7 @@ export async function getAppointment(request: NextRequest, id: string) {
   const user = await getAdminAuth(supabase);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: appointment, error } = await supabase.from("appointments").select("*").eq("id", id).single() as any;
+  const { data: appointment, error } = await supabase.from("appointments").select("*").eq("id", id).single() as unknown;
   if (error || !appointment) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
 
   const appointmentWithRelations = await fetchRelations(supabase, null, appointment);
@@ -60,30 +60,30 @@ export async function updateAppointment(request: NextRequest, id: string) {
   const body = await request.json();
 
   // Fetch pre-update data for cancellation notification
-  let appointmentBeforeCancel: any = null;
+  let appointmentBeforeCancel: unknown = null;
   if (body.status === "cancelled") {
     const { data: apt } = await supabaseServiceRole.from("appointments")
       .select("customer_id, guest_first_name, guest_last_name, guest_email, appointment_date, appointment_time, branch_id, organization_id")
-      .eq("id", id).single() as any;
+      .eq("id", id).single() as unknown;
     appointmentBeforeCancel = apt;
   }
 
   // Fetch pre-update data for reschedule notification
-  let appointmentBeforeReschedule: any = null;
+  let appointmentBeforeReschedule: unknown = null;
   const isReschedule = (body.appointment_date || body.appointment_time) && body.status !== "cancelled";
   if (isReschedule) {
     const { data: apt } = await supabaseServiceRole.from("appointments")
       .select("appointment_date, appointment_time, customer_id, guest_email, branch_id, organization_id")
-      .eq("id", id).single() as any;
+      .eq("id", id).single() as unknown;
     if (apt) {
-      let customer: any = null;
-      let branch: any = null;
+      let customer: unknown = null;
+      let branch: unknown = null;
       if (apt.customer_id) {
-        const { data: c } = await supabaseServiceRole.from("customers").select("first_name, last_name, email").eq("id", apt.customer_id).single() as any;
+        const { data: c } = await supabaseServiceRole.from("customers").select("first_name, last_name, email").eq("id", apt.customer_id).single() as unknown;
         customer = c;
       }
       if (apt.branch_id) {
-        const { data: b } = await supabaseServiceRole.from("branches").select("name, phone, email").eq("id", apt.branch_id).single() as any;
+        const { data: b } = await supabaseServiceRole.from("branches").select("name, phone, email").eq("id", apt.branch_id).single() as unknown;
         branch = b;
       }
       appointmentBeforeReschedule = { ...apt, customer, branch };
@@ -93,9 +93,9 @@ export async function updateAppointment(request: NextRequest, id: string) {
   // Check availability for reschedule
   if (body.appointment_date || body.appointment_time || body.duration_minutes) {
     const { data: currentAppointment } = await supabaseServiceRole.from("appointments")
-      .select("appointment_date, appointment_time, duration_minutes, assigned_to").eq("id", id).single() as any;
+      .select("appointment_date, appointment_time, duration_minutes, assigned_to").eq("id", id).single() as unknown;
     const { data: currentAppointmentForBranch } = await supabaseServiceRole.from("appointments")
-      .select("branch_id").eq("id", id).single() as any;
+      .select("branch_id").eq("id", id).single() as unknown;
 
     const { data: isAvailable, error: availabilityError } = await supabaseServiceRole.rpc("check_appointment_availability", {
       p_date: body.appointment_date || currentAppointment?.appointment_date,
@@ -104,14 +104,14 @@ export async function updateAppointment(request: NextRequest, id: string) {
       p_appointment_id: id,
       p_staff_id: body.assigned_to || currentAppointment?.assigned_to || null,
       p_branch_id: currentAppointmentForBranch?.branch_id || null,
-    }) as any;
+    }) as unknown;
 
     if (availabilityError) return NextResponse.json({ error: "Error checking availability", details: availabilityError.message }, { status: 500 });
     if (!isAvailable) return NextResponse.json({ error: "El horario seleccionado no está disponible", code: "SLOT_NOT_AVAILABLE" }, { status: 400 });
   }
 
   // Build update data
-  const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+  const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
   const updateFields = ["appointment_date", "appointment_time", "duration_minutes", "appointment_type",
     "assigned_to", "notes", "reason", "outcome", "follow_up_required", "follow_up_date",
     "prescription_id", "order_id", "cancellation_reason"];
@@ -139,7 +139,7 @@ export async function updateAppointment(request: NextRequest, id: string) {
   }
 
   const { data: updatedAppointment, error } = await supabaseServiceRole.from("appointments")
-    .update(updateData).eq("id", id).select("*").single() as any;
+    .update(updateData).eq("id", id).select("*").single() as unknown;
   if (error) return NextResponse.json({ error: "Failed to update appointment", details: error.message }, { status: 500 });
 
   // Cancellation notification
@@ -149,7 +149,7 @@ export async function updateAppointment(request: NextRequest, id: string) {
       let customerEmail: string | null = null;
       const apt = appointmentBeforeCancel;
       if (apt.customer_id) {
-        const { data: customer } = await supabaseServiceRole.from("customers").select("first_name, last_name, email").eq("id", apt.customer_id).single() as any;
+        const { data: customer } = await supabaseServiceRole.from("customers").select("first_name, last_name, email").eq("id", apt.customer_id).single() as unknown;
         if (customer) {
           customerName = [customer.first_name, customer.last_name].filter(Boolean).join(" ").trim() || "Cliente";
           customerEmail = customer.email || null;
@@ -164,7 +164,7 @@ export async function updateAppointment(request: NextRequest, id: string) {
       await NotificationService.notifyAppointmentCancelled(id, customerName, aptDate, aptTime, apt.branch_id ?? updatedAppointment.branch_id);
 
       if (customerEmail) {
-        const { data: branch } = apt.branch_id ? await supabaseServiceRole.from("branches").select("name, phone, email").eq("id", apt.branch_id).single() as any : { data: null };
+        const { data: branch } = apt.branch_id ? await supabaseServiceRole.from("branches").select("name, phone, email").eq("id", apt.branch_id).single() as unknown : { data: null };
         sendAppointmentCancellation({
           id, customer_name: customerName, customer_first_name: customerName.split(" ")[0] || "Cliente",
           customer_email: customerEmail, date: aptDate, time: typeof aptTime === "string" ? aptTime.substring(0, 5) : aptTime,
@@ -206,25 +206,25 @@ export async function updateAppointment(request: NextRequest, id: string) {
     try {
       let orgId = updatedAppointment.organization_id;
       if (!orgId) {
-        const { data: adminUser } = await supabaseServiceRole.from("admin_users").select("organization_id").eq("id", user.id).maybeSingle() as any;
+        const { data: adminUser } = await supabaseServiceRole.from("admin_users").select("organization_id").eq("id", user.id).maybeSingle() as unknown;
         orgId = adminUser?.organization_id;
       }
       if (orgId) {
-        const { data: existingCustomer } = await supabaseServiceRole.from("customers").select("id").eq("rut", updatedAppointment.guest_rut).eq("organization_id", orgId).maybeSingle() as any;
+        const { data: existingCustomer } = await supabaseServiceRole.from("customers").select("id").eq("rut", updatedAppointment.guest_rut).eq("organization_id", orgId).maybeSingle() as unknown;
         let targetCustomerId = existingCustomer?.id;
         if (!targetCustomerId) {
           const { data: newCustomer } = await supabaseServiceRole.from("customers").insert({
             first_name: updatedAppointment.guest_first_name, last_name: updatedAppointment.guest_last_name,
             rut: updatedAppointment.guest_rut, email: updatedAppointment.guest_email, phone: updatedAppointment.guest_phone,
             organization_id: orgId, branch_id: updatedAppointment.branch_id, is_active: true,
-          }).select("id").single() as any;
+          }).select("id").single() as unknown;
           if (newCustomer) targetCustomerId = newCustomer.id;
         }
         if (targetCustomerId) {
           const { data: finalUpdate } = await supabaseServiceRole.from("appointments").update({
             customer_id: targetCustomerId, guest_first_name: null, guest_last_name: null,
             guest_rut: null, guest_email: null, guest_phone: null,
-          }).eq("id", id).select("*").single() as any;
+          }).eq("id", id).select("*").single() as unknown;
           if (finalUpdate) finalAppointmentSnapshot = finalUpdate;
         }
       }
@@ -244,7 +244,7 @@ export async function deleteAppointment(request: NextRequest, id: string) {
   const user = await getAdminAuth(supabase);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await supabaseServiceRole.from("appointments").delete().eq("id", id) as any;
+  const { error } = await supabaseServiceRole.from("appointments").delete().eq("id", id) as unknown;
   if (error) return NextResponse.json({ error: "Failed to delete appointment", details: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

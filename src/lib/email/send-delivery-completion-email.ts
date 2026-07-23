@@ -4,9 +4,8 @@
  * template if survey is enabled for the organization.
  */
 
-import { randomUUID } from "crypto";
-
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
 
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";

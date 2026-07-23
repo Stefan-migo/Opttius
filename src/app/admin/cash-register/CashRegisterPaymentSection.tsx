@@ -2,10 +2,9 @@
 
 import { AlertCircle, RefreshCw } from "lucide-react";
 
-import type { DailySummary, Movement } from "./cashRegister.types";
-
 import { CashReconciliationForm } from "./_components/CashReconciliationForm";
 import { DailySummaryCard } from "./_components/DailySummaryCard";
+import type { DailySummary, Movement } from "./cashRegister.types";
 
 interface PaymentSectionProps {
   loadingSummary: boolean;
@@ -84,31 +83,31 @@ export function CashRegisterPaymentSection(props: PaymentSectionProps) {
     <div className="space-y-4 sm:space-y-6">
       <DailySummaryCard
         dailySummary={dailySummary}
-        movements={movements}
         loadingMovements={loadingMovements}
         movementFilter={movementFilter}
+        movements={movements}
         movementTypeFilter={movementTypeFilter}
         setMovementFilter={setMovementFilter}
         setMovementTypeFilter={setMovementTypeFilter}
       />
 
       <CashReconciliationForm
-        openingCash={openingCash}
         actualCash={actualCash}
-        cardMachineDebit={cardMachineDebit}
         cardMachineCredit={cardMachineCredit}
-        transferTotal={transferTotal}
-        notes={notes}
-        discrepancies={discrepancies}
+        cardMachineDebit={cardMachineDebit}
         cashDifference={cashDifference}
         dailySummary={dailySummary}
-        setOpeningCash={setOpeningCash}
+        discrepancies={discrepancies}
+        notes={notes}
+        openingCash={openingCash}
         setActualCash={setActualCash}
-        setCardMachineDebit={setCardMachineDebit}
         setCardMachineCredit={setCardMachineCredit}
-        setTransferTotal={setTransferTotal}
-        setNotes={setNotes}
+        setCardMachineDebit={setCardMachineDebit}
         setDiscrepancies={setDiscrepancies}
+        setNotes={setNotes}
+        setOpeningCash={setOpeningCash}
+        setTransferTotal={setTransferTotal}
+        transferTotal={transferTotal}
       />
     </div>
   );

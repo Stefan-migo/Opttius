@@ -10,8 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLike } from "@/contexts/LikeContext";
 import { cn } from "@/lib/utils";
 
-import { cardVariants, lineThemeClasses } from "./_components/ProductCardTheme";
 import { ProductCardDesktopContent, ProductCardMobileContent } from "./_components/ProductCardContent";
+import { cardVariants, lineThemeClasses } from "./_components/ProductCardTheme";
 
 interface ProductCardProps {
   id: string; name: string; description: string; price: number; originalPrice?: number;
@@ -43,8 +43,8 @@ function ProductCard({ id, name, description, price, originalPrice, category, im
           {stock === 0 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm pointer-events-none"><Badge className="bg-white text-gray-800 shadow-xl px-4 py-2 text-base" variant="secondary">Sin Stock</Badge></div>}
         </div>
         <CardContent className="p-2 flex-1 flex flex-col" padding="none">
-          <ProductCardDesktopContent id={id} name={name} description={description} price={price} originalPrice={originalPrice} rating={rating} isNatural={isNatural} isNew={isNew} isOnSale={isOnSale} stock={stock} size={size} theme={theme} quantity={quantity} onQuantityChange={setQuantity} onAddToCart={() => { if (onAddToCart && stock > 0) { onAddToCart(id, quantity); setQuantity(1); }}} />
-          <ProductCardMobileContent id={id} name={name} description={description} price={price} originalPrice={originalPrice} rating={rating} isNatural={isNatural} isNew={isNew} isOnSale={isOnSale} stock={stock} size={size} theme={theme} quantity={quantity} onQuantityChange={setQuantity} onAddToCart={() => { if (onAddToCart && stock > 0) { onAddToCart(id, quantity); setQuantity(1); }}} />
+          <ProductCardDesktopContent description={description} id={id} isNatural={isNatural} isNew={isNew} isOnSale={isOnSale} name={name} originalPrice={originalPrice} price={price} quantity={quantity} rating={rating} size={size} stock={stock} theme={theme} onAddToCart={() => { if (onAddToCart && stock > 0) { onAddToCart(id, quantity); setQuantity(1); }}} onQuantityChange={setQuantity} />
+          <ProductCardMobileContent description={description} id={id} isNatural={isNatural} isNew={isNew} isOnSale={isOnSale} name={name} originalPrice={originalPrice} price={price} quantity={quantity} rating={rating} size={size} stock={stock} theme={theme} onAddToCart={() => { if (onAddToCart && stock > 0) { onAddToCart(id, quantity); setQuantity(1); }}} onQuantityChange={setQuantity} />
         </CardContent>
       </div>
     </Card>

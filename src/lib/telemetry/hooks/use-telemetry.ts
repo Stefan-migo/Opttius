@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
+import { appLogger } from '@/lib/logger';
+
 import { telemetryCollector } from "../collector/browser-collector";
 
 /**
@@ -122,7 +124,7 @@ export function usePerformanceMetrics() {
         entryTypes: ["navigation", "paint", "largest-contentful-paint"],
       });
     } catch (error) {
-      console.warn("Performance Observer not supported:", error);
+      appLogger.warn("Performance Observer not supported:", error);
     }
 
     // Cleanup observer

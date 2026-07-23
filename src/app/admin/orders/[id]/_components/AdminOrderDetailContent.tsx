@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
 
@@ -48,7 +49,7 @@ export default function AdminOrderDetailContent() {
         toast.error(error.error || "Error al cargar la orden");
       }
     } catch (error: unknown) {
-      console.error("Error fetching order:", error);
+      appLogger.error("Error fetching order:", error);
       toast.error("Error al cargar la orden");
     } finally {
       setLoading(false);

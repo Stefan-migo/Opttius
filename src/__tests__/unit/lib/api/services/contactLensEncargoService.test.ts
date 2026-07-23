@@ -5,7 +5,7 @@
  * Mock fetch via vi.fn() on globalThis.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -20,8 +20,8 @@ vi.stubGlobal("fetch", mockFetch);
 // ---------------------------------------------------------------------------
 // Import AFTER mocks
 // ---------------------------------------------------------------------------
-import { contactLensEncargoService } from "@/lib/api/services/contactLensEncargoService";
 import type { CreateEncargoParams } from "@/lib/api/services/contactLensEncargoService";
+import { contactLensEncargoService } from "@/lib/api/services/contactLensEncargoService";
 
 const validParams: CreateEncargoParams = {
   customer_name: "Juan Pérez",

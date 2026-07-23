@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { InsightFeedbackSchema } from "@/lib/ai/insights/schemas";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**

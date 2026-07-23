@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { AuthState, useAuth } from "@/hooks/useAuth";
+import { appLogger } from '@/lib/logger';
 import { Tables } from "@/types/database";
 import {
   GetAdminRoleParams,
@@ -73,7 +74,7 @@ async function checkAdminStatus(
       role: adminRole || null,
     };
   } catch (error) {
-    console.error("Error checking admin status:", error);
+    appLogger.error("Error checking admin status:", error);
     return {
       isAdmin: false,
       role: null,

@@ -8,9 +8,12 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { PAYMENT_METHOD_FILTER_MAP } from "./cashPaymentUtils";
-import { buildOrderParams, buildClosureParams, getTodayChileDate } from "./cashOpsUtils";
+
 import { extractDataFromResponse, extractTotalFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
+
+import { buildClosureParams, buildOrderParams, getTodayChileDate } from "./cashOpsUtils";
+import { PAYMENT_METHOD_FILTER_MAP } from "./cashPaymentUtils";
 import type { CashClosure } from "./cashRegister.types";
 
 export function useCashRegisterOrders(
@@ -63,7 +66,7 @@ export function useCashRegisterOrders(
         toast.error(error.error || "Error al cargar cierres de caja");
       }
     } catch (error: unknown) {
-      console.error("Error fetching closures:", error);
+      appLogger.error("Error fetching closures:", error);
       toast.error("Error al cargar cierres de caja");
     } finally {
       setLoading(false);
@@ -129,7 +132,7 @@ export function useCashRegisterOrders(
         toast.error(error.error || "Error al cargar órdenes");
       }
     } catch (error: unknown) {
-      console.error("Error fetching orders:", error);
+      appLogger.error("Error fetching orders:", error);
       toast.error("Error al cargar órdenes");
     } finally {
       setLoadingOrders(false);
@@ -171,7 +174,7 @@ export function useCashRegisterOrders(
         toast.error(msg);
       }
     } catch (error: unknown) {
-      console.error("Error cancelling order:", error);
+      appLogger.error("Error cancelling order:", error);
       toast.error("Error al anular venta");
     } finally {
       setProcessingOrderAction(false);
@@ -196,7 +199,7 @@ export function useCashRegisterOrders(
         toast.error(error.error || "Error al eliminar venta");
       }
     } catch (error: unknown) {
-      console.error("Error deleting order:", error);
+      appLogger.error("Error deleting order:", error);
       toast.error("Error al eliminar venta");
     } finally {
       setProcessingOrderAction(false);

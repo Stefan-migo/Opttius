@@ -250,28 +250,28 @@ export default function SupportContent() {
       {activeTab === "tickets" && (
         <div className="space-y-6">
           <SupportTicketFilters
+            categoryLabels={categoryLabels}
             filters={filters}
+            statusLabels={statusLabels}
             onFilterChange={(updates) =>
               setFilters((prev) => ({ ...prev, ...updates, page: 1 }))
             }
             onRefresh={loadTickets}
-            statusLabels={statusLabels}
-            categoryLabels={categoryLabels}
           />
 
           <SupportTicketList
-            tickets={tickets}
+            categoryLabels={categoryLabels}
             loading={loadingTickets}
-            total={pagination.total}
             page={pagination.page}
+            priorityColors={priorityColors}
+            statusColors={statusColors}
+            statusLabels={statusLabels}
+            tickets={tickets}
+            total={pagination.total}
             totalPages={pagination.totalPages}
             onPageChange={(page) =>
               setPagination((prev) => ({ ...prev, page }))
             }
-            statusLabels={statusLabels}
-            statusColors={statusColors}
-            priorityColors={priorityColors}
-            categoryLabels={categoryLabels}
           />
         </div>
       )}
@@ -279,11 +279,11 @@ export default function SupportContent() {
       {/* Search Tab */}
       {activeTab === "search" && (
         <SupportSearchResults
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          searchResults={searchResults}
-          searching={searching}
           hasSearched={hasSearched}
+          searching={searching}
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          onSearchQueryChange={setSearchQuery}
         />
       )}
     </div>

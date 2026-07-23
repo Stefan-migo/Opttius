@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import FormField, { FormFieldActions } from "@/components/ui/FormField";
+import { FormFieldActions } from "@/components/ui/FormField";
 import { useBranch } from "@/hooks/useBranch";
 import { useFormSimple } from "@/hooks/useForm";
-import { handleApiError, getUserFriendlyMessage } from "@/lib/api/services/errorService";
+import { getUserFriendlyMessage,handleApiError } from "@/lib/api/services/errorService";
 import { error as notifyError, success } from "@/lib/api/services/notificationService";
 
 import { CustomerInfoSection, OrderDetailsSection, OrderItemsSection, ShippingSection } from "./_components/ManualOrderFormSections";
@@ -67,10 +67,10 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit}>
-      <CustomerInfoSection customerSearch={customerSearch} customerResults={customerResults} searchingCustomers={searchingCustomers} openCustomerSearch={openCustomerSearch} email={form.values.email} onCustomerSearchChange={setCustomerSearch} onCustomerOpenChange={setOpenCustomerSearch} onLoadCustomer={loadCustomerData} onEmailChange={(v) => form.setValue("email", v)} />
-      <OrderDetailsSection status={form.values.status} paymentStatus={form.values.payment_status} paymentMethod={form.values.payment_method} notes={form.values.notes} onStatusChange={(v) => form.setValue("status", v)} onPaymentStatusChange={(v) => form.setValue("payment_status", v)} onPaymentMethodChange={(v) => form.setValue("payment_method", v)} onNotesChange={(v) => form.setValue("notes", v)} />
+      <CustomerInfoSection customerResults={customerResults} customerSearch={customerSearch} email={form.values.email} openCustomerSearch={openCustomerSearch} searchingCustomers={searchingCustomers} onCustomerOpenChange={setOpenCustomerSearch} onCustomerSearchChange={setCustomerSearch} onEmailChange={(v) => form.setValue("email", v)} onLoadCustomer={loadCustomerData} />
+      <OrderDetailsSection notes={form.values.notes} paymentMethod={form.values.payment_method} paymentStatus={form.values.payment_status} status={form.values.status} onNotesChange={(v) => form.setValue("notes", v)} onPaymentMethodChange={(v) => form.setValue("payment_method", v)} onPaymentStatusChange={(v) => form.setValue("payment_status", v)} onStatusChange={(v) => form.setValue("status", v)} />
       <ShippingSection shipping={form.values.shipping} onShippingChange={handleShippingChange} />
-      <OrderItemsSection productSearch={productSearch} productResults={productResults} searchingProducts={searchingProducts} openProductSearch={openProductSearch} items={items} totalAmount={form.values.total_amount} onProductSearchChange={setProductSearch} onProductOpenChange={setOpenProductSearch} onAddProduct={addProductToOrder} onAddItem={addItem} onRemoveItem={removeItem} onUpdateItem={updateItem} onCalculateTotal={() => form.setFieldValues(calculateTotal(form.getValues().items))} />
+      <OrderItemsSection items={items} openProductSearch={openProductSearch} productResults={productResults} productSearch={productSearch} searchingProducts={searchingProducts} totalAmount={form.values.total_amount} onAddItem={addItem} onAddProduct={addProductToOrder} onCalculateTotal={() => form.setFieldValues(calculateTotal(form.getValues().items))} onProductOpenChange={setOpenProductSearch} onProductSearchChange={setProductSearch} onRemoveItem={removeItem} onUpdateItem={updateItem} />
       <FormFieldActions align="space-between">
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
         <Button disabled={form.isSubmitting} type="submit">{form.isSubmitting ? "Creando..." : "Crear Pedido"}</Button>

@@ -2,10 +2,13 @@
 
 import { useEffect } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 export default function TestErrorComponent() {
   useEffect(() => {
     // This will trigger an error that Sentry should capture
-    console.log("Triggering test error...");
+    appLogger.info("Triggering test error...");
 
     // Simulate an error after component mounts
     setTimeout(() => {

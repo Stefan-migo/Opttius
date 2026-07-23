@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import SystemAdminContent from "./_components/SystemAdminContent";
 
 export const dynamic = "force-dynamic";

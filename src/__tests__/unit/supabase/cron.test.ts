@@ -11,6 +11,7 @@ vi.mock("@supabase/supabase-js", () => ({
 }));
 
 import { createClient } from "@supabase/supabase-js";
+
 import { createCronClient } from "@/utils/supabase/cron";
 
 describe("createCronClient", () => {

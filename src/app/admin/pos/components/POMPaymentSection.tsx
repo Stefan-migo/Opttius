@@ -43,10 +43,10 @@ export function POMPaymentSection({
           <div className="flex flex-wrap gap-1">
             {quickCashAmounts.map((amount) => (
               <Button
-                key={amount}
-                variant="outline"
-                size="sm"
                 className="text-xs"
+                key={amount}
+                size="sm"
+                variant="outline"
                 onClick={() => onQuickCash(amount)}
               >
                 ${amount.toLocaleString("es-CL")}
@@ -63,11 +63,11 @@ export function POMPaymentSection({
             Efectivo recibido:
           </label>
           <input
-            type="number"
             className="w-full p-2 border rounded-lg text-lg font-semibold"
+            placeholder="$0"
+            type="number"
             value={cashReceived || ""}
             onChange={(e) => onCashReceivedChange(Number(e.target.value) || 0)}
-            placeholder="$0"
           />
           {cashReceived > 0 && (
             <div className="flex justify-between text-sm text-green-600">
@@ -88,12 +88,12 @@ export function POMPaymentSection({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  className="flex-1"
+                  size="sm"
                   variant={
                     paymentMethod === "cash" ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => onPaymentMethodChange("cash")}
-                  className="flex-1"
                 >
                   Efectivo
                 </Button>
@@ -105,12 +105,12 @@ export function POMPaymentSection({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  className="flex-1"
+                  size="sm"
                   variant={
                     paymentMethod === "debit_card" ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => onPaymentMethodChange("debit_card")}
-                  className="flex-1"
                 >
                   Débito
                 </Button>
@@ -122,14 +122,14 @@ export function POMPaymentSection({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  className="flex-1"
+                  size="sm"
                   variant={
                     paymentMethod === "credit_card"
                       ? "default"
                       : "outline"
                   }
-                  size="sm"
                   onClick={() => onPaymentMethodChange("credit_card")}
-                  className="flex-1"
                 >
                   Crédito
                 </Button>
@@ -141,12 +141,12 @@ export function POMPaymentSection({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  className="flex-1"
+                  size="sm"
                   variant={
                     paymentMethod === "transfer" ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => onPaymentMethodChange("transfer")}
-                  className="flex-1"
                 >
                   Transf.
                 </Button>

@@ -8,6 +8,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { useChatConfig } from "@/hooks/useChatConfig";
 import { useChatSession } from "@/hooks/useChatSession";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 import { ChatHeader } from "../chat/ChatHeader";
@@ -107,7 +108,7 @@ export function ChatbotContent({
   // Show session errors to user
   useEffect(() => {
     if (sessionError) {
-      console.error("Session error:", sessionError);
+      appLogger.error("Session error:", sessionError);
     }
   }, [sessionError]);
 
@@ -223,7 +224,7 @@ export function ChatbotContent({
           await handleNewSession();
         }
       } catch (error) {
-        console.error("Error deleting session:", error);
+        appLogger.error("Error deleting session:", error);
       }
     }
   };

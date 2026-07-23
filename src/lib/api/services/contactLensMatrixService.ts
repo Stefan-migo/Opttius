@@ -4,8 +4,8 @@
  * Service for calculating contact lens prices based on prescription parameters.
  */
 
-import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
+import { appLogger as logger } from "@/lib/logger";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 

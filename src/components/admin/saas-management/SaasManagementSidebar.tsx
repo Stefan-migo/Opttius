@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
@@ -80,7 +81,7 @@ export function SaasManagementSidebar({
           });
         }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        appLogger.error("Error fetching stats:", error);
       } finally {
         setLoading(false);
       }

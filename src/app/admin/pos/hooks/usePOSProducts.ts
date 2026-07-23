@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { searchProducts } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 import type { POSProduct } from "../types";
 
@@ -67,7 +68,7 @@ export function usePOSProducts({
         setResults(mappedResults);
         setSelectedIndex(-1);
       } catch (error) {
-        console.error("Error searching products:", error);
+        appLogger.error("Error searching products:", error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -114,7 +115,7 @@ export function usePOSProducts({
         }
         return null;
       } catch (error) {
-        console.error("Error searching by barcode:", error);
+        appLogger.error("Error searching by barcode:", error);
         return null;
       } finally {
         setLoading(false);

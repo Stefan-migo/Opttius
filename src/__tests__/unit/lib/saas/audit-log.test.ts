@@ -15,6 +15,8 @@ vi.mock("@/lib/logger", () => ({
   appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
+import type { Mock } from "vitest";
+
 import {
   getAuditLogsForTarget,
   getClientInfoFromRequest,
@@ -22,7 +24,6 @@ import {
   recordAuditLog,
 } from "@/lib/saas/audit-log";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import type { Mock } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Helpers

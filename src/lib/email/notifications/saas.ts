@@ -1,7 +1,8 @@
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -24,6 +25,7 @@ export async function sendSaaSNotification(
     };
 
     const subject = replaceTemplateVariables(template.subject, allVariables);
+
     let html = replaceTemplateVariables(template.content, allVariables);
 
     const { wrapInModernLayout } = await import("../layout");
@@ -53,7 +55,7 @@ export async function sendSaaSNotification(
 
     return result;
   } catch (error) {
-    console.error(`Error sending SaaS notification (${type}):`, error);
+    appLogger.error(`Error sending SaaS notification (${type}):`, error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -73,7 +75,7 @@ export async function sendMembershipWelcome(
     const template = await loadEmailTemplate("membership_welcome", true);
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active membership_welcome template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -117,7 +119,7 @@ export async function sendMembershipWelcome(
 
     return result;
   } catch (error) {
-    console.error("Error sending membership welcome email:", error);
+    appLogger.error("Error sending membership welcome email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -136,7 +138,7 @@ export async function sendMembershipReminder(
     const template = await loadEmailTemplate("membership_reminder", true);
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active membership_reminder template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -173,7 +175,7 @@ export async function sendMembershipReminder(
 
     return result;
   } catch (error) {
-    console.error("Error sending membership reminder email:", error);
+    appLogger.error("Error sending membership reminder email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

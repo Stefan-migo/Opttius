@@ -37,6 +37,7 @@ import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { formatDate } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
 
@@ -113,7 +114,7 @@ export default function FieldOperationsContent() {
       setTotalPages(pagination.totalPages || 1);
       setTotalOperations(pagination.total || 0);
     } catch (error) {
-      console.error("Error fetching field operations:", error);
+      appLogger.error("Error fetching field operations:", error);
       toast.error("Error al cargar operativos");
     } finally {
       setLoading(false);

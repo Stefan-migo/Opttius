@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // First try with regular client (respects RLS)
-    let { data: categories, error } = await supabase
+    const { data: categories, error } = await supabase
       .from("categories")
       .select("*")
       .eq("is_active", true)

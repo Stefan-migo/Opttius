@@ -5,6 +5,8 @@
  * relevant context to the agent. This is the main entry point for memory operations.
  */
 
+import { appLogger } from '@/lib/logger';
+
 import { LongTermMemory } from "./long-term";
 import { SemanticMemory } from "./semantic";
 import { SessionMemory } from "./session";
@@ -86,7 +88,7 @@ export class MemoryManager {
         });
         semanticResults.push(...results);
       } catch (error) {
-        console.error("Semantic search failed:", error);
+        appLogger.error("Semantic search failed:", error);
       }
     }
 
@@ -99,7 +101,7 @@ export class MemoryManager {
         });
         memoryFacts.push(...facts);
       } catch (error) {
-        console.error("Memory facts search failed:", error);
+        appLogger.error("Memory facts search failed:", error);
       }
     }
 
@@ -224,7 +226,7 @@ export class MemoryManager {
       const indexer = new MemoryIndexer(this.context);
       await indexer.indexChatSession(this.context.sessionId);
     } catch (error) {
-      console.error("Failed to index session:", error);
+      appLogger.error("Failed to index session:", error);
     }
   }
 

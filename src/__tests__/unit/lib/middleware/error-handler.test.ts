@@ -65,11 +65,12 @@ vi.mock("@/lib/errors/comprehensive-handler", () => ({
 
 // --- Imports (after mocks) ---
 
+import { handleApiError } from "@/lib/errors/comprehensive-handler";
 import {
+  handleDelete,
   handleGet,
   handlePost,
   handlePut,
-  handleDelete,
   paginatedResponse,
   parsePagination,
   successResponse,
@@ -77,7 +78,6 @@ import {
   validateRequestBody,
   withErrorHandling,
 } from "@/lib/middleware/error-handler";
-import { handleApiError } from "@/lib/errors/comprehensive-handler";
 
 // --- Helpers ---
 

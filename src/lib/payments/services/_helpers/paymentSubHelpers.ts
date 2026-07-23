@@ -26,7 +26,7 @@ export async function processSubscriptionUpdate(supabase: SupabaseClient, organi
   if (metaTier && validTiers.includes(metaTier as TierName)) tier = metaTier as TierName;
   else {
     const { data: tiers } = await supabase.from("subscription_tiers").select("name, price_monthly").order("price_monthly", { ascending: false });
-    const match = (tiers ?? []).find((t: any) => Number(t.price_monthly) === payment.amount);
+    const match = (tiers ?? []).find((t: unknown) => Number(t.price_monthly) === payment.amount);
     if (match && validTiers.includes(match.name as TierName)) tier = match.name as TierName;
   }
 

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { appLogger } from '@/lib/logger';
 
 interface ImageUploadProps {
   value: string;
@@ -84,7 +85,7 @@ export default function ImageUpload({
         throw new Error("No se recibió URL de la imagen");
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
+      appLogger.error("Error uploading image:", error);
       toast.error("Error al subir la imagen. Inténtalo de nuevo.");
     } finally {
       setUploading(false);

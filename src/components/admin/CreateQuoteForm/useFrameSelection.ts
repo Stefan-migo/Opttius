@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type React from "react";
+import { useEffect, useState } from "react";
 
 import { productService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 import type { QuoteFormData } from "./CreateQuoteForm.types";
 
@@ -44,7 +45,7 @@ export function useFrameSelection(
         );
         setFrameResults(frames || []);
       } catch (error) {
-        console.error("Error searching frames:", error);
+        appLogger.error("Error searching frames:", error);
       } finally {
         setSearchingFrames(false);
       }
@@ -70,7 +71,7 @@ export function useFrameSelection(
         );
         setNearFrameResults(results || []);
       } catch (error) {
-        console.error("Error searching near frames:", error);
+        appLogger.error("Error searching near frames:", error);
       } finally {
         setSearchingNearFrames(false);
       }

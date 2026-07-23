@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import {
   getKnowledgeBase,
   type KnowledgeContext,
@@ -53,16 +56,16 @@ export async function getKnowledgeBaseContext(
       `========================`,
     ];
 
-    console.log(
+    appLogger.info(
       `Knowledge base context injected for query: "${lastUserMessage.content}"`,
     );
-    console.log(
+    appLogger.info(
       `Top result: ${topResult.document.title} (${(topResult.similarity * 100).toFixed(1)}% confidence)`,
     );
 
     return contextSections.join("\n");
   } catch (error) {
-    console.error("Failed to get knowledge base context:", error);
+    appLogger.error("Failed to get knowledge base context:", error);
     return null;
   }
 }

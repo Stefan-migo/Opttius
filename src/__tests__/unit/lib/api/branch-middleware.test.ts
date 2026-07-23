@@ -13,11 +13,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   addBranchFilter,
   addBranchFilterForBranchScopedTable,
+  type BranchContext,
   getBranchFromRequest,
   getFieldOperationFromRequest,
   getOperativoContext,
   validateBranchAccess,
-  type BranchContext,
 } from "@/lib/api/branch-middleware";
 import { createClient } from "@/utils/supabase/server";
 

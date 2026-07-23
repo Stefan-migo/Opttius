@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 
 /**
  * Hook para verificar si el usuario actual tiene rol root o dev
@@ -36,7 +37,7 @@ export function useRoot() {
         const isRootUser = data.organization?.isRootUser || false;
         setIsRoot(isRootUser);
       } catch (error) {
-        console.error("Error checking root status:", error);
+        appLogger.error("Error checking root status:", error);
         setIsRoot(false);
       } finally {
         setIsLoading(false);

@@ -3,6 +3,7 @@
 import type { AuthError, Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/client";
 
 import { fetchProfile } from "./useAuthFetchProfile";
@@ -189,7 +190,7 @@ export function useAuth(initialUser?: User | null) {
       }
       return { data, error: null };
     } catch (error) {
-      console.error("SignIn error:", error);
+      appLogger.error("SignIn error:", error);
       const authError =
         error instanceof Error ? error : new Error("Unknown error");
       setAuthState((prev) => ({

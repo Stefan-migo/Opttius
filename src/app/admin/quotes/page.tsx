@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import QuotesContent from "./_components/QuotesContent";
 
 export const dynamic = "force-dynamic";

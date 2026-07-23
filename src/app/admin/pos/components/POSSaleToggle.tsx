@@ -1,6 +1,6 @@
 "use client";
 
-import { Zap, ShoppingBag, Waves } from "lucide-react";
+import { ShoppingBag, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -50,8 +50,6 @@ export function POSSaleToggle({
           <Tooltip key={m.id}>
             <TooltipTrigger asChild>
               <Button
-                variant={mode === m.id ? "default" : "ghost"}
-                size="sm"
                 className={`
                   relative gap-2 transition-all
                   ${
@@ -60,8 +58,10 @@ export function POSSaleToggle({
                       : "text-gray-600 hover:text-gray-900"
                   }
                 `}
-                onClick={() => onModeChange(m.id)}
                 disabled={disabled}
+                size="sm"
+                variant={mode === m.id ? "default" : "ghost"}
+                onClick={() => onModeChange(m.id)}
               >
                 <m.icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{m.label}</span>
@@ -102,12 +102,12 @@ export function POSSaleToggleMobile({
     <div className="flex items-center gap-2">
       {modes.map((m) => (
         <Button
-          key={m.id}
-          variant={mode === m.id ? "default" : "outline"}
-          size="sm"
           className="gap-2"
-          onClick={() => onModeChange(m.id)}
           disabled={disabled}
+          key={m.id}
+          size="sm"
+          variant={mode === m.id ? "default" : "outline"}
+          onClick={() => onModeChange(m.id)}
         >
           <m.icon className="h-4 w-4" />
           <span className="sm:hidden">{mode === m.id ? m.label : ""}</span>

@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import {
   getCategorySlugsForPresbyopia,
   getLensTypesForPresbyopia,
@@ -138,7 +139,7 @@ export function LensFamilyCombobox({
           setFetchedFamilies(Array.isArray(data) ? data : []);
         }
       } catch (err) {
-        console.error("Error fetching lens families:", err);
+        appLogger.error("Error fetching lens families:", err);
         setFetchedFamilies([]);
       } finally {
         setFetchLoading(false);

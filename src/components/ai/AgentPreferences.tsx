@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,9 +98,9 @@ export function AgentPreferencesPanel({
       <div className="flex items-center justify-between">
         <h4 className="font-semibold text-gray-800">Preferencias del Agente</h4>
         <button
-          type="button"
           aria-label="Cerrar preferencias"
           className="rounded p-1 text-gray-400 hover:text-gray-600"
+          type="button"
           onClick={onClose}
         >
           <svg
@@ -111,9 +111,9 @@ export function AgentPreferencesPanel({
             viewBox="0 0 24 24"
           >
             <path
+              d="M6 18L18 6M6 6l12 12"
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
             />
           </svg>
         </button>
@@ -128,12 +128,12 @@ export function AgentPreferencesPanel({
           </div>
         </div>
         <button
-          type="button"
-          role="switch"
           aria-checked={prefs.auto_mode}
           className={`relative h-5 w-9 rounded-full transition-colors ${
             prefs.auto_mode ? "bg-epoch-primary" : "bg-gray-300"
           }`}
+          role="switch"
+          type="button"
           onClick={() => onUpdate("auto_mode", !prefs.auto_mode)}
         >
           <span
@@ -155,11 +155,11 @@ export function AgentPreferencesPanel({
           </div>
         </div>
         <select
+          className="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-epoch-accent"
           value={prefs.bubble_position}
           onChange={(e) =>
             onUpdate("bubble_position", e.target.value as BubblePosition)
           }
-          className="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-epoch-accent"
         >
           <option value="floating">Flotante</option>
           <option value="docked">Fijo</option>
@@ -175,9 +175,9 @@ export function AgentPreferencesPanel({
           </div>
         </div>
         <select
+          className="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-epoch-accent"
           value={prefs.agent_tone}
           onChange={(e) => onUpdate("agent_tone", e.target.value as AgentTone)}
-          className="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-epoch-accent"
         >
           <option value="professional">Profesional</option>
           <option value="casual">Casual</option>
@@ -187,8 +187,8 @@ export function AgentPreferencesPanel({
 
       {/* Reset */}
       <button
-        type="button"
         className="self-start rounded-lg px-3 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+        type="button"
         onClick={onReset}
       >
         Restablecer valores predeterminados

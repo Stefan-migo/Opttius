@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface TimeSlot {
@@ -34,13 +35,13 @@ export function useAvailability({
 
   const fetchAvailability = async (date: string, duration: number) => {
     if (!date) {
-      console.log("No date selected, clearing availability");
+      appLogger.info("No date selected, clearing availability");
       setAvailableSlots([]);
       return;
     }
 
     if (!scheduleSettings) {
-      console.log(
+      appLogger.info(
         "Schedule settings not loaded yet, skipping availability fetch",
       );
       return;
@@ -51,7 +52,7 @@ export function useAvailability({
     today.setHours(0, 0, 0, 0);
     const isToday = selectedDate.getTime() === today.getTime();
 
-    console.log("🔍 Fetching availability for:", {
+    appLogger.info("🔍 Fetching availability for:", {
       date,
       duration,
       isToday,
@@ -78,15 +79,15 @@ export function useAvailability({
 
       if (response.ok) {
         const data = await response.json();
-        console.log("✅ Available slots response:", data);
-        console.log("📊 Total slots:", data.slots?.length || 0);
+        appLogger.info("✅ Available slots response:", data);
+        appLogger.info("📊 Total slots:", data.slots?.length || 0);
         const availableCount =
           data.slots?.filter((s: unknown) => s.available === true).length || 0;
-        console.log("📊 Available slots:", availableCount);
-        console.log("📋 First few slots:", data.slots?.slice(0, 5));
+        appLogger.info("📊 Available slots:", availableCount);
+        appLogger.info("📋 First few slots:", data.slots?.slice(0, 5));
 
         if (data.slots && data.slots.length > 0) {
-          console.log(
+          appLogger.info(
             "✅ Setting available slots:",
             data.slots.length,
             "total,",
@@ -95,17 +96,17 @@ export function useAvailability({
           );
           setAvailableSlots(data.slots);
         } else {
-          console.warn("⚠️ No slots returned from API - empty array");
+          appLogger.warn("⚠️ No slots returned from API - empty array");
           setAvailableSlots([]);
         }
       } else {
         const errorData = await response.json();
-        console.error("Error fetching availability:", errorData);
+        appLogger.error("Error fetching availability:", errorData);
         toast.error(errorData.error || "Error al cargar disponibilidad");
         setAvailableSlots([]);
       }
     } catch (error) {
-      console.error("Error fetching availability:", error);
+      appLogger.error("Error fetching availability:", error);
       toast.error("Error al cargar disponibilidad");
       setAvailableSlots([]);
     } finally {

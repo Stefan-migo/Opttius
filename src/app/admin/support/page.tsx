@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import OpticalInternalSupportContent from "./_components/OpticalInternalSupportContent";
 
 export const dynamic = "force-dynamic";

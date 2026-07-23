@@ -7,10 +7,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import { UserDeleteDialog } from "./UserDeleteDialog";
-import {
-  UserActivityCard,
+import {  UserActivityCard,
   UserBranchesCard,
   UserOrgCard,
   UserPersonalCard,
@@ -65,6 +65,7 @@ interface UserDetails {
 
 export default function UserDetailsPage() {
   const params = useParams();
+
   const router = useRouter();
   const userId = params.id as string;
 
@@ -98,7 +99,7 @@ export default function UserDetailsPage() {
       setUser(data.user);
       setError(null);
     } catch (err) {
-      console.error("Error fetching user details:", err);
+      appLogger.error("Error fetching user details:", err);
       setError(err instanceof Error ? err.message : "Error desconocido");
       toast.error(
         err instanceof Error

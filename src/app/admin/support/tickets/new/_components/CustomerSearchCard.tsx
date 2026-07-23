@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 import type { Customer } from "./types";
 
@@ -50,7 +51,7 @@ export function CustomerSearchCard({
         setCustomers(extractDataFromResponse(data));
       }
     } catch (err) {
-      console.error("Error searching customers:", err);
+      appLogger.error("Error searching customers:", err);
     } finally {
       setSearching(false);
     }

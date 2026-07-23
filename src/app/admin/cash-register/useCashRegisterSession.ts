@@ -9,6 +9,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface FieldOperation {
   id: string;
   name: string;
@@ -98,7 +101,7 @@ export function useCashRegisterSession({
         }
       }
     } catch (error: unknown) {
-      console.error("Error checking cash status:", error);
+      appLogger.error("Error checking cash status:", error);
     } finally {
       setCheckingCashStatus(false);
     }
@@ -135,7 +138,7 @@ export function useCashRegisterSession({
         toast.error(error.error || "Error al abrir la caja");
       }
     } catch (error: unknown) {
-      console.error("Error opening cash register:", error);
+      appLogger.error("Error opening cash register:", error);
       toast.error("Error al abrir la caja");
     } finally {
       setOpeningCashRegister(false);
@@ -154,7 +157,7 @@ export function useCashRegisterSession({
         }
       }
     } catch (error: unknown) {
-      console.error("Error fetching session ID:", error);
+      appLogger.error("Error fetching session ID:", error);
     }
   };
 
@@ -222,7 +225,7 @@ export function useCashRegisterSession({
       setNotes("");
       setDiscrepancies("");
     } catch (error: unknown) {
-      console.error("Error closing cash register:", error);
+      appLogger.error("Error closing cash register:", error);
       const err = error as Error;
       toast.error(err.message || "Error al cerrar la caja");
     } finally {
@@ -252,7 +255,7 @@ export function useCashRegisterSession({
         toast.error(error.error || "Error al reabrir la caja");
       }
     } catch (error: unknown) {
-      console.error("Error reopening cash register:", error);
+      appLogger.error("Error reopening cash register:", error);
       toast.error("Error al reabrir la caja");
     } finally {
       setReopening(false);

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { SubscriptionManagementSection } from "@/components/admin/SubscriptionManagementSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 import { formatDate } from "@/lib/utils";
 
 import { ProfileHeaderCard } from "./_components/ProfileHeaderCard";
@@ -85,7 +86,7 @@ export function ProfilePageContent({
           setSubscriptionData(data);
         }
       } catch (error) {
-        console.error("Error loading profile data:", error);
+        appLogger.error("Error loading profile data:", error);
       } finally {
         setDataLoading(false);
       }
@@ -115,7 +116,7 @@ export function ProfilePageContent({
       await refetchProfile();
       toast.success("Foto de perfil actualizada exitosamente");
     } catch (error) {
-      console.error("Error updating avatar:", error);
+      appLogger.error("Error updating avatar:", error);
       toast.error("Error al actualizar la foto de perfil");
       throw error;
     }

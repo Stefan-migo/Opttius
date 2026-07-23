@@ -130,7 +130,7 @@ export const workOrderTools: ToolDefinition[] = [
             .from("branches")
             .select("id")
             .eq("organization_id", organizationId);
-          branchIdsToFilter = (orgBranches as any[])?.map((b: any) => b.id) || [];
+          branchIdsToFilter = (orgBranches as unknown[])?.map((b: unknown) => b.id) || [];
         }
 
         let query = supabase

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { useBranch } from "@/hooks/useBranch";
@@ -12,14 +13,14 @@ import {
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
 import type { createOpticalInternalSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
-import type { z } from "zod";
 
 import { CreateTicketDialog } from "./CreateTicketDialog";
+import type { FiltersState, PaginationState, Ticket } from "./supportConstants";
 import { TicketFilters } from "./TicketFilters";
 import { TicketList } from "./TicketList";
 import { TicketStats } from "./TicketStats";
-import type { FiltersState, PaginationState, Ticket } from "./supportConstants";
 
 type TicketForm = z.infer<typeof createOpticalInternalSupportTicketSchema>;
 
@@ -80,7 +81,7 @@ export default function OpticalInternalSupportContent() {
         );
       }
     } catch (err) {
-      console.error("Error loading customers:", err);
+      appLogger.error("Error loading customers:", err);
     } finally {
       setLoadingCustomers(false);
     }
@@ -214,39 +215,39 @@ export default function OpticalInternalSupportContent() {
       </div>
 
       <TicketStats
-        total={pagination.total}
-        openTicketsCount={openTicketsCount}
         inProgressCount={inProgressCount}
+        openTicketsCount={openTicketsCount}
         resolvedCount={resolvedCount}
+        total={pagination.total}
       />
 
       <TicketFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        customers={customers}
         branches={branches}
-        isSuperAdmin={isSuperAdmin}
+        customers={customers}
+        filters={filters}
         isGlobalView={isGlobalView}
+        isSuperAdmin={isSuperAdmin}
+        onFiltersChange={handleFiltersChange}
         onRefresh={loadTickets}
       />
 
       <TicketList
-        tickets={tickets}
+        filters={filters}
         loading={loadingTickets}
         pagination={pagination}
+        tickets={tickets}
         onPageChange={(page) =>
           setPagination((prev) => ({ ...prev, page }))
         }
-        filters={filters}
         onShowCreateDialog={() => setShowCreateDialog(true)}
       />
 
       <CreateTicketDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
         currentBranchId={currentBranchId}
         isGlobalView={isGlobalView}
         isSuperAdmin={isSuperAdmin}
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
         onSubmit={handleCreateTicket}
       />
     </div>

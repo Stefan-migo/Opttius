@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { recordAuditLog, getClientInfoFromRequest } from "@/lib/saas/audit-log";
+import { getClientInfoFromRequest,recordAuditLog } from "@/lib/saas/audit-log";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**

@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import EditProductContent from "./_components/EditProductContent";
 
 export const dynamic = "force-dynamic";

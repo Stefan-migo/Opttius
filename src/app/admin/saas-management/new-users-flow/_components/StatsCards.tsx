@@ -3,6 +3,7 @@
 import { Calendar, CheckCircle2, Clock, TrendingUp, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import type { Stats } from "./types";
 
 interface StatsCardsProps {

@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Try with regular client
-    let { data: session, error } = await supabase
+    const { data: session, error } = await supabase
       .from("chat_sessions")
       .insert(insertData)
       .select()

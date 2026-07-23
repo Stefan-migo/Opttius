@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 interface AdminUser {
   id: string;
@@ -83,7 +84,7 @@ export default function AdminUserDetailContent() {
       setAdminUser(data.adminUser);
       setError(null);
     } catch (err) {
-      console.error("Error fetching admin user:", err);
+      appLogger.error("Error fetching admin user:", err);
       setError(err instanceof Error ? err.message : "Error desconocido");
       toast.error(
         err instanceof Error ? err.message : "Error al cargar el administrador",
@@ -169,7 +170,7 @@ export default function AdminUserDetailContent() {
       );
       fetchAdminUser();
     } catch (error) {
-      console.error("Error toggling admin status:", error);
+      appLogger.error("Error toggling admin status:", error);
       toast.error(
         error instanceof Error ? error.message : "Error al actualizar estado",
       );

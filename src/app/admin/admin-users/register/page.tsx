@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 interface Branch {
   id: string;
@@ -62,7 +63,7 @@ export default function RegisterUserPage() {
           setBranches(data.branches || []);
         }
       } catch (err) {
-        console.error("Error fetching branches:", err);
+        appLogger.error("Error fetching branches:", err);
       } finally {
         setLoadingBranches(false);
       }

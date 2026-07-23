@@ -1,11 +1,10 @@
 "use client";
 
-import { ArrowLeft, Crown, Edit, Pause, Play, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Crown, Edit, Pause, Play, Trash2 , XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle } from "lucide-react";
 
 interface OrgDetailHeaderProps {
   name: string;

@@ -5,6 +5,8 @@
  * Loads and stores conversation history from the database.
  */
 
+import { appLogger } from '@/lib/logger';
+
 import type {
   MemoryContext,
   SessionMemoryConfig,
@@ -27,7 +29,7 @@ export class SessionMemory {
     const { maxMessages = 50, includeToolMessages = true } = config;
 
     if (!this.context.sessionId) {
-      console.log("No session ID provided, starting fresh conversation");
+      appLogger.info("No session ID provided, starting fresh conversation");
       this.loaded = true;
       return [];
     }
@@ -47,7 +49,7 @@ export class SessionMemory {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Failed to load session history:", error);
+        appLogger.error("Failed to load session history:", error);
         this.loaded = true;
         return [];
       }
@@ -61,11 +63,11 @@ export class SessionMemory {
       }));
 
       this.loaded = true;
-      console.log(`Loaded ${this.messages.length} messages from session`);
+      appLogger.info(`Loaded ${this.messages.length} messages from session`);
 
       return this.messages;
     } catch (error) {
-      console.error("Load session history failed:", error);
+      appLogger.error("Load session history failed:", error);
       this.loaded = true;
       return [];
     }

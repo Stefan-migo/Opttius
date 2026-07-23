@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useBranch } from "@/hooks/useBranch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 import TicketHeader from "./TicketHeader";
 import TicketInfo from "./TicketInfo";
@@ -133,7 +134,7 @@ export default function TicketDetailContent() {
         setAdminUsers(adminUsers);
       }
     } catch (err) {
-      console.error("Error loading admin users:", err);
+      appLogger.error("Error loading admin users:", err);
     }
   };
 
@@ -167,7 +168,7 @@ export default function TicketDetailContent() {
         setMessages(data.messages || []);
       }
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      appLogger.error("Error fetching messages:", err);
     }
   };
 
@@ -275,9 +276,9 @@ export default function TicketDetailContent() {
         </div>
 
         <TicketStatusActions
-          ticket={ticket}
           adminUsers={adminUsers}
           open={showUpdateDialog}
+          ticket={ticket}
           onOpenChange={setShowUpdateDialog}
           onTicketUpdated={refreshData}
         />

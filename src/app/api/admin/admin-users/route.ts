@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!currentAdmin) return NextResponse.json({ error: "Failed to verify user permissions" }, { status: 500 });
 
     const isRoot = currentAdmin.role === "root" || currentAdmin.role === "dev";
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: auth.user!.id }) as any;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: auth.user!.id }) as unknown;
     const { data: userOrgId } = await supabase.rpc("get_user_organization_id", { user_id: auth.user!.id });
     const effectiveOrgId = userOrgId || currentAdmin.organization_id;
 
@@ -50,15 +50,15 @@ export async function GET(request: NextRequest) {
     if (error) { logger.error("Error fetching admin users", error); return NextResponse.json({ error: "Failed to fetch admin users" }, { status: 500 }); }
 
     const { data: activityStats } = await supabase.from("admin_activity_log").select("admin_user_id, created_at").gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-    const activityMap = (activityStats || []).reduce((acc: any, a: any) => { acc[a.admin_user_id] = (acc[a.admin_user_id] || 0) + 1; return acc; }, {});
-    const adminIds = (adminUsers || []).map((a: any) => a.id);
+    const activityMap = (activityStats || []).reduce((acc: unknown, a: unknown) => { acc[a.admin_user_id] = (acc[a.admin_user_id] || 0) + 1; return acc; }, {});
+    const adminIds = (adminUsers || []).map((a: unknown) => a.id);
     const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, phone").in("id", adminIds);
-    const profilesMap = (profiles || []).reduce((acc: any, p: any) => { acc[p.id] = p; return acc; }, {});
+    const profilesMap = (profiles || []).reduce((acc: unknown, p: unknown) => { acc[p.id] = p; return acc; }, {});
 
-    const adminUsersWithStats = (adminUsers || []).map((admin: any) => {
+    const adminUsersWithStats = (adminUsers || []).map((admin: unknown) => {
       const branchAccess = admin.admin_branch_access || [];
       const profile = profilesMap[admin.id];
-      return { ...admin, is_super_admin: branchAccess.some((a: any) => a.branch_id === null), branches: branchAccess.filter((a: any) => a.branch_id !== null).map((a: any) => ({ id: a.branch_id, name: a.branches?.name || "N/A", code: a.branches?.code || "N/A", is_primary: a.is_primary })), analytics: { activityCount30Days: activityMap[admin.id] || 0, lastActivity: admin.last_login, fullName: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || null : null }, profiles: profile ? { first_name: profile.first_name, last_name: profile.last_name, phone: profile.phone } : null };
+      return { ...admin, is_super_admin: branchAccess.some((a: unknown) => a.branch_id === null), branches: branchAccess.filter((a: unknown) => a.branch_id !== null).map((a: unknown) => ({ id: a.branch_id, name: a.branches?.name || "N/A", code: a.branches?.code || "N/A", is_primary: a.is_primary })), analytics: { activityCount30Days: activityMap[admin.id] || 0, lastActivity: admin.last_login, fullName: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || null : null }, profiles: profile ? { first_name: profile.first_name, last_name: profile.last_name, phone: profile.phone } : null };
     });
 
     const total = count ?? adminUsersWithStats.length;

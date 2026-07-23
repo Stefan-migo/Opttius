@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 
 export default function OnboardingCompletePage() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function OnboardingCompletePage() {
               });
             }
           } else {
-            console.warn(
+            appLogger.warn(
               "Could not fetch organization details:",
               orgResponse.status,
             );
@@ -52,7 +53,7 @@ export default function OnboardingCompletePage() {
 
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching organization info:", err);
+        appLogger.error("Error fetching organization info:", err);
         setIsLoading(false);
       }
     };

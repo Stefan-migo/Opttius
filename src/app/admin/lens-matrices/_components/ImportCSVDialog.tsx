@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { appLogger } from '@/lib/logger';
 
 interface Props {
   open: boolean;
@@ -250,7 +251,7 @@ Poly Blue Single,-10.00,6.00,-4.00,4.00,80000,50000,stock,0.00,0.00`}
               );
 
               if (result.errors > 0 && result.details?.errors) {
-                console.error(
+                appLogger.error(
                   "Errores de importación:",
                   result.details.errors,
                 );

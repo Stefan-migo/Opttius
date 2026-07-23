@@ -2,8 +2,11 @@
 
 import { Plus } from "lucide-react";
 import { useState } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+import type { Appointment } from "./appointmentCalendarHelpers";
 import {
   getAppointmentsForDate,
   getAppointmentStatusColor,
@@ -11,7 +14,6 @@ import {
   isPast,
   isToday,
 } from "./appointmentCalendarHelpers";
-import type { Appointment } from "./appointmentCalendarHelpers";
 
 interface CalendarMonthViewProps {
   currentDate: Date;

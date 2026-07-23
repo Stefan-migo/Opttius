@@ -45,13 +45,13 @@ export function POSCashInput({
         <div className="flex gap-2">
           {quickAmounts.map((amount) => (
             <Button
+              className="flex-1 font-mono"
+              disabled={disabled}
               key={amount}
+              size="lg"
               type="button"
               variant="outline"
-              size="lg"
-              className="flex-1 font-mono"
               onClick={() => handleQuickAmount(amount)}
-              disabled={disabled}
             >
               {formatCurrency(amount)}
             </Button>
@@ -62,23 +62,23 @@ export function POSCashInput({
       {/* Action buttons - Exacto and Revertir */}
       <div className="flex gap-2">
         <Button
+          className="flex-1 gap-2"
+          disabled={disabled}
+          size="lg"
           type="button"
           variant="secondary"
-          size="lg"
-          className="flex-1 gap-2"
           onClick={handleSetExact}
-          disabled={disabled}
         >
           <Calculator className="h-4 w-4" />
           Monto exacto
         </Button>
         <Button
+          disabled={disabled}
+          size="lg"
+          title="Revertir"
           type="button"
           variant="ghost"
-          size="lg"
           onClick={handleReset}
-          disabled={disabled}
-          title="Revertir"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
@@ -92,15 +92,15 @@ export function POSCashInput({
             $
           </span>
           <Input
-            id="cash-received"
-            type="number"
-            min={0}
-            step={100}
-            value={value || ""}
-            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-            placeholder="0"
             className="pl-8 text-lg font-mono"
             disabled={disabled}
+            id="cash-received"
+            min={0}
+            placeholder="0"
+            step={100}
+            type="number"
+            value={value || ""}
+            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
           />
         </div>
       </div>

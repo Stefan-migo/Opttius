@@ -6,9 +6,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  TOUR_STEPS,
-  TOUR_CONFIG,
   getTourStepsForUser,
+  TOUR_CONFIG,
+  TOUR_STEPS,
 } from "@/lib/onboarding/tour-config";
 
 describe("TOUR_STEPS", () => {

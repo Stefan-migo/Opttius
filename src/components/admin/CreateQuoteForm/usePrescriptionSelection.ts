@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 export function usePrescriptionSelection(
   selectedCustomer: unknown,
@@ -22,7 +23,7 @@ export function usePrescriptionSelection(
       const result = await customerService.getPrescriptions(customerId);
       setPrescriptions(result);
     } catch (error) {
-      console.error("Error fetching prescriptions:", error);
+      appLogger.error("Error fetching prescriptions:", error);
     } finally {
       setLoadingPrescriptions(false);
     }

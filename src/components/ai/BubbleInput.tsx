@@ -61,9 +61,9 @@ export function BubbleInput({
       {onAttach && (
         <>
           <button
-            type="button"
             aria-label="Adjuntar archivo"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            type="button"
             onClick={() => fileInputRef.current?.click()}
           >
             <svg
@@ -74,37 +74,37 @@ export function BubbleInput({
               viewBox="0 0 24 24"
             >
               <path
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
               />
             </svg>
           </button>
           <input
-            ref={fileInputRef}
-            type="file"
             accept=".txt,.csv,.json,.md,.log,.env"
             className="hidden"
+            ref={fileInputRef}
+            type="file"
             onChange={handleFileSelect}
           />
         </>
       )}
 
       <textarea
+        className="max-h-24 min-h-[36px] flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none transition-colors focus:border-epoch-accent focus:bg-white focus:ring-1 focus:ring-epoch-accent disabled:opacity-50"
+        disabled={disabled}
+        placeholder={placeholder}
         ref={textareaRef}
+        rows={1}
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={disabled}
-        rows={1}
-        className="max-h-24 min-h-[36px] flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none transition-colors focus:border-epoch-accent focus:bg-white focus:ring-1 focus:ring-epoch-accent disabled:opacity-50"
       />
       <button
-        type="button"
         aria-label="Enviar mensaje"
-        disabled={!value.trim() || disabled}
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-epoch-accent text-epoch-surface transition-colors hover:bg-epoch-accent/90 disabled:opacity-40"
+        disabled={!value.trim() || disabled}
+        type="button"
         onClick={onSend}
       >
         <svg
@@ -115,9 +115,9 @@ export function BubbleInput({
           viewBox="0 0 24 24"
         >
           <path
+            d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
           />
         </svg>
       </button>

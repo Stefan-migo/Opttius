@@ -12,17 +12,18 @@
  *   - filterTreatmentsByLensType: contact filter, vision passthrough
  */
 import { describe, expect, it } from "vitest";
+
+import type { Treatment } from "../POSAdvancedSale.types";
 import {
-  suggestLensFamily,
-  computeTreatmentsPrice,
+  computeDiscountAmount,
   computeLensPrice,
   computeNearLensPrice,
   computeTotalPrice,
-  computeDiscountAmount,
-  updateTreatmentPrice,
+  computeTreatmentsPrice,
   filterTreatmentsByLensType,
+  suggestLensFamily,
+  updateTreatmentPrice,
 } from "../posPricingUtils";
-import type { Treatment } from "../POSAdvancedSale.types";
 
 // ─── suggestLensFamily ────────────────────────────────────────────────────────
 //

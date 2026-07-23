@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils/formatting";
+
 import { LENS_MATERIALS, LENS_TYPES } from "./lensMatricesConstants";
 import type { LensPriceMatrix } from "./lensMatricesTypes";
 

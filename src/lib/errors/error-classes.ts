@@ -5,7 +5,7 @@ export class ApplicationError extends Error {
   constructor(message: string, options: { code: string; statusCode?: number; isOperational?: boolean; details?: Record<string, unknown>; cause?: Error }) {
     super(message);
     this.name = this.constructor.name; this.code = options.code; this.statusCode = options.statusCode || 500; this.isOperational = options.isOperational ?? true; this.details = options.details;
-    if (options.cause) (this as any).cause = options.cause;
+    if (options.cause) (this as unknown).cause = options.cause;
     if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
   }
 }

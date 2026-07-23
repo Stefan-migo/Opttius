@@ -1,11 +1,12 @@
 /**
  * Quote email templates for optical shops
  */
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -15,6 +16,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 export interface QuoteData {
@@ -61,7 +63,7 @@ export async function sendQuoteSent(
     );
 
     if (!template) {
-      console.warn("⚠️ No active quote_sent template found, skipping email");
+      appLogger.warn("⚠️ No active quote_sent template found, skipping email");
       return { success: false, error: "Template not found" };
     }
 
@@ -144,7 +146,7 @@ export async function sendQuoteSent(
 
     return result;
   } catch (error) {
-    console.error("Error sending quote:", error);
+    appLogger.error("Error sending quote:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -165,7 +167,7 @@ export async function sendQuoteExpiring(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active quote_expiring template found, skipping email",
       );
       return { success: false, error: "Template not found" };
@@ -221,7 +223,7 @@ export async function sendQuoteExpiring(
 
     return result;
   } catch (error) {
-    console.error("Error sending quote expiring:", error);
+    appLogger.error("Error sending quote expiring:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

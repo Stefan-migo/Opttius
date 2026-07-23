@@ -1,11 +1,12 @@
 /**
  * Customer welcome, contact form, and birthday promo email templates
  */
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -15,6 +16,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 export interface CustomerData {
@@ -58,7 +60,7 @@ export async function sendAccountWelcomeEmail(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active account_welcome template found, skipping email",
       );
       return { success: false, error: "Template not found" };
@@ -115,7 +117,7 @@ export async function sendAccountWelcomeEmail(
 
     return result;
   } catch (error) {
-    console.error("Error sending account welcome:", error);
+    appLogger.error("Error sending account welcome:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -197,7 +199,7 @@ Responder a: ${data.customer_email}
 
     return result;
   } catch (error) {
-    console.error("Error sending contact form notification:", error);
+    appLogger.error("Error sending contact form notification:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -214,7 +216,7 @@ export async function sendBirthdayPromo(
     const template = await loadEmailTemplate("birthday", true, organizationId);
 
     if (!template) {
-      console.warn("⚠️ No active birthday template found, skipping email");
+      appLogger.warn("⚠️ No active birthday template found, skipping email");
       return { success: false, error: "Template not found" };
     }
 
@@ -273,7 +275,7 @@ export async function sendBirthdayPromo(
 
     return result;
   } catch (error) {
-    console.error("Error sending birthday email:", error);
+    appLogger.error("Error sending birthday email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

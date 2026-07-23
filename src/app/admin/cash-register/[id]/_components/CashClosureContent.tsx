@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
 import CashRegisterHeader from "./CashRegisterHeader";
-import CashRegisterSummary from "./CashRegisterSummary";
 import CashRegisterMovements from "./CashRegisterMovements";
+import CashRegisterSummary from "./CashRegisterSummary";
 
 interface CashClosure {
   id: string;
@@ -131,7 +132,7 @@ export default function CashClosureContent() {
         router.push("/admin/cash-register");
       }
     } catch (error: unknown) {
-      console.error("Error fetching closure:", error);
+      appLogger.error("Error fetching closure:", error);
       toast.error("Error al cargar el cierre de caja");
       router.push("/admin/cash-register");
     } finally {
@@ -151,10 +152,10 @@ export default function CashClosureContent() {
         const data = await response.json();
         setMovements(data.movements || []);
       } else {
-        console.error("Error fetching movements");
+        appLogger.error("Error fetching movements");
       }
     } catch (error: unknown) {
-      console.error("Error fetching movements:", error);
+      appLogger.error("Error fetching movements:", error);
     } finally {
       setLoadingMovements(false);
     }
@@ -210,9 +211,9 @@ export default function CashClosureContent() {
         loadingMovements={loadingMovements}
         movementFilter={movementFilter}
         movements={movements}
-        onMovementFilterChange={setMovementFilter}
         orders={orders}
         posSessionId={closure.pos_session_id}
+        onMovementFilterChange={setMovementFilter}
       />
     </div>
   );

@@ -169,8 +169,8 @@ export default function CustomerDetailContent() {
           <CustomerInfoCard customer={customer} />
           {customer.orders && customer.orders.length > 0 && (
             <CustomerRecentOrders
-              orders={customer.orders as Record<string, unknown>[]}
               customerId={customer.id}
+              orders={customer.orders as Record<string, unknown>[]}
             />
           )}
         </TabsContent>
@@ -249,19 +249,19 @@ export default function CustomerDetailContent() {
 
       <CustomerDetailDialogs
         customerId={customerId}
-        showCreatePrescription={showCreatePrescription}
-        editingPrescription={editingPrescription}
-        showCreateAppointment={showCreateAppointment}
         editingAppointment={editingAppointment}
-        showCreateQuote={showCreateQuote}
+        editingPrescription={editingPrescription}
         fieldOperationId={customer?.field_operation_id ?? undefined}
-        onClosePrescription={() => {
-          setShowCreatePrescription(false);
-          setEditingPrescription(null);
-        }}
+        showCreateAppointment={showCreateAppointment}
+        showCreatePrescription={showCreatePrescription}
+        showCreateQuote={showCreateQuote}
         onCloseAppointment={() => {
           setShowCreateAppointment(false);
           setEditingAppointment(null);
+        }}
+        onClosePrescription={() => {
+          setShowCreatePrescription(false);
+          setEditingPrescription(null);
         }}
         onCloseQuote={() => setShowCreateQuote(false)}
         onSuccess={() => fetchCustomer()}

@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { LENS_TYPE_LABELS, getLensTypeLabel } from "@/lib/lens-type-labels";
+import { getLensTypeLabel,LENS_TYPE_LABELS } from "@/lib/lens-type-labels";
 
 describe("getLensTypeLabel", () => {
   it("returns em-dash for null/undefined/empty", () => {

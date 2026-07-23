@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useBranch } from "@/hooks/useBranch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 import { Customer, Frame, Prescription } from "../types/quote.types";
@@ -33,7 +34,7 @@ export function useCustomerSearch(initialCustomerId?: string) {
           setResults(data.data ?? data.customers ?? []);
         }
       } catch (error) {
-        console.error("Error searching customers:", error);
+        appLogger.error("Error searching customers:", error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -62,7 +63,7 @@ export function useCustomerSearch(initialCustomerId?: string) {
           setSelected(data.data);
         }
       } catch (error) {
-        console.error("Error fetching customer:", error);
+        appLogger.error("Error fetching customer:", error);
       } finally {
         setLoading(false);
       }
@@ -120,7 +121,7 @@ export function usePrescriptionSearch(customerId: string | null) {
         setPrescriptions(Array.isArray(list) ? list : []);
       }
     } catch (error) {
-      console.error("Error fetching prescriptions:", error);
+      appLogger.error("Error fetching prescriptions:", error);
       setPrescriptions([]);
     } finally {
       setLoading(false);
@@ -176,7 +177,7 @@ export function useFrameSearch() {
           setResults(data.data ?? data.products ?? []);
         }
       } catch (error) {
-        console.error("Error searching frames:", error);
+        appLogger.error("Error searching frames:", error);
         setResults([]);
       } finally {
         setLoading(false);

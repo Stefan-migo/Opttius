@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { type PendingBalanceOrder, posService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 export function usePOSPendingBalance(branchId: string | null) {
   const [orders, setOrders] = useState<PendingBalanceOrder[]>([]);
@@ -19,7 +20,7 @@ export function usePOSPendingBalance(branchId: string | null) {
         setAllOrders(result || []);
         setOrders(result || []);
       } catch (error: unknown) {
-        console.error("Error fetching pending balance orders:", error);
+        appLogger.error("Error fetching pending balance orders:", error);
         setOrders([]);
         setAllOrders([]);
       } finally {

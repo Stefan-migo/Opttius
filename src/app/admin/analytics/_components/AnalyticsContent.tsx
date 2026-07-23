@@ -102,7 +102,6 @@ export default function AnalyticsContent() {
   return (
     <div className="space-y-6">
       <AnalyticsHeader
-        title="Analíticas y Reportes"
         description={
           isGlobalView
             ? `Métricas y análisis - Todas las sucursales - Últimos ${analytics.period.days} días`
@@ -110,16 +109,17 @@ export default function AnalyticsContent() {
         }
         period={period}
         refreshing={isRefetching}
+        title="Analíticas y Reportes"
         onPeriodChange={setPeriod}
         onRefresh={refetch}
       />
 
       <AnalyticsKPICards
-        kpis={analytics.kpis}
-        workOrders={analytics.workOrders}
-        quotes={analytics.quotes}
         appointments={analytics.appointments}
+        kpis={analytics.kpis}
         products={analytics.products}
+        quotes={analytics.quotes}
+        workOrders={analytics.workOrders}
       />
 
       {/* Analytics Tabs */}
@@ -169,10 +169,10 @@ export default function AnalyticsContent() {
 
                 <TabsContent className="space-y-4 sm:space-y-6" value="overview">
           <AnalyticsOverviewTab
-            trends={analytics.trends}
-            workOrders={analytics.workOrders}
             quotes={analytics.quotes}
             salesChartType={salesChartType}
+            trends={analytics.trends}
+            workOrders={analytics.workOrders}
             workOrdersChartType={workOrdersChartType}
             onSalesChartTypeChange={setSalesChartType}
             onWorkOrdersChartTypeChange={setWorkOrdersChartType}
@@ -181,19 +181,19 @@ export default function AnalyticsContent() {
 
                 <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
           <AnalyticsWorkOrdersTab
-            workOrders={analytics.workOrders}
             avgDeliveryDays={analytics.kpis.avgDeliveryDays}
+            workOrders={analytics.workOrders}
             workOrdersTrend={analytics.trends.workOrders}
           />
         </TabsContent>
 
                 <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
           <AnalyticsQuotesTab
-            quotes={analytics.quotes}
             avgQuoteValue={analytics.kpis.avgQuoteValue}
             quoteConversionRate={analytics.kpis.quoteConversionRate}
-            quotesTrend={analytics.trends.quotes}
+            quotes={analytics.quotes}
             quotesChartType={quotesChartType}
+            quotesTrend={analytics.trends.quotes}
             onQuotesChartTypeChange={setQuotesChartType}
           />
         </TabsContent>
@@ -201,13 +201,13 @@ export default function AnalyticsContent() {
         <TabsContent className="space-y-4 sm:space-y-6" value="sales">
           <AnalyticsSalesTab
             categoryRevenue={analytics.products.categoryRevenue}
-            paymentMethods={analytics.paymentMethods}
             kpis={{
               totalRevenue: analytics.kpis.totalRevenue,
               avgOrderValue: analytics.kpis.avgOrderValue,
               totalOrders: analytics.kpis.totalOrders,
               revenueGrowth: analytics.kpis.revenueGrowth,
             }}
+            paymentMethods={analytics.paymentMethods}
           />
         </TabsContent>
 

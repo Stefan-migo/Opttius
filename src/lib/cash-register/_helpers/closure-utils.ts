@@ -5,9 +5,9 @@
  * Zero behavioral changes — pure extraction.
  */
 
-import { coerceAmount } from "@/lib/cash-register/payment-aggregator";
-import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
+import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
+import { coerceAmount } from "@/lib/cash-register/payment-aggregator";
 
 import type { ClosureContext, ClosureInputRaw, OrderTotals } from "./closure-types";
 
@@ -47,7 +47,7 @@ export function calculateCashInflowsOutflows(
 
 // ─── Order Totals ───────────────────────────────────────────────────────────
 
-export function calculateOrderTotals(orders: any[]): OrderTotals {
+export function calculateOrderTotals(orders: unknown[]): OrderTotals {
   let totalSales = 0;
   let totalSubtotal = 0;
   let totalTax = 0;
@@ -71,7 +71,7 @@ export function calculateOrderTotals(orders: any[]): OrderTotals {
 export async function getPreviousClosure(
   ctx: ClosureContext,
   dateStr: string,
-): Promise<any | null> {
+): Promise<unknown | null> {
   if (!ctx.effectiveBranchId) return null;
 
   let closureQuery = ctx.supabaseServiceRole

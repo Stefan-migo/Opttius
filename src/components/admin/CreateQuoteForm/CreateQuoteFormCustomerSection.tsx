@@ -5,7 +5,6 @@
 "use client";
 
 import { Eye, Loader2, Plus, Search, User } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -99,11 +98,11 @@ export function CreateQuoteFormCustomerSection({
             >
               <div>
                 <div className="font-medium">
-                  {(selectedCustomer as any).first_name}{" "}
-                  {(selectedCustomer as any).last_name}
+                  {(selectedCustomer as unknown).first_name}{" "}
+                  {(selectedCustomer as unknown).last_name}
                 </div>
                 <div className="text-sm text-admin-text-tertiary">
-                  {(selectedCustomer as any).email}
+                  {(selectedCustomer as unknown).email}
                 </div>
               </div>
               <Button
@@ -131,7 +130,7 @@ export function CreateQuoteFormCustomerSection({
                       <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                     </div>
                   ) : (customerResults || []).length > 0 ? (
-                    customerResults.map((customer: any) => (
+                    customerResults.map((customer: unknown) => (
                       <div
                         className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                         key={customer.id}
@@ -190,10 +189,10 @@ export function CreateQuoteFormCustomerSection({
               </div>
             ) : (
               <Select
-                value={(selectedPrescription as any)?.id || ""}
+                value={(selectedPrescription as unknown)?.id || ""}
                 onValueChange={(value) => {
                   const prescription = prescriptions.find(
-                    (p: any) => p.id === value,
+                    (p: unknown) => p.id === value,
                   );
                   if (prescription) onPrescriptionSelect(prescription);
                 }}
@@ -202,7 +201,7 @@ export function CreateQuoteFormCustomerSection({
                   <SelectValue placeholder="Selecciona una receta" />
                 </SelectTrigger>
                 <SelectContent>
-                  {prescriptions.map((prescription: any) => (
+                  {prescriptions.map((prescription: unknown) => (
                     <SelectItem key={prescription.id} value={prescription.id}>
                       {prescription.prescription_date} -{" "}
                       {translatePrescriptionType(
@@ -226,23 +225,23 @@ export function CreateQuoteFormCustomerSection({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
               <div>
                 <span className="font-semibold">OD:</span> Esf{" "}
-                {(selectedPrescription as any).od_sphere ?? "—"} / Cil{" "}
-                {(selectedPrescription as any).od_cylinder ?? "—"}
-                {(selectedPrescription as any).od_add &&
-                  (selectedPrescription as any).od_add > 0 && (
+                {(selectedPrescription as unknown).od_sphere ?? "—"} / Cil{" "}
+                {(selectedPrescription as unknown).od_cylinder ?? "—"}
+                {(selectedPrescription as unknown).od_add &&
+                  (selectedPrescription as unknown).od_add > 0 && (
                     <span className="ml-2 text-orange-600">
-                      Add: +{(selectedPrescription as any).od_add}
+                      Add: +{(selectedPrescription as unknown).od_add}
                     </span>
                   )}
               </div>
               <div>
                 <span className="font-semibold">OS:</span> Esf{" "}
-                {(selectedPrescription as any).os_sphere ?? "—"} / Cil{" "}
-                {(selectedPrescription as any).os_cylinder ?? "—"}
-                {(selectedPrescription as any).os_add &&
-                  (selectedPrescription as any).os_add > 0 && (
+                {(selectedPrescription as unknown).os_sphere ?? "—"} / Cil{" "}
+                {(selectedPrescription as unknown).os_cylinder ?? "—"}
+                {(selectedPrescription as unknown).os_add &&
+                  (selectedPrescription as unknown).os_add > 0 && (
                     <span className="ml-2 text-orange-600">
-                      Add: +{(selectedPrescription as any).os_add}
+                      Add: +{(selectedPrescription as unknown).os_add}
                     </span>
                   )}
               </div>
@@ -250,7 +249,7 @@ export function CreateQuoteFormCustomerSection({
           </div>
 
           {/* Presbyopia Solution Selector */}
-          {hasAddition(selectedPrescription as any) && (
+          {hasAddition(selectedPrescription as unknown) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-sm">
@@ -262,7 +261,7 @@ export function CreateQuoteFormCustomerSection({
                 <Alert className="mb-4">
                   <AlertDescription>
                     Esta receta tiene adición (+
-                    {getMaxAddition(selectedPrescription as any)} D). Selecciona
+                    {getMaxAddition(selectedPrescription as unknown)} D). Selecciona
                     cómo deseas manejar la presbicia.
                   </AlertDescription>
                 </Alert>
@@ -315,16 +314,16 @@ export function CreateQuoteFormCustomerSection({
               <DialogTitle>Nueva Receta</DialogTitle>
               <DialogDescription>
                 Crea una nueva receta oftalmológica para{" "}
-                {(selectedCustomer as any).first_name}{" "}
-                {(selectedCustomer as any).last_name}
+                {(selectedCustomer as unknown).first_name}{" "}
+                {(selectedCustomer as unknown).last_name}
               </DialogDescription>
             </DialogHeader>
             <CreatePrescriptionForm
-              customerId={(selectedCustomer as any).id}
+              customerId={(selectedCustomer as unknown).id}
               onCancel={onCloseCreatePrescription}
               onSuccess={() => {
                 onCloseCreatePrescription();
-                onPrescriptionCreated((selectedCustomer as any).id);
+                onPrescriptionCreated((selectedCustomer as unknown).id);
               }}
             />
           </DialogContent>

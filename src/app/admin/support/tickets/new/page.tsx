@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 import { CustomerSearchCard } from "./_components/CustomerSearchCard";
 import { OrderSearchCard } from "./_components/OrderSearchCard";
@@ -58,7 +59,7 @@ export default function NewTicketPage() {
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error("Error fetching categories:", err);
+      appLogger.error("Error fetching categories:", err);
     }
   };
 
@@ -70,7 +71,7 @@ export default function NewTicketPage() {
         setAdminUsers(extractDataFromResponse(data));
       }
     } catch (err) {
-      console.error("Error fetching admin users:", err);
+      appLogger.error("Error fetching admin users:", err);
     }
   };
 
@@ -135,7 +136,7 @@ export default function NewTicketPage() {
         router.push("/admin/support");
       }
     } catch (err) {
-      console.error("Error creating ticket:", err);
+      appLogger.error("Error creating ticket:", err);
       toast.error("Error al crear el ticket", {
         description:
           err instanceof Error ? err.message : "Error al crear el ticket.",

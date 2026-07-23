@@ -16,8 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  agreementService,
   AgreementInstitutionalInvoice,
+  agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/api/services/errorService";
 import { formatCurrency, formatDate } from "@/lib/utils";

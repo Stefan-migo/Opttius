@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   createApiErrorResponse,
   createPaginatedResponse,
-} from "@/lib/api/response";
-import { extractPaginationParams } from "@/lib/api/response";
+ extractPaginationParams } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";

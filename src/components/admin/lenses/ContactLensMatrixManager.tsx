@@ -76,7 +76,7 @@ export function ContactLensMatrixManager({ matrices, onChange, readOnly = false 
 
   return (
     <div className="space-y-4">
-      {!readOnly && <MatrixSuggestionSection open={suggestionOpen} onToggle={() => setSuggestionOpen(!suggestionOpen)} onApplyTemplate={handleApplyTemplate} />}
+      {!readOnly && <MatrixSuggestionSection open={suggestionOpen} onApplyTemplate={handleApplyTemplate} onToggle={() => setSuggestionOpen(!suggestionOpen)} />}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Matrices de Precios</h3>
         {!readOnly && <Button size="sm" variant="outline" onClick={() => handleOpenDialog()}><Plus className="h-4 w-4 mr-2" />Agregar Matriz</Button>}
@@ -108,7 +108,7 @@ export function ContactLensMatrixManager({ matrices, onChange, readOnly = false 
         </div>
       )}
 
-      <MatrixEditDialog open={showDialog} editingId={editingId} formData={formData} onOpenChange={setShowDialog} onFormChange={setFormData} onSubmit={handleSubmit} />
+      <MatrixEditDialog editingId={editingId} formData={formData} open={showDialog} onFormChange={setFormData} onOpenChange={setShowDialog} onSubmit={handleSubmit} />
     </div>
   );
 }

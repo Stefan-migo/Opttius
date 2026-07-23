@@ -8,9 +8,10 @@
  * and .single() returns a separate promise.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { ProductsService } from "@/lib/api/services/products/service";
+import { beforeEach,describe, expect, it, vi } from "vitest";
+
 import { NotFoundError, ValidationError } from "@/lib/api/errors";
+import { ProductsService } from "@/lib/api/services/products/service";
 
 // ---------------------------------------------------------------------------
 // Mock logger — pino is brittle in test, swap for no-ops

@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { buildSession } from "@/lib/ai/agent/session";
 import { buildSystemPrompt } from "@/lib/ai/agent/prompt-builder";
+import { buildSession } from "@/lib/ai/agent/session";
 import { getAllTools } from "@/lib/ai/tools";
 
 // ─── Fixtures ───

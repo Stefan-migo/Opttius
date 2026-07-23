@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const legacyScope = buildLegacyScope(supabase, branchContext, orgBranchIds, applyBranchFilter);
 
     const [productsResult, mvResult, customersResult, pbsResult, ordersAggResult, quotesAggResult, topProductsResult] = await Promise.all([
-      supabase.from("products").select("*").eq("status", "active").then((r: any) => {
+      supabase.from("products").select("*").eq("status", "active").then((r: unknown) => {
         let q = r; const bc = branchContext;
         if (bc.branchId) q = q.eq("organization_id", bc.organizationId || "00000000-0000-0000-0000-000000000000");
         else if (bc.isSuperAdmin && bc.organizationId) q = q.eq("organization_id", bc.organizationId);
@@ -64,28 +64,28 @@ export async function GET(request: NextRequest) {
       legacyScope(supabase.from("orders").select("order_items (product_name, total_price, quantity)").or("status.eq.completed,payment_status.eq.paid").gte("created_at", startOfLastMonth.toISOString())),
     ]);
 
-    const products = (productsResult as any)?.data || [];
-    const mvRows = (mvResult as any)?.data || [];
-    const customers = (customersResult as any)?.data || [];
-    const productBranchStock = (pbsResult as any)?.data || [];
-    const ordersLight = (ordersAggResult as any)?.data || [];
-    const quotesLight = (quotesAggResult as any)?.data || [];
-    const topProductsData = (topProductsResult as any)?.data || [];
+    const products = (productsResult as unknown)?.data || [];
+    const mvRows = (mvResult as unknown)?.data || [];
+    const customers = (customersResult as unknown)?.data || [];
+    const productBranchStock = (pbsResult as unknown)?.data || [];
+    const ordersLight = (ordersAggResult as unknown)?.data || [];
+    const quotesLight = (quotesAggResult as unknown)?.data || [];
+    const topProductsData = (topProductsResult as unknown)?.data || [];
 
-    const activeProducts = products.filter((p: any) => p.status === "active");
-    const productIds = new Set(activeProducts.map((p: any) => p.id));
-    const inventoryMetrics = computeInventoryMetrics(productBranchStock, productIds, { products: activeProducts.map((p: any) => ({ id: p.id, name: p.name, slug: p.slug })), maxLowStockList: 5 });
+    const activeProducts = products.filter((p: unknown) => p.status === "active");
+    const productIds = new Set(activeProducts.map((p: unknown) => p.id));
+    const inventoryMetrics = computeInventoryMetrics(productBranchStock, productIds, { products: activeProducts.map((p: unknown) => ({ id: p.id, name: p.name, slug: p.slug })), maxLowStockList: 5 });
 
     return createApiSuccessResponse({
       branch: { id: branchContext.branchId, is_global: branchContext.isGlobalView, is_super_admin: branchContext.isSuperAdmin },
       kpis: {
         products: { total: activeProducts.length, lowStock: inventoryMetrics.lowStock, outOfStock: inventoryMetrics.outOfStock },
-        orders: { total: computeDashboardKpis(mvRows, now).orders.total, pending: ordersLight.filter((o: any) => o.status === "pending").length, processing: ordersLight.filter((o: any) => o.status === "processing").length, completed: ordersLight.filter((o: any) => o.status === "completed").length, failed: ordersLight.filter((o: any) => o.status === "failed").length },
+        orders: { total: computeDashboardKpis(mvRows, now).orders.total, pending: ordersLight.filter((o: unknown) => o.status === "pending").length, processing: ordersLight.filter((o: unknown) => o.status === "processing").length, completed: ordersLight.filter((o: unknown) => o.status === "completed").length, failed: ordersLight.filter((o: unknown) => o.status === "failed").length },
         revenue: computeDashboardKpis(mvRows, now).revenue,
-        customers: { total: customers.length, new: customers.filter((c: any) => new Date(c.created_at) >= thirtyDaysAgo).length, returning: Math.max(0, customers.length - customers.filter((c: any) => new Date(c.created_at) >= thirtyDaysAgo).length) },
+        customers: { total: customers.length, new: customers.filter((c: unknown) => new Date(c.created_at) >= thirtyDaysAgo).length, returning: Math.max(0, customers.length - customers.filter((c: unknown) => new Date(c.created_at) >= thirtyDaysAgo).length) },
         appointments: await computeAppointments(supabase, branchContext, orgBranchIds, todayStr, applyBranchFilter),
         workOrders: computeDashboardKpis(mvRows, now).workOrders,
-        quotes: { total: computeDashboardKpis(mvRows, now).quotes.total, pending: quotesLight.filter((q: any) => ["draft", "sent"].includes(q.status) && !q.converted_to_work_order_id).length, converted: quotesLight.filter((q: any) => q.status === "accepted" || q.converted_to_work_order_id).length },
+        quotes: { total: computeDashboardKpis(mvRows, now).quotes.total, pending: quotesLight.filter((q: unknown) => ["draft", "sent"].includes(q.status) && !q.converted_to_work_order_id).length, converted: quotesLight.filter((q: unknown) => q.status === "accepted" || q.converted_to_work_order_id).length },
       },
       todayAppointments: await computeTodayAppointmentsList(supabase, branchContext, orgBranchIds, todayStr, applyBranchFilter),
       lowStockProducts: inventoryMetrics.lowStockProductsList ?? [],
@@ -97,25 +97,25 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function computeAppointments(supabase: any, bc: any, orgBranchIds: string[], todayStr: string, applyFilter: any) {
+async function computeAppointments(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   const q = buildApptQuery(supabase, bc, orgBranchIds, todayStr, applyFilter);
   const { data: appointments } = await q;
   const a = appointments || [];
-  return { today: a.length, scheduled: a.filter((x: any) => x.status === "scheduled").length, confirmed: a.filter((x: any) => x.status === "confirmed").length, pending: a.filter((x: any) => x.status === "scheduled" || x.status === "pending").length };
+  return { today: a.length, scheduled: a.filter((x: unknown) => x.status === "scheduled").length, confirmed: a.filter((x: unknown) => x.status === "confirmed").length, pending: a.filter((x: unknown) => x.status === "scheduled" || x.status === "pending").length };
 }
 
-async function computeTodayAppointmentsList(supabase: any, bc: any, orgBranchIds: string[], todayStr: string, applyFilter: any) {
+async function computeTodayAppointmentsList(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   const q = buildApptQuery(supabase, bc, orgBranchIds, todayStr, applyFilter).order("appointment_time", { ascending: true }).limit(10);
   const { data: todayData } = await q;
-  const customerIds = [...new Set((todayData || []).map((a: any) => a.customer_id).filter(Boolean))];
+  const customerIds = [...new Set((todayData || []).map((a: unknown) => a.customer_id).filter(Boolean))];
   const { data: customersForAppts } = customerIds.length > 0 ? await supabase.from("customers").select("id, first_name, last_name, email, phone").in("id", customerIds) : { data: [] };
-  return (todayData || []).map((apt: any) => {
-    const c = customersForAppts?.find((x: any) => x.id === apt.customer_id);
+  return (todayData || []).map((apt: unknown) => {
+    const c = customersForAppts?.find((x: unknown) => x.id === apt.customer_id);
     return { id: apt.id, customer_name: c ? `${c.first_name || ""} ${c.last_name || ""}`.trim() || c.email || "Cliente" : "Cliente", customer_email: c?.email || null, appointment_time: apt.appointment_time, appointment_type: apt.appointment_type || "consultation", status: apt.status, duration_minutes: apt.duration_minutes || 30, notes: apt.notes };
   });
 }
 
-function buildApptQuery(supabase: any, bc: any, orgBranchIds: string[], todayStr: string, applyFilter: any) {
+function buildApptQuery(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   if (bc.isSuperAdmin && !bc.branchId && bc.organizationId && orgBranchIds.length > 0) {
     return supabase.from("appointments").select("*").eq("appointment_date", todayStr).or(`organization_id.eq.${bc.organizationId},branch_id.in.(${orgBranchIds.join(",")})`);
   }

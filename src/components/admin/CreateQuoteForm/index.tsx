@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import {
   getDefaultPresbyopiaSolution,
   hasAddition,
@@ -25,8 +26,7 @@ import { getBranchHeader } from "@/lib/utils/branch";
 // Local imports
 import { useFrameSearch, useQuoteForm } from "./hooks";
 import { CustomerSelection, PrescriptionSelection } from "./sections";
-import {
-  CreateQuoteFormProps,
+import {  CreateQuoteFormProps,
   Customer,
   Prescription,
 } from "./types/quote.types";
@@ -178,7 +178,7 @@ export default function CreateQuoteForm({
       toast.success("Cotización creada exitosamente");
       onSuccess();
     } catch (error) {
-      console.error("Error creating quote:", error);
+      appLogger.error("Error creating quote:", error);
       toast.error("Error al crear la cotización");
     } finally {
       setSaving(false);

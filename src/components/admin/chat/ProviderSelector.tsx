@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { LLMProvider } from "@/lib/ai/types";
+import { appLogger } from '@/lib/logger';
 
 interface ProviderSelectorProps {
   selectedProvider?: LLMProvider;
@@ -37,7 +38,7 @@ export function ProviderSelector({
           setProviders(data.providers || []);
         }
       } catch (error) {
-        console.error("Error fetching providers:", error);
+        appLogger.error("Error fetching providers:", error);
       } finally {
         setLoading(false);
       }

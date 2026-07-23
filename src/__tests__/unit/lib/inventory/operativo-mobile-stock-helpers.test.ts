@@ -4,7 +4,7 @@
  * Supabase is mocked inline with a chainable query builder.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks — hoisted before imports

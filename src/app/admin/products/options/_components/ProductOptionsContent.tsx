@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import { AddOptionValueDialog } from "./_components/AddOptionValueDialog";
 import { EditOptionValueDialog } from "./_components/EditOptionValueDialog";
@@ -50,7 +51,7 @@ export default function ProductOptionsContent() {
         toast.error(data.error || "Error al cargar opciones");
       }
     } catch (error) {
-      console.error("Error fetching fields:", error);
+      appLogger.error("Error fetching fields:", error);
       toast.error("Error al cargar opciones");
     } finally {
       setLoading(false);
@@ -89,7 +90,7 @@ export default function ProductOptionsContent() {
         toast.error(data.error || "Error al agregar opción");
       }
     } catch (error) {
-      console.error("Error adding value:", error);
+      appLogger.error("Error adding value:", error);
       toast.error("Error al agregar opción");
     }
   };
@@ -126,7 +127,7 @@ export default function ProductOptionsContent() {
         toast.error(data.error || "Error al actualizar opción");
       }
     } catch (error) {
-      console.error("Error updating value:", error);
+      appLogger.error("Error updating value:", error);
       toast.error("Error al actualizar opción");
     }
   };
@@ -150,7 +151,7 @@ export default function ProductOptionsContent() {
         toast.error(data.error || "Error al eliminar opción");
       }
     } catch (error) {
-      console.error("Error deleting value:", error);
+      appLogger.error("Error deleting value:", error);
       toast.error("Error al eliminar opción");
     }
   };
@@ -176,7 +177,7 @@ export default function ProductOptionsContent() {
         toast.error("Error al actualizar opción");
       }
     } catch (error) {
-      console.error("Error toggling value:", error);
+      appLogger.error("Error toggling value:", error);
       toast.error("Error al actualizar opción");
     }
   };

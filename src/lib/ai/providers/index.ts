@@ -5,8 +5,8 @@ import { GoogleProvider } from "./google";
 import { KilocodeProvider } from "./kilocode";
 import { MinimaxProvider } from "./minimax";
 import { NvidiaProvider } from "./nvidia";
-import { OpenCodeZenProvider } from "./opencodezen";
 import { OpenAIProvider } from "./openai";
+import { OpenCodeZenProvider } from "./opencodezen";
 import { OpenRouterProvider } from "./openrouter";
 
 export const providers: Record<LLMProvider, () => LLMProviderInterface> = {

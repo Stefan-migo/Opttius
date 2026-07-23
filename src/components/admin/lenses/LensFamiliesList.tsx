@@ -17,14 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
+import {  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { appLogger } from '@/lib/logger';
 
 interface LensFamily {
   id: string;
@@ -59,6 +59,7 @@ const LENS_MATERIALS = [
 
 export default function LensFamiliesList() {
   const router = useRouter();
+
   const [families, setFamilies] = useState<LensFamily[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,7 +94,7 @@ export default function LensFamiliesList() {
         toast.error("Error al cargar familias de lentes");
       }
     } catch (error) {
-      console.error("Error fetching families:", error);
+      appLogger.error("Error fetching families:", error);
       toast.error("Error al cargar familias de lentes");
     } finally {
       setLoading(false);

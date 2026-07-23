@@ -45,7 +45,7 @@ export function AppointmentsSection({ customer, onNew, onEdit }: { customer: Cus
 
 export function QuotesSection({ customer, onNew }: { customer: Customer; onNew?: () => void }) {
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = { draft: { variant: "outline", label: "Borrador" }, sent: { variant: "default", label: "Enviado" }, accepted: { variant: "default", label: "Aceptado" }, rejected: { variant: "destructive", label: "Rechazado" }, expired: { variant: "outline", label: "Expirado" }, converted_to_work: { variant: "secondary", label: "Convertido" } };
+    const config: Record<string, { variant: unknown; label: string }> = { draft: { variant: "outline", label: "Borrador" }, sent: { variant: "default", label: "Enviado" }, accepted: { variant: "default", label: "Aceptado" }, rejected: { variant: "destructive", label: "Rechazado" }, expired: { variant: "outline", label: "Expirado" }, converted_to_work: { variant: "secondary", label: "Convertido" } };
     const c = config[status] || { variant: "outline", label: status };
     return <Badge variant={c.variant}>{c.label}</Badge>;
   };

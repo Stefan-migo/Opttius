@@ -10,8 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { DemoRequest, FunnelStage } from "./types";
+
 import { STAGE_COLORS, STAGE_LABELS } from "./constants";
+import type { DemoRequest, FunnelStage } from "./types";
 
 interface FunnelForm {
   meeting_url: string;

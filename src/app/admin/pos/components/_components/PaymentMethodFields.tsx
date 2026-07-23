@@ -6,6 +6,7 @@ import { useEffect,useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type Agreement,getAgreements } from "@/lib/api/services/agreementService";
+import { appLogger } from '@/lib/logger';
 
 import type { POSPaymentMethod } from "../../types";
 import { POSAgreementSelector } from "../POSAgreementSelector";
@@ -45,7 +46,7 @@ export function PaymentMethodFields({
           setAgreements(response.data);
         })
         .catch((error) => {
-          console.error("Error loading agreements:", error);
+          appLogger.error("Error loading agreements:", error);
           setAgreements([]);
         })
         .finally(() => {

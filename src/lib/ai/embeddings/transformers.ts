@@ -19,6 +19,8 @@
  * the @xenova/transformers package to be installed.
  */
 
+import { appLogger } from '@/lib/logger';
+
 import type {
   EmbeddingBatchResult,
   EmbeddingProvider,
@@ -75,15 +77,15 @@ async function getEmbeddingPipeline(modelName: string) {
       const transformers = await eval('import("@xenova/transformers")');
       pipeline = transformers.pipeline;
 
-      console.log(`Loading Transformers.js model: ${modelName}...`);
+      appLogger.info(`Loading Transformers.js model: ${modelName}...`);
       embeddingPipeline = await pipeline("feature-extraction", modelName, {
         quantized: true, // Use quantized model for faster inference
       });
-      console.log("Transformers.js model loaded successfully");
+      appLogger.info("Transformers.js model loaded successfully");
 
       return embeddingPipeline;
     } catch (error: unknown) {
-      console.error("Failed to load Transformers.js:", error);
+      appLogger.error("Failed to load Transformers.js:", error);
       loadError = error;
       throw error;
     } finally {

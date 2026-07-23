@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 interface BlogCardProps {
   id: string;
@@ -128,7 +129,7 @@ export default function BlogCard({
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 src={getImageUrl()}
                 onError={(e) => {
-                  console.error(
+                  appLogger.error(
                     "Error loading blog image:",
                     mainImage?.asset?.url,
                   );
@@ -248,7 +249,7 @@ export default function BlogCard({
                       className="object-cover"
                       src={getAuthorImageUrl()}
                       onError={(e) => {
-                        console.error(
+                        appLogger.error(
                           "Error loading author image:",
                           author?.image?.asset?.url,
                         );

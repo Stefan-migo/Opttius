@@ -44,16 +44,15 @@ vi.mock("@/lib/email/template-utils", () => ({
 }));
 
 import { sendEmail } from "@/lib/email/client";
-import { appLogger } from "@/lib/logger";
-import { wrapInModernLayout } from "@/lib/email/layout";
 import { getOrganizationInfoWithFallbacks } from "@/lib/email/org-utils";
+import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 import {
   incrementTemplateUsage,
   loadEmailTemplate,
 } from "@/lib/email/template-loader";
 import { getDefaultVariables, replaceTemplateVariables } from "@/lib/email/template-utils";
+import { appLogger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 
 const ORG_ID = "org-1";
 const CUSTOMER_ID = "cust-1";

@@ -2,6 +2,9 @@
 
 import { createContext, ReactNode, useContext } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface LikeContextType {
   likedProducts: string[];
   toggleLike: (productId: string) => void;
@@ -16,7 +19,7 @@ export function LikeProvider({ children }: { children: ReactNode }) {
 
   const toggleLike = (productId: string) => {
     // Stub implementation
-    console.log("Like toggled for product:", productId);
+    appLogger.info("Like toggled for product:", productId);
   };
 
   const isLiked = (productId: string) => {

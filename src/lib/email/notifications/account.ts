@@ -1,8 +1,9 @@
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -14,6 +15,7 @@ export async function sendAccountWelcome(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+
     const template = await loadEmailTemplate(
       "account_welcome",
       true,
@@ -21,7 +23,7 @@ export async function sendAccountWelcome(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active account_welcome template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -71,7 +73,7 @@ export async function sendAccountWelcome(
 
     return result;
   } catch (error) {
-    console.error("Error sending account welcome email:", error);
+    appLogger.error("Error sending account welcome email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -89,7 +91,7 @@ export async function sendPasswordReset(
     const template = await loadEmailTemplate("password_reset", true);
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active password_reset template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -124,7 +126,7 @@ export async function sendPasswordReset(
 
     return result;
   } catch (error) {
-    console.error("Error sending password reset email:", error);
+    appLogger.error("Error sending password reset email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

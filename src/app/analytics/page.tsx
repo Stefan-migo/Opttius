@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
 import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface DashboardData {
@@ -50,7 +51,7 @@ export default function UsageAnalyticsDashboard() {
         const data = await response.json();
         setDashboardData(data);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        appLogger.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
       }

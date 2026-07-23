@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import SubscriptionsContent from "./_components/SubscriptionsContent";
 
 export const dynamic = "force-dynamic";

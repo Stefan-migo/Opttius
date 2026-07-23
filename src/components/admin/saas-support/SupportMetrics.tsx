@@ -3,6 +3,8 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
 import { SupportMetricsDashboard } from "./_components/SupportMetricsDashboard";
 
 interface SupportMetrics {
@@ -35,7 +37,7 @@ export function SupportMetrics() {
         setMetrics(data.metrics);
       }
     } catch (error) {
-      console.error("Error fetching metrics:", error);
+      appLogger.error("Error fetching metrics:", error);
     } finally {
       setLoading(false);
     }

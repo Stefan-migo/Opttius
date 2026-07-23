@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { useSystemConfig } from "@/app/admin/system/hooks/useSystemConfig";
+import { appLogger } from '@/lib/logger';
 
 import { PrescriptionFormGeneralInfo } from "./CreatePrescriptionFormGeneralInfo";
 import { PrescriptionFormLeftEye } from "./CreatePrescriptionFormLeftEye";
@@ -209,7 +210,7 @@ export default function CreatePrescriptionForm({
       );
       onSuccess();
     } catch (error: unknown) {
-      console.error("Error saving prescription:", error);
+      appLogger.error("Error saving prescription:", error);
       toast.error(error.message || "Error al guardar receta");
     } finally {
       setSaving(false);
@@ -250,8 +251,8 @@ export default function CreatePrescriptionForm({
         formData={formData}
         isEdit={!!initialData?.id}
         saving={saving}
-        onChange={handleFieldChange}
         onCancel={onCancel}
+        onChange={handleFieldChange}
       />
     </form>
   );

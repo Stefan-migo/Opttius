@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface DashboardData {
@@ -61,7 +62,7 @@ export default function SaaSAnalyticsContent() {
         const data = await response.json();
         setDashboardData(data);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        appLogger.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
       }

@@ -137,8 +137,8 @@ export function LensMatrixDialog({
                 </Select>
               </div>
               <div className="flex items-center space-x-2 pt-4">
-                <input type="checkbox" id="is_active_matrix" checked={formData.is_active}
-                  className="h-4 w-4 rounded border-gray-300"
+                <input checked={formData.is_active} className="h-4 w-4 rounded border-gray-300" id="is_active_matrix"
+                  type="checkbox"
                   onChange={(e) => onChange({ is_active: e.target.checked })} />
                 <Label className="cursor-pointer" htmlFor="is_active_matrix">Matriz Activa</Label>
               </div>

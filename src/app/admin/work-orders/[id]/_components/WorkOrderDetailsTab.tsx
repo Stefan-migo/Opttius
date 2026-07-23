@@ -2,12 +2,12 @@
 
 import { Eye, Package } from "lucide-react";
 
-import { PrescriptionFullDisplay, type PrescriptionDisplayData } from "@/components/admin/PrescriptionFullDisplay";
+import { LabDeliveryCard } from "@/components/admin/LabDeliveryCard";
+import { type PrescriptionDisplayData,PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LabDeliveryCard } from "@/components/admin/LabDeliveryCard";
-import { getLensTypeLabel } from "@/lib/lens-type-labels";
 import type { WorkOrder } from "@/hooks/useWorkOrder";
+import { getLensTypeLabel } from "@/lib/lens-type-labels";
 
 interface WorkOrderDetailsTabProps {
   workOrder: WorkOrder;

@@ -1,7 +1,7 @@
 "use client";
 
-import { AgentContextProvider, useAgentContext } from "./AgentContextProvider";
 import { AgentBubble } from "./AgentBubble";
+import { AgentContextProvider, useAgentContext } from "./AgentContextProvider";
 
 /**
  * Wraps AgentBubble inside AgentContextProvider for screen metadata.
@@ -9,7 +9,7 @@ import { AgentBubble } from "./AgentBubble";
  */
 function AgentBubbleInner() {
   const { route, branchName } = useAgentContext();
-  return <AgentBubble route={route} branchName={branchName} />;
+  return <AgentBubble branchName={branchName} route={route} />;
 }
 
 export function AgentBubbleContainer() {

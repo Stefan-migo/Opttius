@@ -1,5 +1,4 @@
 import {
-  Activity,
   AlertTriangle,
   Building2,
   CheckCircle,

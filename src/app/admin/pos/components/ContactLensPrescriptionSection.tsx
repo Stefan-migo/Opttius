@@ -167,17 +167,17 @@ export function ContactLensPrescriptionSection({
       ) : (
         <div className="grid grid-cols-2 gap-4">
           <PrescriptionManualEntry
-            side="od"
-            values={manualPrescription}
-            sphereOptions={sphereOptions}
             cylinderOptions={cylinderOptions}
+            side="od"
+            sphereOptions={sphereOptions}
+            values={manualPrescription}
             onFieldChange={handleFieldChange}
           />
           <PrescriptionManualEntry
-            side="os"
-            values={manualPrescription}
-            sphereOptions={sphereOptions}
             cylinderOptions={cylinderOptions}
+            side="os"
+            sphereOptions={sphereOptions}
+            values={manualPrescription}
             onFieldChange={handleFieldChange}
           />
         </div>

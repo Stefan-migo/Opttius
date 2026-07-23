@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import BlurText from "../BlurText";
@@ -6,7 +6,7 @@ import BlurText from "../BlurText";
 describe("BlurText", () => {
   it("renders each word as a span when animateBy='words'", () => {
     const { container } = render(
-      <BlurText text="Hola mundo" animateBy="words" />,
+      <BlurText animateBy="words" text="Hola mundo" />,
     );
     const spans = container.querySelectorAll("span");
     // 2 words → 2 spans (trailing nbsp is inside each span)
@@ -17,7 +17,7 @@ describe("BlurText", () => {
 
   it("renders each letter as a span when animateBy='letters'", () => {
     const { container } = render(
-      <BlurText text="Hola" animateBy="letters" />,
+      <BlurText animateBy="letters" text="Hola" />,
     );
     const spans = container.querySelectorAll("span");
     expect(spans.length).toBe(4);
@@ -26,7 +26,7 @@ describe("BlurText", () => {
   });
 
   it("applies custom className alongside blur-text", () => {
-    render(<BlurText text="test" className="custom-cls" />);
+    render(<BlurText className="custom-cls" text="test" />);
     const wrapper = document.querySelector(".blur-text");
     expect(wrapper).toBeInTheDocument();
     expect(wrapper).toHaveClass("custom-cls");
@@ -41,7 +41,7 @@ describe("BlurText", () => {
 
   it("inserts non-breaking spaces between words", () => {
     const { container } = render(
-      <BlurText text="a b c" animateBy="words" />,
+      <BlurText animateBy="words" text="a b c" />,
     );
     const spans = container.querySelectorAll("span");
     // 3 words → 3 spans

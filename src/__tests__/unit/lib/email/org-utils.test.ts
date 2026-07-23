@@ -4,9 +4,8 @@
  * Tests getOrganizationInfoWithFallbacks with a mocked Supabase client.
  */
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/supabase/server", () => ({
   createServiceRoleClient: vi.fn(),
@@ -16,8 +15,8 @@ vi.mock("@/lib/logger", () => ({
   appLogger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import { getOrganizationInfoWithFallbacks } from "@/lib/email/org-utils";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /** Build a chainable supabase mock that returns a given result from .single() */
 function mockOrgQuery(result: PostgrestSingleResponse<unknown>) {

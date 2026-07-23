@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 
-import {
-  PresbyopiaSolution,
+import {  PresbyopiaSolution,
   QuoteFormData,
   QuoteSettings,
 } from "../types/quote.types";
@@ -134,7 +134,7 @@ export function useQuoteForm(
         }));
       }
     } catch (error) {
-      console.error("Error fetching quote settings:", error);
+      appLogger.error("Error fetching quote settings:", error);
     } finally {
       setLoadingSettings(false);
     }

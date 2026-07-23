@@ -24,6 +24,6 @@ export interface CreateQuoteFormLensSectionProps {
   onLensCostChange: (v: number) => void;
   onManualLensPriceToggle: () => void;
   onSourcingTypeChange: (v: "stock" | "surfaced") => void;
-  onLensFormDataChange: (field: string, value: any) => void;
+  onLensFormDataChange: (field: string, value: unknown) => void;
   onTreatmentToggle: (treatment: { value: string; label: string; cost: number; enabled: boolean }) => void;
 }

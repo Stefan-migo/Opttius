@@ -4,23 +4,22 @@
  * @module __tests__/unit/lib/api/errors.test
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 import {
   APIError,
+  asyncHandler,
   AuthenticationError,
   AuthorizationError,
   ConflictError,
+  createErrorResponse,
+  createSuccessResponse,
   NotFoundError,
   PaymentError,
   RateLimitError,
   ValidationError,
-  asyncHandler,
-  createErrorResponse,
-  createSuccessResponse,
   withErrorHandler,
 } from "@/lib/api/errors";
-import { appLogger } from "@/lib/logger";
 
 vi.mock("@/lib/logger", () => ({
   appLogger: {

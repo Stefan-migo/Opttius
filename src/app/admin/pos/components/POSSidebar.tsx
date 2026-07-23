@@ -9,7 +9,6 @@ import {
   Percent,
   Plus,
   RefreshCw,
-  ShoppingBag,
   Users,
 } from "lucide-react";
 
@@ -106,9 +105,9 @@ export function POSSidebar({
         </h3>
         {quickActions.map((action, index) => (
           <Button
+            className="w-full justify-start gap-2 h-10"
             key={index}
             variant={action.variant || "outline"}
-            className="w-full justify-start gap-2 h-10"
             onClick={action.onClick}
           >
             <action.icon className="h-4 w-4" />
@@ -131,9 +130,9 @@ export function POSSidebar({
         </h3>
         {secondaryActions.map((action, index) => (
           <Button
+            className="w-full justify-start gap-2 h-9"
             key={index}
             variant={action.variant || "ghost"}
-            className="w-full justify-start gap-2 h-9"
             onClick={action.onClick}
           >
             <action.icon className="h-4 w-4" />

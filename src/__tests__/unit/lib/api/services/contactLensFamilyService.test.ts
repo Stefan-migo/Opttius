@@ -5,7 +5,7 @@
  * a plain constructor function.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -46,8 +46,8 @@ function getMockClient() {
 }
 
 // Import AFTER mocks
-import { contactLensFamilyService } from "@/lib/api/services/contactLensFamilyService";
 import type { ContactLensFamily } from "@/lib/api/services/contactLensFamilyService";
+import { contactLensFamilyService } from "@/lib/api/services/contactLensFamilyService";
 
 const mockFamily: ContactLensFamily = {
   id: "clf-001",

@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import CashClosureContent from "./_components/CashClosureContent";
 
 export const dynamic = "force-dynamic";

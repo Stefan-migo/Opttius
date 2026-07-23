@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger } from '@/lib/logger';
 
 type SupportForm = z.infer<typeof createPublicSaasSupportTicketSchema>;
 
@@ -94,7 +95,7 @@ export function SupportTicketForm({ onSuccess }: SupportTicketFormProps) {
         throw new Error(result.error || "Error al crear el ticket");
       onSuccess(result.ticket?.ticket_number || "");
     } catch (error) {
-      console.error("Error creating ticket:", error);
+      appLogger.error("Error creating ticket:", error);
     }
   };
 

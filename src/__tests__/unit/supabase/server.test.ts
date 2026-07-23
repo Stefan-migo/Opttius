@@ -4,7 +4,7 @@
  * @module __tests__/unit/supabase/server.test
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // --- Mocks ---
 
@@ -27,9 +27,9 @@ vi.mock("@supabase/supabase-js", () => ({
 
 // --- Imports ---
 
-import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 import {
   createClient as createSvrClient,
   createClientFromRequest,

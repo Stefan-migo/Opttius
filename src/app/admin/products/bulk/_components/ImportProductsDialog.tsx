@@ -116,8 +116,8 @@ export function ImportProductsDialog({
             <Label htmlFor="csv_file">Archivo CSV</Label>
             <Input
               accept=".csv"
-              ref={fileInputRef}
               disabled={processing}
+              ref={fileInputRef}
               type="file"
               onChange={(e) => {
                 const file = e.target.files?.[0];

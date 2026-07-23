@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 // Hooks
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 import AppointmentDetails from "./AppointmentDetails";
 import BranchSelectorForm from "./BranchSelector";
@@ -75,7 +76,7 @@ export default function CreateAppointmentForm({
     ) {
       // Add a small delay to ensure state is ready
       const timer = setTimeout(() => {
-        console.log("⏰ Calling fetchAvailability after delay");
+        appLogger.info("⏰ Calling fetchAvailability after delay");
         availabilityHook.fetchAvailability(
           appointmentFormHook.formData.appointment_date,
           appointmentFormHook.formData.duration_minutes,
@@ -127,7 +128,7 @@ export default function CreateAppointmentForm({
         onSuccess();
       }
     } catch (error: unknown) {
-      console.error("Error saving appointment:", error);
+      appLogger.error("Error saving appointment:", error);
       toast.error(error.message || "Error al guardar cita");
     }
   };

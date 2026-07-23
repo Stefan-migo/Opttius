@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency } from "@/lib/utils";
 
-import { POSCart } from "./POSCart";
 import type { POSCartItem, POSCustomer, POSProduct } from "../types";
+import { POSCart } from "./POSCart";
 
 // Inline simple search input component to avoid prop mismatch
 function SimpleProductSearch({
@@ -20,11 +20,11 @@ function SimpleProductSearch({
   return (
     <div className="space-y-2">
       <input
+        className="w-full px-3 py-2 border rounded-md"
+        placeholder="Buscar productos..."
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Buscar productos..."
-        className="w-full px-3 py-2 border rounded-md"
       />
       <p className="text-sm text-muted-foreground">
         Use la búsqueda de productos en el panel principal
@@ -47,8 +47,8 @@ function SimpleCustomerSearch({
         <div className="p-3 border rounded-md">
           <p className="font-medium">{selectedCustomer.name}</p>
           <button
-            onClick={() => onCustomerSelect(null)}
             className="text-sm text-red-600"
+            onClick={() => onCustomerSelect(null)}
           >
             Quitar
           </button>
@@ -114,26 +114,26 @@ export function POSQuickSale({
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         {/* Tabs for Products/Customer */}
         <Tabs
+          className="flex-1 flex flex-col"
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as "products" | "customer")}
-          className="flex-1 flex flex-col"
         >
           <TabsList className="w-full justify-start">
-            <TabsTrigger value="products" className="gap-2">
+            <TabsTrigger className="gap-2" value="products">
               <span className="hidden sm:inline">Productos</span>
               <span className="sm:hidden">Prod</span>
             </TabsTrigger>
-            <TabsTrigger value="customer" className="gap-2">
+            <TabsTrigger className="gap-2" value="customer">
               <span className="hidden sm:inline">Cliente</span>
               <span className="sm:hidden">Cli</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="flex-1 mt-0">
+          <TabsContent className="flex-1 mt-0" value="products">
             <SimpleProductSearch onProductSelect={onAddToCart} />
           </TabsContent>
 
-          <TabsContent value="customer" className="flex-1 mt-0">
+          <TabsContent className="flex-1 mt-0" value="customer">
             <SimpleCustomerSearch
               selectedCustomer={customer}
               onCustomerSelect={onCustomerSelect}
@@ -151,9 +151,9 @@ export function POSQuickSale({
             subtotal={subtotal}
             taxAmount={taxAmount}
             total={total}
-            onUpdateQuantity={onUpdateQuantity}
-            onRemove={onRemoveFromCart}
             onClear={onClearCart}
+            onRemove={onRemoveFromCart}
+            onUpdateQuantity={onUpdateQuantity}
           />
         </Card>
 
@@ -204,8 +204,8 @@ export function POSQuickSale({
                       : "bg-muted text-muted-foreground cursor-not-allowed"
                   }
                 `}
-                onClick={onCheckout}
                 disabled={!canCheckout || isProcessing}
+                onClick={onCheckout}
               >
                 {isProcessing ? (
                   <>

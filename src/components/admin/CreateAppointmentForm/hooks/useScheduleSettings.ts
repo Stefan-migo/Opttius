@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface ScheduleSettings {
@@ -58,7 +59,7 @@ export function useScheduleSettings(
         setSettings(data.data ?? data.settings);
       }
     } catch (error) {
-      console.error("Error fetching schedule settings:", error);
+      appLogger.error("Error fetching schedule settings:", error);
     } finally {
       setLoading(false);
     }

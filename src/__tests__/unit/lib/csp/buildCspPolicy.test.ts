@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
 
 // buildCspPolicy will be exported from middleware.ts in the implementation
 import { buildCspPolicy } from "@/middleware";

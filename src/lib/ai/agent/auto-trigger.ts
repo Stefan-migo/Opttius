@@ -89,16 +89,16 @@ export async function checkTriggers(
     if (lowStockItems && lowStockItems.length > 0) {
       setCooldown("low_stock", orgId);
       for (const item of lowStockItems.slice(0, 3)) {
-        const name = (item as any).products?.name || "Producto";
-        const qty = (item as any).quantity ?? 0;
+        const name = (item as unknown).products?.name || "Producto";
+        const qty = (item as unknown).quantity ?? 0;
         events.push({
           type: "low_stock",
           severity: qty === 0 ? "critical" : "warning",
-          entity: { id: (item as any).product_id, name, type: "product" },
+          entity: { id: (item as unknown).product_id, name, type: "product" },
           action: {
             label: "Ver producto",
             type: "navigation",
-            payload: { path: `/admin/products/${(item as any).product_id}` },
+            payload: { path: `/admin/products/${(item as unknown).product_id}` },
           },
           message: `Stock bajo: "${name}" tiene ${qty} unidades.`,
         });

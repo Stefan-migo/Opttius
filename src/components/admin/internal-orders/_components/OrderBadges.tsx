@@ -1,5 +1,6 @@
-import { Badge } from "@/components/ui/badge";
 import { Clock, Package, Truck, X } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 
 export function getStatusBadge(status: string) {
   const statusConfig: Record<string, { variant: "secondary" | "default" | "destructive"; label: string; icon: React.ReactNode }> = {

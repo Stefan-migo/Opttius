@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
 
@@ -60,7 +61,7 @@ export default function OrderDetailPage() {
         toast.error(error.error || "Error al cargar la orden");
       }
     } catch (error: unknown) {
-      console.error("Error fetching order:", error);
+      appLogger.error("Error fetching order:", error);
       toast.error("Error al cargar la orden");
     } finally {
       setLoading(false);

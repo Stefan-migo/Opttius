@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 import {
+  dateISOOptionalSchema,
   emailOptionalSchema,
   phoneOptionalSchema,
   rutOptionalSchema,
-  dateISOOptionalSchema,
-  uuidOptionalSchema,
   searchSchema,
+  uuidOptionalSchema,
 } from "./base";
 
 export const customerBaseSchema = z

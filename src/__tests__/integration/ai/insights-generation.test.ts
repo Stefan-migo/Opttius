@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { generateInsights } from "@/lib/ai/insights/generator";
 import { LLMFactory } from "@/lib/ai/factory";
+import { generateInsights } from "@/lib/ai/insights/generator";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 import type { MaturityLevel } from "@/lib/ai/memory/organizational";
 

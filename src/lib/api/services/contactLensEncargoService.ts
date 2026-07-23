@@ -3,7 +3,6 @@
  * Handles CRUD operations for contact lens purchase orders (encargos)
  */
 
-import { createApiSuccessResponse } from "@/lib/api/response";
 
 export interface ContactLensEncargo {
   id: string;

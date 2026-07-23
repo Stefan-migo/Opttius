@@ -3,7 +3,6 @@
 import {
   AlertCircle,
   CheckCircle,
-  Factory,
   FileText,
   Package,
   Send,

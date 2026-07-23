@@ -8,6 +8,7 @@ import { type ThemeProviderProps } from "next-themes/dist/types";
 import * as React from "react";
 
 import { getTheme, ThemeId, themes } from "@/config/themes";
+import { appLogger } from '@/lib/logger';
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
@@ -68,8 +69,8 @@ function ThemeClassManager({ children }: { children: React.ReactNode }) {
 
     // Debug logging (only in development)
     if (process.env.NODE_ENV === "development") {
-      console.log("🎨 Theme applied:", theme);
-      console.log("🎨 Classes on <html>:", root.className);
+      appLogger.info("🎨 Theme applied:", theme);
+      appLogger.info("🎨 Classes on <html>:", root.className);
     }
   }, [theme, mounted]);
 

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { logAdminActivity } from "@/lib/api/middleware";
+import { appLogger } from '@/lib/logger';
 
 import { getToolByName } from "../tools";
 import type { ToolExecutionContext, ToolResult } from "../tools/types";
@@ -133,7 +134,7 @@ export async function createToolExecutor(
         resolvedOrgId = profile.organization_id;
       }
     } catch (e) {
-      console.error("Failed to resolve organization ID from profile:", e);
+      appLogger.error("Failed to resolve organization ID from profile:", e);
     }
   }
 
@@ -145,7 +146,7 @@ export async function createToolExecutor(
       currency = orgContext.organization.currency;
     }
   } catch (e) {
-    console.error("Failed to fetch currency for tool executor:", e);
+    appLogger.error("Failed to fetch currency for tool executor:", e);
   }
 
   const context: ToolExecutionContext = {
@@ -175,7 +176,7 @@ export async function executeToolCalls(
   for (const toolCall of toolCalls) {
     if (!toolCall.name || !toolCall.name.trim()) {
       const errorMsg = `Error: Nombre de herramienta inválido o vacío`;
-      console.error("Tool validation:", errorMsg);
+      appLogger.error("Tool validation:", errorMsg);
       messages.push({
         role: "tool",
         content: errorMsg,
@@ -187,25 +188,25 @@ export async function executeToolCalls(
 
     const toolName = toolCall.name.trim();
 
-    console.log(`[Agent] Executing tool: ${toolName}`);
-    console.log("=== TOOL EXECUTION DEBUG ===");
-    console.log("Tool name:", toolName);
-    console.log("Tool arguments:", JSON.stringify(toolCall.arguments, null, 2));
-    console.log("Arguments type:", typeof toolCall.arguments);
-    console.log("Arguments keys:", toolCall.arguments ? Object.keys(toolCall.arguments) : []);
-    console.log("Arguments values:", toolCall.arguments ? Object.values(toolCall.arguments) : []);
-    console.log("===========================");
+    appLogger.info(`[Agent] Executing tool: ${toolName}`);
+    appLogger.info("=== TOOL EXECUTION DEBUG ===");
+    appLogger.info("Tool name:", toolName);
+    appLogger.info("Tool arguments:", JSON.stringify(toolCall.arguments, null, 2));
+    appLogger.info("Arguments type:", typeof toolCall.arguments);
+    appLogger.info("Arguments keys:", toolCall.arguments ? Object.keys(toolCall.arguments) : []);
+    appLogger.info("Arguments values:", toolCall.arguments ? Object.values(toolCall.arguments) : []);
+    appLogger.info("===========================");
 
     const validation = executor.validateToolCall(toolName, toolCall.arguments);
     if (!validation.valid) {
       const errorMsg = `Error validando herramienta: ${validation.error}`;
-      console.error("Tool validation failed:", { toolName, arguments: toolCall.arguments, error: validation.error });
+      appLogger.error("Tool validation failed:", { toolName, arguments: toolCall.arguments, error: validation.error });
       messages.push({ role: "tool", content: errorMsg, toolCallId: toolCall.id, name: toolName });
       continue;
     }
 
     if (executor.requiresConfirmation(toolName) && config.requireConfirmationForDestructiveActions) {
-      console.log(`[Agent] Tool ${toolName} requires confirmation, executing anyway`);
+      appLogger.info(`[Agent] Tool ${toolName} requires confirmation, executing anyway`);
     }
 
     // ponytail: simple retry-once — exponential backoff if retries > 1 needed
@@ -221,20 +222,20 @@ export async function executeToolCalls(
             toolCallId: toolCall.id,
             name: toolName,
           });
-          console.log(`[Agent] Tool ${toolName} completed successfully`);
+          appLogger.info(`[Agent] Tool ${toolName} completed successfully`);
           break;
         }
 
         lastError = result.error || "Unknown error";
-        console.error(`[Agent] Tool ${toolName} failed (attempt ${attempt + 1}):`, lastError);
+        appLogger.error(`[Agent] Tool ${toolName} failed (attempt ${attempt + 1}):`, lastError);
 
         if (attempt === 0) {
-          console.log(`[Agent] Retrying tool ${toolName}...`);
+          appLogger.info(`[Agent] Retrying tool ${toolName}...`);
           continue;
         }
       } catch (innerError: unknown) {
         lastError = (innerError as Error).message || "Error desconocido";
-        console.error(`[Agent] Tool ${toolName} threw (attempt ${attempt + 1}):`, lastError);
+        appLogger.error(`[Agent] Tool ${toolName} threw (attempt ${attempt + 1}):`, lastError);
 
         if (attempt === 0) {
           continue;

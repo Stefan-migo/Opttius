@@ -5,7 +5,7 @@ import { handleApiError } from "@/lib/api/services/errorService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
-import type { AgreementUsage, CreateCustomerData, CreatePrescriptionData, Customer, CustomerAnalytics, CustomerListResponse, CustomerSearchParams, LensPurchase, Prescription, UpdateCustomerData } from "./customerTypes";
+import type { CreateCustomerData, CreatePrescriptionData, Customer, CustomerListResponse, CustomerSearchParams, Prescription, UpdateCustomerData } from "./customerTypes";
 
 const client = new ApiClient();
 

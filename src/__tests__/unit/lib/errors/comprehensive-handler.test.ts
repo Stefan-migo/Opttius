@@ -4,10 +4,10 @@
  * @module __tests__/unit/lib/errors/comprehensive-handler.test
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
-import { appLogger } from "@/lib/logger";
 import * as Errors from "@/lib/errors/comprehensive-handler";
+import { appLogger } from "@/lib/logger";
 
 // Mock logger
 vi.mock("@/lib/logger", () => ({

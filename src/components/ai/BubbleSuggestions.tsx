@@ -20,9 +20,9 @@ export function BubbleSuggestions({ suggestions }: BubbleSuggestionsProps) {
     <div className="flex flex-wrap gap-2 px-4 pb-3">
       {suggestions.map((s, i) => (
         <button
+          className="rounded-full border border-epoch-accent/30 bg-epoch-accent/5 px-3 py-1 text-xs font-medium text-epoch-primary transition-colors hover:bg-epoch-accent/15"
           key={i}
           type="button"
-          className="rounded-full border border-epoch-accent/30 bg-epoch-accent/5 px-3 py-1 text-xs font-medium text-epoch-primary transition-colors hover:bg-epoch-accent/15"
           onClick={s.onClick}
         >
           {s.label}

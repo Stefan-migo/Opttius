@@ -7,11 +7,11 @@ import { NotFoundError, ValidationError } from "@/lib/api/errors";
 import { appLogger as logger } from "@/lib/logger";
 import { Database } from "@/types/supabase";
 
-import { ProductInsert, ProductListParams, ProductListResponse, ProductServiceContext, ProductUpdate, ProductWithRelations } from "./types";
 import {
   applyProductFilters, buildProductSelectString, ensureUniqueSlug, filterInStockProducts,
   filterLowStockProducts, filterOutOfStockProducts, filterProductsByBranch, generateSlug, validateSortColumn,
 } from "./_helpers";
+import { ProductInsert, ProductListParams, ProductListResponse, ProductServiceContext, ProductUpdate, ProductWithRelations } from "./types";
 
 export class ProductsService {
   private supabase: SupabaseClient<Database>;

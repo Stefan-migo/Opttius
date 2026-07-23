@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { searchCustomers } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 import type { POSCustomer } from "../types";
 
@@ -79,7 +80,7 @@ export function usePOSCustomer({
         setResults(mappedResults);
         setSelectedIndex(-1);
       } catch (error) {
-        console.error("Error searching customers:", error);
+        appLogger.error("Error searching customers:", error);
         setResults([]);
       } finally {
         setLoading(false);

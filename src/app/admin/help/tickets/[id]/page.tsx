@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger } from '@/lib/logger';
 
 type MessageForm = z.input<typeof createSaasSupportMessageSchema>;
 
@@ -154,7 +155,7 @@ export default function HelpTicketDetailPage() {
         setMessages(data.messages || []);
       }
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      appLogger.error("Error fetching messages:", err);
     }
   };
 

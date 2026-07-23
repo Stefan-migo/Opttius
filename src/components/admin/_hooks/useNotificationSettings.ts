@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface NotificationSetting {
   id: string;
   notification_type: string;
@@ -63,7 +66,7 @@ export function useNotificationSettings({
       setSettings(data.settings || []);
       setHasChanges(false);
     } catch (error) {
-      console.error("Error fetching notification settings:", error);
+      appLogger.error("Error fetching notification settings:", error);
       toast.error("Error al cargar la configuración de notificaciones");
       setSettings([]);
     } finally {
@@ -116,7 +119,7 @@ export function useNotificationSettings({
       toast.success("Configuración guardada exitosamente");
       setHasChanges(false);
     } catch (error) {
-      console.error("Error saving notification settings:", error);
+      appLogger.error("Error saving notification settings:", error);
       toast.error("Error al guardar la configuración de notificaciones");
     } finally {
       setSaving(false);
@@ -141,7 +144,7 @@ export function useNotificationSettings({
         setMigrationSQL(data.migrationSQL || data.sql || "No SQL generated");
       }
     } catch (err) {
-      console.error("Error fetching migration SQL:", err);
+      appLogger.error("Error fetching migration SQL:", err);
     } finally {
       setLoadingSQL(false);
     }

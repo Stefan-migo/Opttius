@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
+
 import { buildPrintContent } from "./printTemplate";
 import type { DeliveryError, LabInfo, StatusHistory, WorkOrder } from "./types";
 
@@ -70,7 +72,7 @@ export function useWorkOrder() {
         });
       }
     } catch (error) {
-      console.error("Error fetching work order:", error);
+      appLogger.error("Error fetching work order:", error);
       toast.error("Error al cargar el trabajo");
     } finally {
       setLoading(false);
@@ -115,7 +117,7 @@ export function useWorkOrder() {
       setStatusNotes("");
       fetchWorkOrder();
     } catch (error: unknown) {
-      console.error("Error updating status:", error);
+      appLogger.error("Error updating status:", error);
       toast.error(
         (error as { message?: string }).message || "Error al actualizar estado",
       );
@@ -161,7 +163,7 @@ export function useWorkOrder() {
         await fetchWorkOrder();
       }
     } catch (error: unknown) {
-      console.error("Error delivering work order:", error);
+      appLogger.error("Error delivering work order:", error);
       toast.error(
         (error as { message?: string }).message || "Error al entregar trabajo",
       );
@@ -186,7 +188,7 @@ export function useWorkOrder() {
       toast.success("Trabajo eliminado exitosamente");
       router.push("/admin/work-orders");
     } catch (error: unknown) {
-      console.error("Error deleting work order:", error);
+      appLogger.error("Error deleting work order:", error);
       toast.error(
         (error as { message?: string }).message || "Error al eliminar trabajo",
       );

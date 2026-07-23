@@ -1,5 +1,8 @@
 import { useCallback, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface CalculateLensPriceParams {
   lens_family_id: string;
   sphere: number;
@@ -55,7 +58,7 @@ export function useLensPriceCalculation() {
         setError(errorMessage);
         // Don't show toast for missing matrices (user can manually enter price)
         if (!err.message?.includes("No se encontró")) {
-          console.warn("Lens price calculation error:", errorMessage);
+          appLogger.warn("Lens price calculation error:", errorMessage);
         }
         return null;
       } finally {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type BlurTextProps = {
   text?: string;
@@ -79,9 +79,6 @@ const BlurText: React.FC<BlurTextProps> = ({
         {elements.map((segment, index) => (
           <span
             key={index}
-            onAnimationEnd={
-              index === elements.length - 1 ? onAnimationComplete : undefined
-            }
             style={{
               display: "inline-block",
               willChange: "transform, filter, opacity",
@@ -93,6 +90,9 @@ const BlurText: React.FC<BlurTextProps> = ({
               letterSpacing: "inherit",
               animationDelay: `${(index * delay) / 1000}s`,
             }}
+            onAnimationEnd={
+              index === elements.length - 1 ? onAnimationComplete : undefined
+            }
           >
             {segment === " " ? "\u00A0" : segment}
             {animateBy === "words" && index < elements.length - 1 && "\u00A0"}

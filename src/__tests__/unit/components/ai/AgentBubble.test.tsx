@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { AgentContextProvider } from "@/components/ai/AgentContextProvider";
 import { AgentBubble } from "@/components/ai/AgentBubble";
+import { AgentContextProvider } from "@/components/ai/AgentContextProvider";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({

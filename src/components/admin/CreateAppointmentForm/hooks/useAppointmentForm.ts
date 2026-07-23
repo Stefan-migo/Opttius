@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface AppointmentFormData {
@@ -261,7 +262,7 @@ export function useAppointmentForm({
 
       return true;
     } catch (error: unknown) {
-      console.error("Error saving appointment:", error);
+      appLogger.error("Error saving appointment:", error);
       throw error;
     } finally {
       setSaving(false);

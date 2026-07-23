@@ -2,12 +2,13 @@
  * SaaS subscription email templates — welcome, trial, payments
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { appLogger } from '@/lib/logger';
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { sendEmail } from "../client";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -17,6 +18,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 async function getOrganizationInfo(organizationId: string, supabase?: SupabaseClient) {
@@ -29,7 +31,7 @@ async function getOrganizationInfo(organizationId: string, supabase?: SupabaseCl
       .single();
     return org;
   } catch (error) {
-    console.error("Error fetching organization info:", error);
+    appLogger.error("Error fetching organization info:", error);
     return null;
   }
 }
@@ -93,7 +95,7 @@ export async function sendSaaSWelcome(
     const template = await loadEmailTemplate("saas_welcome", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_welcome template found");
+      appLogger.warn("⚠️ No saas_welcome template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -127,7 +129,7 @@ export async function sendSaaSWelcome(
 
     return result;
   } catch (error) {
-    console.error("Error sending SaaS welcome:", error);
+    appLogger.error("Error sending SaaS welcome:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -190,7 +192,7 @@ export async function sendSaaSTrialEnding(
 
     return result;
   } catch (error) {
-    console.error("Error sending trial ending:", error);
+    appLogger.error("Error sending trial ending:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -258,7 +260,7 @@ export async function sendSaaSSubscriptionSuccess(
 
     return result;
   } catch (error) {
-    console.error("Error sending subscription success:", error);
+    appLogger.error("Error sending subscription success:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -274,7 +276,7 @@ export async function sendSaaSPaymentFailed(
     const template = await loadEmailTemplate("saas_payment_failed", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_payment_failed template found");
+      appLogger.warn("⚠️ No saas_payment_failed template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -314,7 +316,7 @@ export async function sendSaaSPaymentFailed(
 
     return result;
   } catch (error) {
-    console.error("Error sending payment failed:", error);
+    appLogger.error("Error sending payment failed:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -330,7 +332,7 @@ export async function sendSaaSPaymentReminder(
     const template = await loadEmailTemplate("saas_payment_reminder", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_payment_reminder template found");
+      appLogger.warn("⚠️ No saas_payment_reminder template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -369,7 +371,7 @@ export async function sendSaaSPaymentReminder(
 
     return result;
   } catch (error) {
-    console.error("Error sending payment reminder:", error);
+    appLogger.error("Error sending payment reminder:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

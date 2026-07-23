@@ -61,7 +61,7 @@ vi.mock("mercadopago", () => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getMocks(): any {
-  return (globalThis as any).__mpMocks__;
+  return (globalThis as unknown).__mpMocks__;
 }
 
 describe("MercadoPagoGateway", () => {

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
+import { appLogger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/client";
 
 export interface AdminNotification {
@@ -54,7 +55,7 @@ export function useNotificationDropdown() {
       setUnreadCount(data.unreadCount || 0);
     } catch (error) {
       if (error instanceof Error && !error.message.includes("401")) {
-        console.error("Error fetching notifications:", error);
+        appLogger.error("Error fetching notifications:", error);
       }
     }
   };
@@ -106,7 +107,7 @@ export function useNotificationDropdown() {
         router.push(actionUrl);
       }
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      appLogger.error("Error marking notification as read:", error);
       toast.error("Error al marcar la notificación");
     }
   };
@@ -125,7 +126,7 @@ export function useNotificationDropdown() {
       setUnreadCount(0);
       toast.success("Todas las notificaciones marcadas como leídas");
     } catch (error) {
-      console.error("Error marking all as read:", error);
+      appLogger.error("Error marking all as read:", error);
       toast.error("Error al marcar todas como leídas");
     } finally {
       setLoading(false);

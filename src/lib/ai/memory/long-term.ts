@@ -5,8 +5,10 @@
  * These facts persist across sessions and help personalize the agent's responses.
  */
 
+
+import { appLogger } from '@/lib/logger';
+
 import { getEmbeddingFactory } from "../embeddings";
-import { appLogger } from "@/lib/logger";
 import type {
   LongTermMemoryConfig,
   MemoryContext,
@@ -29,7 +31,7 @@ export class LongTermMemory {
       const factory = getEmbeddingFactory();
       const embeddingResult = await factory.embed(fact.content);
 
-      const insertData: any = {
+      const insertData: unknown = {
         user_id: fact.userId,
         fact_type: fact.factType,
         category: fact.category || null,
@@ -95,7 +97,7 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: any) => ({
+      return (data || []).map((row: unknown) => ({
         id: row.id,
         userId: this.context.userId,
         factType: row.fact_type,
@@ -141,7 +143,7 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: any) => ({
+      return (data || []).map((row: unknown) => ({
         id: row.id,
         userId: row.user_id,
         factType: row.fact_type,
@@ -180,7 +182,7 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: any) => ({
+      return (data || []).map((row: unknown) => ({
         id: row.id,
         userId: row.user_id,
         factType: row.fact_type,

@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 export interface ContactLensFamilyOption {
@@ -81,7 +82,7 @@ export function ContactLensFamilyCombobox({
           setFetchedFamilies(Array.isArray(data) ? data : []);
         }
       } catch (err) {
-        console.error("Error fetching contact lens families:", err);
+        appLogger.error("Error fetching contact lens families:", err);
         setFetchedFamilies([]);
       } finally {
         setFetchLoading(false);

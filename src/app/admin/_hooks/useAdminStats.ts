@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 export interface AdminStats {
@@ -83,10 +84,10 @@ export function useAdminStats({ adminState }: UseAdminStatsParams) {
                     t.status !== "resolved" && t.status !== "closed",
                 ).length;
               } else if (ticketsResponse.status === 403) {
-                console.debug("User doesn't have access to tickets");
+                appLogger.debug("User doesn't have access to tickets");
               }
             } catch (error) {
-              console.debug("Error fetching open tickets count:", error);
+              appLogger.debug("Error fetching open tickets count:", error);
             }
           }
 
@@ -104,7 +105,7 @@ export function useAdminStats({ adminState }: UseAdminStatsParams) {
         }
       } catch (error) {
         if (error instanceof Error && !error.message.includes("401")) {
-          console.error("Error fetching stats:", error);
+          appLogger.error("Error fetching stats:", error);
         }
       }
     };

@@ -1,10 +1,11 @@
 /**
  * SaaS admin notification email templates — terms, maintenance, usage, features
  */
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -14,6 +15,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 export async function sendSaaSTermsUpdate(
@@ -27,7 +29,7 @@ export async function sendSaaSTermsUpdate(
     const template = await loadEmailTemplate("saas_terms_update", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_terms_update template found");
+      appLogger.warn("⚠️ No saas_terms_update template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -58,7 +60,7 @@ export async function sendSaaSTermsUpdate(
 
     return result;
   } catch (error) {
-    console.error("Error sending terms update:", error);
+    appLogger.error("Error sending terms update:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -78,7 +80,7 @@ export async function sendSaaSMaintenanceNotice(
     const template = await loadEmailTemplate("saas_maintenance", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_maintenance template found");
+      appLogger.warn("⚠️ No saas_maintenance template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -110,7 +112,7 @@ export async function sendSaaSMaintenanceNotice(
 
     return result;
   } catch (error) {
-    console.error("Error sending maintenance notice:", error);
+    appLogger.error("Error sending maintenance notice:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -132,7 +134,7 @@ export async function sendSaaSUsageAlert(
     const template = await loadEmailTemplate("saas_usage_alert", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_usage_alert template found");
+      appLogger.warn("⚠️ No saas_usage_alert template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -175,7 +177,7 @@ export async function sendSaaSUsageAlert(
 
     return result;
   } catch (error) {
-    console.error("Error sending usage alert:", error);
+    appLogger.error("Error sending usage alert:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -196,7 +198,7 @@ export async function sendSaaSFeatureAnnouncement(
     const template = await loadEmailTemplate("saas_feature_announcement", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_feature_announcement template found");
+      appLogger.warn("⚠️ No saas_feature_announcement template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -229,7 +231,7 @@ export async function sendSaaSFeatureAnnouncement(
 
     return result;
   } catch (error) {
-    console.error("Error sending feature announcement:", error);
+    appLogger.error("Error sending feature announcement:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

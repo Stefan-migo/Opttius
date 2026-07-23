@@ -77,7 +77,7 @@ export function SEOManagerToolsTab({ baseUrl }: Props) {
             { label: "Twitter Card Validator", desc: "Prueba tus Twitter Cards", href: "https://cards-dev.twitter.com/validator" },
             { label: "Google Rich Results Test", desc: "Verifica datos estructurados", href: "https://search.google.com/test/rich-results" },
           ].map((item) => (
-            <div key={item.href} className="flex items-center justify-between p-3 border rounded-lg bg-admin-bg-tertiary">
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-admin-bg-tertiary" key={item.href}>
               <div>
                 <Label className="font-semibold">{item.label}</Label>
                 <p className="text-xs text-tierra-media">{item.desc}</p>

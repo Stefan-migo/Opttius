@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, Phone, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,7 +9,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,11 +67,11 @@ export default function SignupPage() {
         return;
       }
       setTimeout(() => router.push("/onboarding/choice"), 1500);
-    } catch (err: any) { setError(err.message || "An error occurred during signup"); }
+    } catch (err: unknown) { setError(err.message || "An error occurred during signup"); }
   };
 
   if (!configChecked) return <div className="min-h-screen flex items-center justify-center bg-epoch-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-epoch-primary" /></div>;
-  if (isSuccess) return <SignupSuccessView requiresEmailConfirmation={requiresEmailConfirmation} onGoToLogin={() => router.push("/login")} onContinue={() => router.push("/onboarding/choice")} />;
+  if (isSuccess) return <SignupSuccessView requiresEmailConfirmation={requiresEmailConfirmation} onContinue={() => router.push("/onboarding/choice")} onGoToLogin={() => router.push("/login")} />;
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-epoch-background overflow-hidden relative">
@@ -89,15 +87,15 @@ export default function SignupPage() {
               <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
                 {error && <Alert className="bg-red-500/10 border-red-500/20 rounded-xl" variant="destructive"><AlertDescription className="text-red-950 font-serif italic text-xs">{error}</AlertDescription></Alert>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <Field icon={<User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Nombre" error={errors.firstName}>
+                  <Field error={errors.firstName} icon={<User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Nombre">
                     <Input placeholder="Alejandro" {...register("firstName")} className={cn("h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner", errors.firstName && "border-red-900")} disabled={loading} />
                   </Field>
-                  <Field icon={<User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Apellido" error={errors.lastName}>
+                  <Field error={errors.lastName} icon={<User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Apellido">
                     <Input placeholder="Valdivia" {...register("lastName")} className={cn("h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner", errors.lastName && "border-red-900")} disabled={loading} />
                   </Field>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <Field icon={<Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Email Corporativo" error={errors.email}>
+                  <Field error={errors.email} icon={<Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Email Corporativo">
                     <Input placeholder="directorio@optica.com" type="email" {...register("email")} className={cn("h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner", errors.email && "border-red-900")} disabled={loading} />
                   </Field>
                   <Field icon={<Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />} label="Teléfono Móvil">
@@ -105,8 +103,8 @@ export default function SignupPage() {
                   </Field>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <PasswordField label="Contraseña" error={errors.password} show={showPassword} onToggle={() => setShowPassword(!showPassword)} register={register("password")} disabled={loading} />
-                  <PasswordField label="Confirmar contraseña" error={errors.confirmPassword} show={showConfirmPassword} onToggle={() => setShowConfirmPassword(!showConfirmPassword)} register={register("confirmPassword")} disabled={loading} />
+                  <PasswordField disabled={loading} error={errors.password} label="Contraseña" register={register("password")} show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
+                  <PasswordField disabled={loading} error={errors.confirmPassword} label="Confirmar contraseña" register={register("confirmPassword")} show={showConfirmPassword} onToggle={() => setShowConfirmPassword(!showConfirmPassword)} />
                 </div>
                 <Button className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] transition-all shadow-xl" disabled={loading} size="lg" type="submit">
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span className="flex items-center gap-3">Crear cuenta<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-3" /></span>}
@@ -125,11 +123,11 @@ export default function SignupPage() {
   );
 }
 
-function Field({ children, label, error, icon }: { children: React.ReactNode; label: string; error?: any; icon?: React.ReactNode }) {
+function Field({ children, label, error, icon }: { children: React.ReactNode; label: string; error?: unknown; icon?: React.ReactNode }) {
   return (<div className="space-y-3"><Label className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest ml-1">{label}</Label><div className="relative group">{children}{icon && <div className="pointer-events-none">{icon}</div>}</div>{error && <p className="text-xs text-red-500 ml-1">{error.message}</p>}</div>);
 }
 
-function PasswordField({ label, error, show, onToggle, register, disabled }: { label: string; error?: any; show: boolean; onToggle: () => void; register: any; disabled?: boolean }) {
+function PasswordField({ label, error, show, onToggle, register, disabled }: { label: string; error?: unknown; show: boolean; onToggle: () => void; register: unknown; disabled?: boolean }) {
   return (<div className="space-y-3"><Label className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest ml-1">{label}</Label><div className="relative group">
     <Input placeholder="••••••••" type={show ? "text" : "password"} {...register} className={cn("h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner", error && "border-red-900")} disabled={disabled} />
     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />

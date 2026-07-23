@@ -12,7 +12,7 @@ import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: any) {
+async function getAdminAuth(supabase: unknown) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new AuthenticationError("No autorizado");
   const { data: isAdmin } = (await supabase.rpc("is_admin", { user_id: user.id } as IsAdminParams)) as { data: IsAdminResult | null };
@@ -24,7 +24,7 @@ export async function getQuote(request: NextRequest, id: string) {
   const supabase = await createClient();
   const user = await getAdminAuth(supabase);
 
-  const adminUser = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+  const adminUser = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
   const userOrganizationId = adminUser?.data?.organization_id ?? null;
   const branchContext = await getBranchContext(request, user.id);
   const supabaseServiceRole = createServiceRoleClient();
@@ -34,7 +34,7 @@ export async function getQuote(request: NextRequest, id: string) {
 
   // Check exists
   const { data: quoteCheck, error: checkError } = await supabaseServiceRole
-    .from("quotes").select("id, branch_id, organization_id, quote_number").eq("id", id).single() as any;
+    .from("quotes").select("id, branch_id, organization_id, quote_number").eq("id", id).single() as unknown;
   if (checkError || !quoteCheck) {
     return NextResponse.json({ error: "Quote not found", details: checkError?.message || "Quote does not exist" }, { status: 404 });
   }
@@ -47,38 +47,38 @@ export async function getQuote(request: NextRequest, id: string) {
 
   // Fetch full quote
   const { data: quoteData, error: quoteError } = await supabaseServiceRole
-    .from("quotes").select("*").eq("id", id).single() as any;
+    .from("quotes").select("*").eq("id", id).single() as unknown;
   if (quoteError || !quoteData) {
     return createApiErrorResponse(new Error(quoteError?.message || "Failed to fetch quote"));
   }
 
   // Fetch relations
-  const relations: Record<string, any> = {};
+  const relations: Record<string, unknown> = {};
   if (quoteData.customer_id) {
     const { data: customerData } = await supabaseServiceRole
-      .from("customers").select("id, first_name, last_name, email, phone, rut").eq("id", quoteData.customer_id) as any;
+      .from("customers").select("id, first_name, last_name, email, phone, rut").eq("id", quoteData.customer_id) as unknown;
     relations.customer = (customerData && customerData.length > 0) ? customerData[0] : null;
   } else {
     relations.customer = null;
   }
   if (quoteData.prescription_id) {
-    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("*").eq("id", quoteData.prescription_id).single() as any;
+    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("*").eq("id", quoteData.prescription_id).single() as unknown;
     relations.prescription = prescription || null;
   }
   if (quoteData.frame_product_id) {
-    const { data: frameProduct } = await supabaseServiceRole.from("products").select("id, name, price, frame_brand, frame_model").eq("id", quoteData.frame_product_id).single() as any;
+    const { data: frameProduct } = await supabaseServiceRole.from("products").select("id, name, price, frame_brand, frame_model").eq("id", quoteData.frame_product_id).single() as unknown;
     relations.frame_product = frameProduct || null;
   }
   if (quoteData.far_lens_family_id) {
-    const { data: farLensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.far_lens_family_id).single() as any;
+    const { data: farLensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.far_lens_family_id).single() as unknown;
     relations.far_lens_family = farLensFamily || null;
   }
   if (quoteData.near_lens_family_id) {
-    const { data: nearLensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.near_lens_family_id).single() as any;
+    const { data: nearLensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.near_lens_family_id).single() as unknown;
     relations.near_lens_family = nearLensFamily || null;
   }
   if (quoteData.lens_family_id) {
-    const { data: lensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.lens_family_id).single() as any;
+    const { data: lensFamily } = await supabaseServiceRole.from("lens_families").select("id, name").eq("id", quoteData.lens_family_id).single() as unknown;
     relations.lens_family = lensFamily || null;
   }
 
@@ -102,10 +102,10 @@ export async function updateQuote(request: NextRequest, id: string) {
   const branchContext = await getBranchContext(request, user.id);
 
   // Verify access
-  const applyBranchFilter = (query: any) => addBranchFilter(query, branchContext.branchId, branchContext.isSuperAdmin, branchContext.organizationId);
+  const applyBranchFilter = (query: unknown) => addBranchFilter(query, branchContext.branchId, branchContext.isSuperAdmin, branchContext.organizationId);
   const { data: existingQuote, error: fetchError } = await applyBranchFilter(
-    supabase.from("quotes").select("id, branch_id, customer_id") as any,
-  ).eq("id", id).single() as any;
+    supabase.from("quotes").select("id, branch_id, customer_id") as unknown,
+  ).eq("id", id).single() as unknown;
 
   if (fetchError || !existingQuote) {
     return NextResponse.json({ error: "Presupuesto no encontrado o sin acceso" }, { status: 404 });
@@ -116,14 +116,14 @@ export async function updateQuote(request: NextRequest, id: string) {
   // Validate prescription belongs to customer
   const prescriptionId = body.prescription_id || null;
   if (prescriptionId) {
-    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("customer_id").eq("id", prescriptionId).single() as any;
+    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("customer_id").eq("id", prescriptionId).single() as unknown;
     if (prescription && existingQuote.customer_id && prescription.customer_id !== existingQuote.customer_id) {
       return NextResponse.json({ error: "La receta no pertenece al cliente del presupuesto" }, { status: 400 });
     }
   }
 
   // Build update data
-  const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+  const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
   const fields = [
     "frame_name", "frame_brand", "frame_model", "frame_color", "frame_size", "frame_sku",
     "frame_price", "lens_type", "lens_material", "lens_index", "lens_treatments", "lens_tint_color",
@@ -150,7 +150,7 @@ export async function updateQuote(request: NextRequest, id: string) {
   const { data: updatedQuote, error } = await supabaseServiceRole
     .from("quotes").update(updateData).eq("id", id)
     .select(`*, customer:customers!quotes_customer_id_fkey(id, first_name, last_name, email, phone), prescription:prescriptions!quotes_prescription_id_fkey(*)`)
-    .single() as any;
+    .single() as unknown;
 
   if (error) {
     logger.error("Error updating quote", error);
@@ -161,7 +161,7 @@ export async function updateQuote(request: NextRequest, id: string) {
   if (body.status === "sent" && updatedQuote.status === "sent" && (updatedQuote.customer?.email || updatedQuote.guest_email)) {
     (async () => {
       try {
-        const { data: branch } = await supabaseServiceRole.from("branches").select("name").eq("id", updatedQuote.branch_id).single() as any;
+        const { data: branch } = await supabaseServiceRole.from("branches").select("name").eq("id", updatedQuote.branch_id).single() as unknown;
         await sendQuoteSent({
           customer_name: `${updatedQuote.customer?.first_name || ""} ${updatedQuote.customer?.last_name || ""}`.trim() || "Cliente",
           customer_email: updatedQuote.customer?.email || updatedQuote.guest_email,
@@ -186,14 +186,14 @@ export async function deleteQuote(request: NextRequest, id: string) {
   await getAdminAuth(supabase);
 
   const { data: quote, error: fetchError } = await supabaseServiceRole
-    .from("quotes").select("id, status, converted_to_work_order_id").eq("id", id).single() as any;
+    .from("quotes").select("id, status, converted_to_work_order_id").eq("id", id).single() as unknown;
   if (fetchError || !quote) return NextResponse.json({ error: "Quote not found" }, { status: 404 });
 
   if (quote.status === "converted_to_work" || quote.converted_to_work_order_id) {
     return NextResponse.json({ error: "No se puede eliminar un presupuesto que ha sido convertido a trabajo" }, { status: 400 });
   }
 
-  const { error: deleteError } = await supabaseServiceRole.from("quotes").delete().eq("id", id) as any;
+  const { error: deleteError } = await supabaseServiceRole.from("quotes").delete().eq("id", id) as unknown;
   if (deleteError) {
     logger.error("Error deleting quote", deleteError);
     return NextResponse.json({ error: "Failed to delete quote" }, { status: 500 });
@@ -221,16 +221,16 @@ export async function listQuotes(request: NextRequest) {
   const branchContext = await getBranchContext(request, user.id);
   let effectiveBranchId = branchContext.branchId;
   if (fieldOperationId) {
-    const { data: fieldOp } = await supabaseServiceRole.from("field_operations").select("id, branch_id").eq("id", fieldOperationId).single() as any;
+    const { data: fieldOp } = await supabaseServiceRole.from("field_operations").select("id, branch_id").eq("id", fieldOperationId).single() as unknown;
     if (fieldOp) effectiveBranchId = fieldOp.branch_id;
   }
 
-  const { data: adminUser } = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+  const { data: adminUser } = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
   const userOrganizationId = adminUser?.organization_id;
   const forCustomerQuotesOnly = Boolean(customerId || customerRut || customerEmail);
 
   // Build branch filter
-  const applyBranchFilter = (query: any) => {
+  const applyBranchFilter = (query: unknown) => {
     if (userOrganizationId && !branchContext.isSuperAdmin) {
       if (forCustomerQuotesOnly) {
         query = query.or(`organization_id.eq.${userOrganizationId},organization_id.is.null`);
@@ -264,12 +264,12 @@ export async function listQuotes(request: NextRequest) {
     if (userOrganizationId && (customerRut || customerEmail)) {
       const normalizedRut = customerRut ? customerRut.toLowerCase().replace(/[^0-9k]/g, "") : "";
       const normalizedEmail = customerEmail?.toLowerCase() || "";
-      const { data: customersInOrg } = await supabaseServiceRole.from("customers").select("id, rut, email").eq("organization_id", userOrganizationId).limit(1000) as any;
-      const matchingIds = (customersInOrg || []).filter((c: any) => {
+      const { data: customersInOrg } = await supabaseServiceRole.from("customers").select("id, rut, email").eq("organization_id", userOrganizationId).limit(1000) as unknown;
+      const matchingIds = (customersInOrg || []).filter((c: unknown) => {
         const rutMatches = normalizedRut && c.rut && c.rut.toLowerCase().replace(/[^0-9k]/g, "") === normalizedRut;
         const emailMatches = normalizedEmail && c.email && c.email.toLowerCase() === normalizedEmail;
         return rutMatches || emailMatches;
-      }).map((c: any) => c.id);
+      }).map((c: unknown) => c.id);
       if (matchingIds.length > 0) query = query.in("customer_id", matchingIds);
       else if (customerId) query = query.eq("customer_id", customerId);
       else query = query.eq("customer_id", "00000000-0000-0000-0000-000000000000");
@@ -279,27 +279,27 @@ export async function listQuotes(request: NextRequest) {
   }
 
   const from = (page - 1) * limit;
-  const { data: quotes, error, count } = await query.range(from, from + limit - 1) as any;
+  const { data: quotes, error, count } = await query.range(from, from + limit - 1) as unknown;
   if (error) throw new Error(`Failed to fetch quotes: ${error.message}`);
 
   // Fetch related data
   let quotesWithRelations = quotes || [];
   if (quotesWithRelations.length > 0) {
-    const customerIds = [...new Set(quotesWithRelations.map((q: any) => q.customer_id).filter(Boolean))];
-    const prescriptionIds = [...new Set(quotesWithRelations.map((q: any) => q.prescription_id).filter(Boolean))];
-    const productIds = [...new Set(quotesWithRelations.map((q: any) => q.frame_product_id).filter(Boolean))];
+    const customerIds = [...new Set(quotesWithRelations.map((q: unknown) => q.customer_id).filter(Boolean))];
+    const prescriptionIds = [...new Set(quotesWithRelations.map((q: unknown) => q.prescription_id).filter(Boolean))];
+    const productIds = [...new Set(quotesWithRelations.map((q: unknown) => q.frame_product_id).filter(Boolean))];
 
     const [{ data: customers }, { data: prescriptions }, { data: products }] = await Promise.all([
       customerIds.length > 0 ? supabase.from("customers").select("id, first_name, last_name, email, phone, rut").in("id", customerIds) : Promise.resolve({ data: [] }),
       prescriptionIds.length > 0 ? supabase.from("prescriptions").select("*").in("id", prescriptionIds) : Promise.resolve({ data: [] }),
       productIds.length > 0 ? supabase.from("products").select("id, name, price, frame_brand, frame_model").in("id", productIds) : Promise.resolve({ data: [] }),
-    ]) as any;
+    ]) as unknown;
 
-    quotesWithRelations = quotesWithRelations.map((quote: any) => ({
+    quotesWithRelations = quotesWithRelations.map((quote: unknown) => ({
       ...quote,
-      customer: customers?.find((c: any) => c.id === quote.customer_id) || null,
-      prescription: prescriptions?.find((p: any) => p.id === quote.prescription_id) || null,
-      frame_product: products?.find((p: any) => p.id === quote.frame_product_id) || null,
+      customer: customers?.find((c: unknown) => c.id === quote.customer_id) || null,
+      prescription: prescriptions?.find((p: unknown) => p.id === quote.prescription_id) || null,
+      frame_product: products?.find((p: unknown) => p.id === quote.frame_product_id) || null,
       original_status: quote.original_status || (quote.status === "converted_to_work" ? "accepted" : quote.status),
     }));
   }
@@ -321,10 +321,10 @@ export async function createQuote(request: NextRequest) {
   const { normalizeRUT } = await import("@/lib/utils/rut");
   const { NotificationService } = await import("@/lib/notifications/notification-service");
 
-  let validatedBody: any;
+  let validatedBody: unknown;
   try {
     validatedBody = await parseAndValidateBody(request, createQuoteSchema);
-  } catch (error: any) {
+  } catch (error: unknown) {
     const { ValidationError } = await import("@/lib/api/errors");
     if (error instanceof ValidationError) return (await import("@/lib/api/validation/zod-helpers")).validationErrorResponse(error);
     throw error;
@@ -332,37 +332,37 @@ export async function createQuote(request: NextRequest) {
 
   // Validate prescription belongs to customer
   if (validatedBody.prescription_id) {
-    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("customer_id").eq("id", validatedBody.prescription_id).single() as any;
+    const { data: prescription } = await supabaseServiceRole.from("prescriptions").select("customer_id").eq("id", validatedBody.prescription_id).single() as unknown;
     if (prescription && prescription.customer_id !== validatedBody.customer_id) {
       return NextResponse.json({ error: "La receta no pertenece al cliente seleccionado" }, { status: 400 });
     }
   }
 
   // Generate quote number
-  const { data: quoteNumber, error: quoteNumberError } = await supabaseServiceRole.rpc("generate_quote_number") as any;
+  const { data: quoteNumber, error: quoteNumberError } = await supabaseServiceRole.rpc("generate_quote_number") as unknown;
   if (quoteNumberError || !quoteNumber) return NextResponse.json({ error: "Failed to generate quote number" }, { status: 500 });
 
   // Get default expiration
-  const { data: settings } = await supabaseServiceRole.from("quote_settings").select("default_expiration_days").limit(1).single() as any;
+  const { data: settings } = await supabaseServiceRole.from("quote_settings").select("default_expiration_days").limit(1).single() as unknown;
   const defaultExpirationDays = settings?.default_expiration_days || 30;
   const branchContext = await getBranchContext(request, user.id);
 
   // Determine branch
   let quoteBranchId = validatedBody.branch_id || branchContext.branchId;
   if (!quoteBranchId && validatedBody.customer_id) {
-    const { data: customer } = await supabaseServiceRole.from("customers").select("branch_id").eq("id", validatedBody.customer_id).single() as any;
+    const { data: customer } = await supabaseServiceRole.from("customers").select("branch_id").eq("id", validatedBody.customer_id).single() as unknown;
     quoteBranchId = customer?.branch_id || null;
   }
 
   if (!branchContext.isSuperAdmin && quoteBranchId) {
-    const hasAccess = branchContext.accessibleBranches.some((b: any) => b.id === quoteBranchId);
+    const hasAccess = branchContext.accessibleBranches.some((b: unknown) => b.id === quoteBranchId);
     if (!hasAccess) return NextResponse.json({ error: "No tiene acceso a esta sucursal" }, { status: 403 });
   }
   if (!branchContext.isSuperAdmin && !quoteBranchId) return NextResponse.json({ error: "Debe especificar una sucursal para el presupuesto" }, { status: 400 });
 
   // Validate customer belongs to branch
   if (validatedBody.customer_id && quoteBranchId) {
-    const { data: customer } = await supabaseServiceRole.from("customers").select("branch_id").eq("id", validatedBody.customer_id).single() as any;
+    const { data: customer } = await supabaseServiceRole.from("customers").select("branch_id").eq("id", validatedBody.customer_id).single() as unknown;
     if (!customer) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     if (customer.branch_id !== quoteBranchId) return NextResponse.json({ error: "El cliente no pertenece a esta sucursal. Seleccione un cliente de la sucursal actual." }, { status: 400 });
   }
@@ -374,18 +374,18 @@ export async function createQuote(request: NextRequest) {
   // Organization ID
   let quoteOrganizationId: string | null = null;
   if (quoteBranchId) {
-    const { data: branch } = await supabaseServiceRole.from("branches").select("organization_id").eq("id", quoteBranchId).single() as any;
+    const { data: branch } = await supabaseServiceRole.from("branches").select("organization_id").eq("id", quoteBranchId).single() as unknown;
     quoteOrganizationId = branch?.organization_id ?? null;
   }
   if (!quoteOrganizationId) {
-    const { data: adminUser } = await supabaseServiceRole.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+    const { data: adminUser } = await supabaseServiceRole.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
     quoteOrganizationId = adminUser?.organization_id ?? null;
   }
 
   // Field operation inheritance
   let quoteFieldOperationId = validatedBody.field_operation_id || null;
   if (!quoteFieldOperationId && validatedBody.customer_id) {
-    const { data: cust } = await supabaseServiceRole.from("customers").select("field_operation_id").eq("id", validatedBody.customer_id).single() as any;
+    const { data: cust } = await supabaseServiceRole.from("customers").select("field_operation_id").eq("id", validatedBody.customer_id).single() as unknown;
     quoteFieldOperationId = cust?.field_operation_id ?? null;
   }
 
@@ -461,7 +461,7 @@ export async function createQuote(request: NextRequest) {
     terms_and_conditions: validatedBody.terms_and_conditions || null,
     expiration_date: expirationDate.toISOString().split("T")[0],
     created_by: user.id,
-  }).select(`*, customer:customers!quotes_customer_id_fkey(id, first_name, last_name, email, phone), prescription:prescriptions!quotes_prescription_id_fkey(*)`).single() as any;
+  }).select(`*, customer:customers!quotes_customer_id_fkey(id, first_name, last_name, email, phone), prescription:prescriptions!quotes_prescription_id_fkey(*)`).single() as unknown;
 
   if (quoteError) return NextResponse.json({ error: "Failed to create quote", details: quoteError.message }, { status: 500 });
 
@@ -477,7 +477,7 @@ export async function createQuote(request: NextRequest) {
     if (newQuote.status === "sent" && (newQuote.customer?.email || newQuote.guest_email)) {
       (async () => {
         try {
-          const { data: branch } = await supabaseServiceRole.from("branches").select("name").eq("id", newQuote.branch_id).single() as any;
+          const { data: branch } = await supabaseServiceRole.from("branches").select("name").eq("id", newQuote.branch_id).single() as unknown;
           await sendQuoteSent({
             customer_name: customerName,
             customer_email: newQuote.customer?.email || newQuote.guest_email,

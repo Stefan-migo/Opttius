@@ -7,18 +7,19 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import {
   SubscriptionDeleteDialog,
   SubscriptionEditForm,
 } from "./SubscriptionDialogs";
-import {
-  SubscriptionDetails,
+import {  SubscriptionDetails,
   SubscriptionInfoCards,
 } from "./SubscriptionInfoCards";
 
 export default function SubscriptionDetailsContent() {
   const params = useParams();
+
   const router = useRouter();
   const subscriptionId = params.id as string;
 
@@ -140,7 +141,7 @@ export default function SubscriptionDetailsContent() {
       });
       setError(null);
     } catch (err) {
-      console.error("Error fetching subscription details:", err);
+      appLogger.error("Error fetching subscription details:", err);
       setError(err instanceof Error ? err.message : "Error desconocido");
       toast.error(
         err instanceof Error

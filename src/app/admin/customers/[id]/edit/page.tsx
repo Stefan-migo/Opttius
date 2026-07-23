@@ -14,6 +14,7 @@ import {
   error as notifyError,
   success,
 } from "@/lib/api/services/notificationService";
+import { appLogger } from '@/lib/logger';
 import { completeRUTIfNeeded, formatRUT } from "@/lib/utils/rut";
 import { customerEditSchema } from "@/lib/validation/formValidation";
 
@@ -110,7 +111,7 @@ export default function CustomerEditPage() {
       form.setFieldValues(formData);
       setFetchError(null);
     } catch (err) {
-      console.error("Error fetching customer:", err);
+      appLogger.error("Error fetching customer:", err);
       setFetchError(
         err instanceof Error ? err.message : "Unknown error occurred",
       );
@@ -232,12 +233,12 @@ export default function CustomerEditPage() {
       )}
 
       <CustomerEditForm
-        values={form.values}
         errors={form.errors}
-        setValue={form.setValue}
-        handleSubmit={form.handleSubmit}
-        handleRUTChange={handleRUTChange}
         handleRUTBlur={handleRUTBlur}
+        handleRUTChange={handleRUTChange}
+        handleSubmit={form.handleSubmit}
+        setValue={form.setValue}
+        values={form.values}
       />
     </div>
   );

@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import type {
   LLMConfig,
   LLMMessage,
@@ -153,7 +156,7 @@ export class GoogleProvider extends BaseLLMProvider {
 
         // Check for errors first
         if (parsed.error) {
-          console.error("Gemini API error:", parsed.error);
+          appLogger.error("Gemini API error:", parsed.error);
           throw new Error(
             `Gemini API error: ${parsed.error.message || JSON.stringify(parsed.error)}`,
           );
@@ -192,7 +195,7 @@ export class GoogleProvider extends BaseLLMProvider {
             finishReason === "MAX_TOKENS" ||
             finishReason === "SAFETY")
         ) {
-          console.log(
+          appLogger.info(
             "Stream finished with reason:",
             finishReason,
             "Final text length:",
@@ -228,7 +231,7 @@ export class GoogleProvider extends BaseLLMProvider {
               yield { content: result.text, done: false };
             }
             if (result.toolCalls && result.toolCalls.length > 0) {
-              console.log(
+              appLogger.info(
                 "Yielding remaining tool calls:",
                 result.toolCalls.map((tc) => tc.name).join(", "),
               );
@@ -282,7 +285,7 @@ export class GoogleProvider extends BaseLLMProvider {
               if (result) {
                 // First yield any text content
                 if (result.text) {
-                  console.log(
+                  appLogger.info(
                     "Yielding text chunk:",
                     result.text.substring(0, 50) + "...",
                   );
@@ -291,7 +294,7 @@ export class GoogleProvider extends BaseLLMProvider {
 
                 // Then yield tool calls if any (BEFORE marking done)
                 if (result.toolCalls && result.toolCalls.length > 0) {
-                  console.log(
+                  appLogger.info(
                     "Yielding tool calls:",
                     result.toolCalls.map((tc) => tc.name).join(", "),
                   );
@@ -304,7 +307,7 @@ export class GoogleProvider extends BaseLLMProvider {
 
                 // Finally, if done, mark as done
                 if (result.done) {
-                  console.log("Gemini stream finished");
+                  appLogger.info("Gemini stream finished");
                   yield { content: "", done: true };
                   return;
                 }

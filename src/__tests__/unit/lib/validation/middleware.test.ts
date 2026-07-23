@@ -13,8 +13,8 @@ import { z } from "zod";
 
 import {
   withBodyValidation,
-  withQueryValidation,
   withPathValidation,
+  withQueryValidation,
   withValidation,
 } from "@/lib/validation/middleware";
 

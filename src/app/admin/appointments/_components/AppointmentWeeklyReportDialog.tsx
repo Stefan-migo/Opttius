@@ -3,13 +3,6 @@
 import { FileText } from "lucide-react";
 import { useRef } from "react";
 
-import {
-  Appointment,
-  getAppointmentTypeLabel,
-  getStatusBadge,
-  getWeeklyReportData,
-  handlePrintWeeklyReport,
-} from "./appointmentsUtils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+import {
+  Appointment,
+  getAppointmentTypeLabel,
+  getStatusBadge,
+  getWeeklyReportData,
+  handlePrintWeeklyReport,
+} from "./appointmentsUtils";
 
 interface AppointmentWeeklyReportDialogProps {
   open: boolean;

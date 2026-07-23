@@ -6,16 +6,14 @@ import { unstable_cache } from "next/cache";
 
 import {
   computeInventoryMetrics,
-  parseAnalyticsPeriod,
 } from "@/lib/analytics/analytics-service";
+import { computeAnalyticsMvData } from "@/lib/analytics/compute-analytics-kpis";
+import type { MvKpiRow } from "@/lib/analytics/compute-dashboard-kpis";
 import {
   addBranchFilter,
   addBranchFilterForBranchScopedTable,
 } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import type { MvKpiRow } from "@/lib/analytics/compute-dashboard-kpis";
-import { computeAnalyticsMvData } from "@/lib/analytics/compute-analytics-kpis";
 
 function getLocalDateString(date: Date): string {
   const year = date.getFullYear();
@@ -24,7 +22,7 @@ function getLocalDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function scopeByBranchIds(query: any, branchId: string | null, orgBranchIds: string[]) {
+function scopeByBranchIds(query: unknown, branchId: string | null, orgBranchIds: string[]) {
   if (branchId) return query.eq("branch_id", branchId);
   if (orgBranchIds.length > 0) return query.in("branch_id", orgBranchIds);
   return query.limit(0);
@@ -115,7 +113,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const customerScope = await addBranchFilterForBranchScopedTable(
         svc.from("customers").select("id, created_at"),
         { branchId, isSuperAdmin, organizationId: orgIdVal, isGlobalView: false, accessibleBranches: [] },
-        svc as any,
+        svc as unknown,
       );
 
       // Products
@@ -198,11 +196,11 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
 
       // Revenue
       const posOrders = posResult.data || [];
-      const posRevenue = posOrders.reduce((s: number, o: any) => s + Number(o.total_amount || 0), 0);
+      const posRevenue = posOrders.reduce((s: number, o: unknown) => s + Number(o.total_amount || 0), 0);
       const posTransactionCount = posOrders.length;
 
       const paidWorkOrders = woRevenueResult.data || [];
-      const workOrdersRevenue = paidWorkOrders.reduce((s: number, wo: any) => s + Number(wo.total_amount || 0), 0);
+      const workOrdersRevenue = paidWorkOrders.reduce((s: number, wo: unknown) => s + Number(wo.total_amount || 0), 0);
 
       const totalRevenue = posRevenue + workOrdersRevenue;
       const avgOrderValue = posTransactionCount > 0 ? posRevenue / posTransactionCount
@@ -215,13 +213,13 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const quotesByStatus: Record<string, number> = {};
       let acceptedQuotes = 0, rejectedQuotes = 0, expiredQuotes = 0, convertedQuotes = 0, totalQuoteAmount = 0;
       for (const q of quotes) {
-        const status = (q as any).status || "draft";
+        const status = (q as unknown).status || "draft";
         quotesByStatus[status] = (quotesByStatus[status] || 0) + 1;
         if (status === "accepted") acceptedQuotes++;
         if (status === "rejected") rejectedQuotes++;
         if (status === "expired") expiredQuotes++;
         if (status === "converted_to_work") convertedQuotes++;
-        if ((q as any).total_amount) totalQuoteAmount += Number((q as any).total_amount);
+        if ((q as unknown).total_amount) totalQuoteAmount += Number((q as unknown).total_amount);
       }
       const quoteConversionRate = totalQuotes > 0 ? ((acceptedQuotes + convertedQuotes) / totalQuotes) * 100 : 0;
       const avgQuoteValue = totalQuotes > 0 ? totalQuoteAmount / totalQuotes : 0;
@@ -229,7 +227,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       // Customers
       const customers = customersResult.data || [];
       const totalCustomers = customers.length;
-      const customersInPeriod = (customers as any[]).filter((c: any) => {
+      const customersInPeriod = (customers as unknown[]).filter((c: unknown) => {
         const d = new Date(c.created_at);
         return d >= startDate && d <= endDate;
       });
@@ -240,7 +238,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       recurringQuery = addBranchFilter(recurringQuery, branchId, isSuperAdmin, orgId);
       const { data: orderEmails } = await recurringQuery;
       const emailCounts: Record<string, number> = {};
-      ((orderEmails || []) as any[]).forEach((o: any) => {
+      ((orderEmails || []) as unknown[]).forEach((o: unknown) => {
         if (o.customer_email) emailCounts[o.customer_email] = (emailCounts[o.customer_email] || 0) + 1;
       });
       const recurringCustomers = Object.values(emailCounts).filter((c) => c > 1).length;
@@ -249,16 +247,16 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const products = productsResult.data || [];
       const productBranchStock = stockResult.data || [];
       const categories = categoriesResult.data || [];
-      const productIdsInCatalog = new Set((products as any[]).map((p: any) => p.id));
+      const productIdsInCatalog = new Set((products as unknown[]).map((p: unknown) => p.id));
       const inventoryMetrics = computeInventoryMetrics(
-        (productBranchStock || []) as any,
+        (productBranchStock || []) as unknown,
         productIdsInCatalog,
       );
 
       // Top products
-      const productStats: Record<string, any> = {};
-      ((topProductsResult.data || []) as any[]).forEach((order: any) => {
-        (order.order_items || []).forEach((item: any) => {
+      const productStats: Record<string, unknown> = {};
+      ((topProductsResult.data || []) as unknown[]).forEach((order: unknown) => {
+        (order.order_items || []).forEach((item: unknown) => {
           const pid = item.product_id;
           if (!productStats[pid]) {
             productStats[pid] = { id: pid, name: item.product_name || "Producto Sin Nombre", revenue: 0, quantity: 0, orders: new Set() };
@@ -268,24 +266,24 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
         });
       });
       const topProducts = Object.values(productStats)
-        .map((stat: any) => ({ id: stat.id, name: stat.name, category: "General", revenue: stat.revenue, quantity: stat.quantity, orders: stat.orders.size }))
-        .sort((a: any, b: any) => b.revenue - a.revenue)
+        .map((stat: unknown) => ({ id: stat.id, name: stat.name, category: "General", revenue: stat.revenue, quantity: stat.quantity, orders: stat.orders.size }))
+        .sort((a: unknown, b: unknown) => b.revenue - a.revenue)
         .slice(0, 10);
-      topProducts.forEach((product: any) => {
-        const prod = (products as any[]).find((p: any) => p.id === product.id);
+      topProducts.forEach((product: unknown) => {
+        const prod = (products as unknown[]).find((p: unknown) => p.id === product.id);
         if (prod) {
-          const cat = (categories as any[]).find((c: any) => c.id === prod.category_id);
+          const cat = (categories as unknown[]).find((c: unknown) => c.id === prod.category_id);
           product.category = cat?.name || "Sin Categoría";
         }
       });
 
       // Category revenue
       const categoryRevenue: Record<string, number> = {};
-      ((topProductsResult.data || []) as any[]).forEach((order: any) => {
-        (order.order_items || []).forEach((item: any) => {
-          const prod = (products as any[]).find((p: any) => p.id === item.product_id);
+      ((topProductsResult.data || []) as unknown[]).forEach((order: unknown) => {
+        (order.order_items || []).forEach((item: unknown) => {
+          const prod = (products as unknown[]).find((p: unknown) => p.id === item.product_id);
           if (prod && prod.category_id) {
-            const cat = (categories as any[]).find((c: any) => c.id === prod.category_id);
+            const cat = (categories as unknown[]).find((c: unknown) => c.id === prod.category_id);
             const catName = cat?.name || "Sin Categoría";
             categoryRevenue[catName] = (categoryRevenue[catName] || 0) + Number(item.total_price || 0);
           }
@@ -300,9 +298,9 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const paymentMethods: Record<string, { count: number; revenue: number }> = {};
       const closures = closuresResult.data || [];
       if (closures.length > 0) {
-        const totalClosureRevenue = (closures as any[]).reduce((s: number, c: any) => s + (Number(c.total_sales) || 0), 0);
-        const totalClosureTxns = (closures as any[]).reduce((s: number, c: any) => s + (Number(c.total_transactions) || 0), 0);
-        (closures as any[]).forEach((c: any) => {
+        const totalClosureRevenue = (closures as unknown[]).reduce((s: number, c: unknown) => s + (Number(c.total_sales) || 0), 0);
+        const totalClosureTxns = (closures as unknown[]).reduce((s: number, c: unknown) => s + (Number(c.total_transactions) || 0), 0);
+        (closures as unknown[]).forEach((c: unknown) => {
           const addPayment = (method: string, amount: number) => {
             if (amount > 0) {
               if (!paymentMethods[method]) paymentMethods[method] = { count: 0, revenue: 0 };
@@ -330,7 +328,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
         const dateStr = getLocalDateString(d);
         const nextDay = new Date(d);
         nextDay.setDate(nextDay.getDate() + 1);
-        const dayCustomers = (customers as any[]).filter((c: any) => {
+        const dayCustomers = (customers as unknown[]).filter((c: unknown) => {
           const cd = new Date(c.created_at);
           return cd >= d && cd < nextDay;
         });
@@ -341,18 +339,18 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const supportTickets = supportTicketResult.data || [];
       const supportByStatus: Record<string, number> = {};
       const supportByCategory: Record<string, number> = {};
-      (supportTickets as any[]).forEach((t: any) => {
+      (supportTickets as unknown[]).forEach((t: unknown) => {
         const status = t.status || "open";
         supportByStatus[status] = (supportByStatus[status] || 0) + 1;
         const cat = t.category || "other";
         supportByCategory[cat] = (supportByCategory[cat] || 0) + 1;
       });
       const openSupportStatuses = ["open", "assigned", "in_progress", "waiting_customer"];
-      const openTickets = (supportTickets as any[]).filter((t: any) => openSupportStatuses.includes(t.status || "")).length;
-      const resolvedTickets = (supportTickets as any[]).filter((t: any) => t.status === "resolved" || t.status === "closed").length;
-      const ticketsWithResolution = (supportTickets as any[]).filter((t: any) => t.resolution_time_minutes != null);
+      const openTickets = (supportTickets as unknown[]).filter((t: unknown) => openSupportStatuses.includes(t.status || "")).length;
+      const resolvedTickets = (supportTickets as unknown[]).filter((t: unknown) => t.status === "resolved" || t.status === "closed").length;
+      const ticketsWithResolution = (supportTickets as unknown[]).filter((t: unknown) => t.resolution_time_minutes != null);
       const avgResolutionMinutes = ticketsWithResolution.length > 0
-        ? Math.round(ticketsWithResolution.reduce((s: number, t: any) => s + (t.resolution_time_minutes || 0), 0) / ticketsWithResolution.length)
+        ? Math.round(ticketsWithResolution.reduce((s: number, t: unknown) => s + (t.resolution_time_minutes || 0), 0) / ticketsWithResolution.length)
         : null;
 
       // Support trends
@@ -363,7 +361,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
         const dateStr = getLocalDateString(d);
         const nextDay = new Date(d);
         nextDay.setDate(nextDay.getDate() + 1);
-        const dayTickets = (supportTickets as any[]).filter((t: any) => {
+        const dayTickets = (supportTickets as unknown[]).filter((t: unknown) => {
           const td = new Date(t.created_at);
           return td >= d && td < nextDay;
         });
@@ -374,7 +372,7 @@ export async function computeDashboardAnalytics(params: DashboardAnalyticsParams
       const deliveredWorkOrders = deliveryResult.data || [];
       let avgDeliveryDays = 0;
       if (deliveredWorkOrders.length > 0) {
-        const totalDays = (deliveredWorkOrders as any[]).reduce((sum: number, wo: any) => {
+        const totalDays = (deliveredWorkOrders as unknown[]).reduce((sum: number, wo: unknown) => {
           const ordered = new Date(wo.ordered_at);
           const delivered = new Date(wo.delivered_at);
           return sum + Math.ceil((delivered.getTime() - ordered.getTime()) / (1000 * 60 * 60 * 24));

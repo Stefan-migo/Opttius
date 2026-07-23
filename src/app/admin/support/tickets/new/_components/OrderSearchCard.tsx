@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 import type { Order } from "./types";
 
@@ -38,7 +39,7 @@ export function OrderSearchCard({ onSelect }: OrderSearchCardProps) {
         setOrders(extractDataFromResponse(data));
       }
     } catch (err) {
-      console.error("Error searching orders:", err);
+      appLogger.error("Error searching orders:", err);
     } finally {
       setSearching(false);
     }

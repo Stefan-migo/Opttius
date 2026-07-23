@@ -2,15 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import type { Appointment, ScheduleSettings } from "./_components/appointmentCalendarHelpers";
 import {
   generateTimeSlots,
-  getWeekDays,
   getMonthDays,
+  getWeekDays,
 } from "./_components/appointmentCalendarHelpers";
-import type { Appointment, ScheduleSettings } from "./_components/appointmentCalendarHelpers";
 import CalendarDayView from "./_components/CalendarDayView";
-import CalendarWeekView from "./_components/CalendarWeekView";
 import CalendarMonthView from "./_components/CalendarMonthView";
+import CalendarWeekView from "./_components/CalendarWeekView";
 
 export type { Appointment, ScheduleSettings };
 
@@ -53,13 +53,13 @@ export default function AppointmentCalendar({
   if (view === "day") {
     return (
       <CalendarDayView
-        currentDate={currentDate}
         appointments={appointments}
+        currentDate={currentDate}
+        lastRefresh={lastRefresh}
+        scheduleSettings={scheduleSettings}
+        timeSlots={timeSlots}
         onAppointmentClick={onAppointmentClick}
         onSlotClick={onSlotClick}
-        scheduleSettings={scheduleSettings}
-        lastRefresh={lastRefresh}
-        timeSlots={timeSlots}
       />
     );
   }
@@ -67,25 +67,25 @@ export default function AppointmentCalendar({
   if (view === "week") {
     return (
       <CalendarWeekView
-        currentDate={currentDate}
         appointments={appointments}
-        onAppointmentClick={onAppointmentClick}
-        onSlotClick={onSlotClick}
-        scheduleSettings={scheduleSettings}
+        currentDate={currentDate}
         lastRefresh={lastRefresh}
+        scheduleSettings={scheduleSettings}
         timeSlots={timeSlots}
         weekDays={weekDays}
+        onAppointmentClick={onAppointmentClick}
+        onSlotClick={onSlotClick}
       />
     );
   }
 
   return (
     <CalendarMonthView
-      currentDate={currentDate}
       appointments={appointments}
+      currentDate={currentDate}
+      monthDays={monthDays}
       onAppointmentClick={onAppointmentClick}
       onDateChange={onDateChange}
-      monthDays={monthDays}
     />
   );
 }

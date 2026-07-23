@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useMemo } from "react";
 
 import type {
-  POSPaymentMethod as PaymentMethod,
   POSCartItem,
   POSCustomer,
+  POSPaymentMethod as PaymentMethod,
 } from "../types";
 
 export interface POSContextValue {

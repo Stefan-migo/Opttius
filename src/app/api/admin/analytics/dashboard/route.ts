@@ -4,9 +4,9 @@ import { parseAnalyticsPeriod } from "@/lib/analytics/analytics-service";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import { createApiErrorResponse, createApiSuccessResponse } from "@/lib/api/response";
-import { appLogger as logger } from "@/lib/logger";
-import { createClientFromRequest, createServiceRoleClient } from "@/utils/supabase/server";
 import { computeDashboardAnalytics } from "@/lib/api/services/dashboardAnalyticsService";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const { client: supabase, getUser } = await createClientFromRequest(request);
 
     // Auth check
-    const { data: { user } = {}, error: userError } = (await getUser()) as any;
+    const { data: { user } = {}, error: userError } = (await getUser()) as unknown;
     if (userError || !user) {
       return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }

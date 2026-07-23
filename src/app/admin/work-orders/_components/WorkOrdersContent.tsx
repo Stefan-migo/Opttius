@@ -8,6 +8,7 @@ import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 import { DeleteWorkOrderDialog } from "./DeleteWorkOrderDialog";
@@ -97,7 +98,7 @@ export default function WorkOrdersContent() {
       setTotalPages(pagination.totalPages || 1);
       setTotalWorkOrders(pagination.total || 0);
     } catch (error) {
-      console.error("Error fetching work orders:", error);
+      appLogger.error("Error fetching work orders:", error);
       toast.error("Error al cargar trabajos");
     } finally {
       setLoading(false);
@@ -132,7 +133,7 @@ export default function WorkOrdersContent() {
       setWorkOrderToDelete(null);
       fetchWorkOrders();
     } catch (error: unknown) {
-      console.error("Error deleting work order:", error);
+      appLogger.error("Error deleting work order:", error);
       toast.error((error as Error).message || "Error al eliminar trabajo");
     } finally {
       setDeleting(false);
@@ -170,7 +171,7 @@ export default function WorkOrdersContent() {
 
       toast.success("Estado de pago actualizado");
     } catch (error: unknown) {
-      console.error("Error updating payment status:", error);
+      appLogger.error("Error updating payment status:", error);
       toast.error((error as Error).message || "Error al actualizar estado de pago");
       fetchWorkOrders();
     }
@@ -222,10 +223,10 @@ export default function WorkOrdersContent() {
       </div>
 
       <WorkOrderStats
-        totalWorkOrders={totalWorkOrders}
+        deliveredCount={deliveredCount}
         inLabCount={inLabCount}
         readyForPickupCount={readyForPickupCount}
-        deliveredCount={deliveredCount}
+        totalWorkOrders={totalWorkOrders}
       />
 
       <WorkOrderFilters
@@ -236,27 +237,27 @@ export default function WorkOrdersContent() {
       />
 
       <WorkOrderTable
-        workOrders={filteredWorkOrders}
-        loading={loading}
         currentPage={currentPage}
-        totalPages={totalPages}
         filteredLength={filteredWorkOrders.length}
-        totalWorkOrders={totalWorkOrders}
+        loading={loading}
         searchTerm={searchTerm}
-        onPageChange={setCurrentPage}
+        totalPages={totalPages}
+        totalWorkOrders={totalWorkOrders}
+        workOrders={filteredWorkOrders}
         onDeleteClick={handleDeleteClick}
+        onPageChange={setCurrentPage}
         onPaymentStatusChange={handlePaymentStatusChange}
       />
 
       <DeleteWorkOrderDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
         deleting={deleting}
-        onDeleteConfirm={handleDeleteConfirm}
+        open={deleteDialogOpen}
         onCancel={() => {
           setDeleteDialogOpen(false);
           setWorkOrderToDelete(null);
         }}
+        onDeleteConfirm={handleDeleteConfirm}
+        onOpenChange={setDeleteDialogOpen}
       />
     </div>
   );

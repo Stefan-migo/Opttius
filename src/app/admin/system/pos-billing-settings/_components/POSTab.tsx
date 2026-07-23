@@ -30,13 +30,13 @@ export default function POSTab({
   return (
     <TabsContent className="space-y-4 sm:space-y-6" value="pos">
       <SettingsSection
+        description="Configura el depósito mínimo requerido para procesar trabajos. El sistema usará el mayor valor entre el porcentaje y el monto fijo."
         title={
           <>
             <Settings className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             Configuración de Depósito Mínimo
           </>
         }
-        description="Configura el depósito mínimo requerido para procesar trabajos. El sistema usará el mayor valor entre el porcentaje y el monto fijo."
       >
         <div className="space-y-2">
           <Label htmlFor="min_deposit_percent">

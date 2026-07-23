@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { useBranch } from "@/hooks/useBranch";
 import { quoteSettingsService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import { type PresbyopiaSolution } from "@/lib/presbyopia-helpers";
 
 import { DEFAULT_QUOTE_SETTINGS } from "./CreateQuoteForm.constants";
@@ -19,7 +20,6 @@ import type {
   QuoteFormData,
   QuoteSettings,
 } from "./CreateQuoteForm.types";
-
 import { useContactLensSelection } from "./useContactLensSelection";
 import { useCustomerSelection } from "./useCustomerSelection";
 import { useFormPricing } from "./useFormPricing";
@@ -240,7 +240,7 @@ export function useCreateQuoteForm(
         }));
       }
     } catch {
-      console.error("Error fetching quote settings");
+      appLogger.error("Error fetching quote settings");
       setQuoteSettings(DEFAULT_QUOTE_SETTINGS);
     } finally {
       setLoadingSettings(false);

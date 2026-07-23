@@ -5,7 +5,8 @@
  * for semantic search. Generates embeddings and stores them in the database.
  */
 
-import { appLogger } from "@/lib/logger";
+
+import { appLogger } from '@/lib/logger';
 
 import { SemanticMemory } from "../semantic";
 import type {

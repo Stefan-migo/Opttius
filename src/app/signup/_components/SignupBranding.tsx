@@ -1,8 +1,9 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
+
+import { Badge } from "@/components/ui/badge";
 
 export function SignupBrandingSide() {
   return (
@@ -44,7 +45,7 @@ export function SignupSuccessView({ requiresEmailConfirmation, onGoToLogin, onCo
         <div className="overflow-hidden rounded-3xl shadow-2xl border-0 bg-epoch-primary">
           <div className="bg-epoch-primary p-6 sm:p-10 text-center">
             <div className="relative mx-auto mb-6 flex justify-center"><Image alt="Opttius" className="h-24 w-28 object-contain" height={227} src="/logoYopttius.png" width={248} /></div>
-            <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-epoch-accent/40 rounded-full mb-6"><svg className="h-10 w-10 text-epoch-accent stroke-[1.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.5 12.75l6 6 9-13.5" /></svg></div>
+            <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-epoch-accent/40 rounded-full mb-6"><svg className="h-10 w-10 text-epoch-accent stroke-[1.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} /></svg></div>
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight mb-2">Bienvenido al Nuevo Estándar</h1>
             <p className="text-white/95 font-serif italic text-base uppercase tracking-[0.2em]">Registro Exitoso</p>
           </div>
@@ -52,12 +53,12 @@ export function SignupSuccessView({ requiresEmailConfirmation, onGoToLogin, onCo
             {requiresEmailConfirmation ? (
               <div className="space-y-6 sm:space-y-8">
                 <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">Su óptica está a un paso de la automatización. Revise su bandeja de entrada y active su cuenta para comenzar.</p>
-                <button onClick={onGoToLogin} className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-2 py-3 sm:py-4"><span>REGRESAR AL ACCESO</span><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></button>
+                <button className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-2 py-3 sm:py-4" onClick={onGoToLogin}><span>REGRESAR AL ACCESO</span><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg></button>
               </div>
             ) : (
               <div className="space-y-6 sm:space-y-8">
                 <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">Su cuenta ha sido creada. Redirigiéndole a la configuración inicial...</p>
-                <button onClick={onContinue} className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-2 py-3 sm:py-4"><span>CONTINUAR</span><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></button>
+                <button className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-2 py-3 sm:py-4" onClick={onContinue}><span>CONTINUAR</span><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg></button>
               </div>
             )}
           </div>

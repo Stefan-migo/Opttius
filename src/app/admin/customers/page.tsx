@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import CustomersContent from "./_components/CustomersContent";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +11,8 @@ export default async function CustomersPage() {
   if (!user?.id) {
     return (
       <CustomersContent
-        initialCustomers={[]}
         currentBranchId={null}
+        initialCustomers={[]}
         isSuperAdmin={false}
         organizationId={null}
       />
@@ -46,8 +47,8 @@ export default async function CustomersPage() {
 
   return (
     <CustomersContent
-      initialCustomers={initialCustomers ?? []}
       currentBranchId={currentBranchId}
+      initialCustomers={initialCustomers ?? []}
       isSuperAdmin={isSuperAdmin}
       organizationId={organizationId}
     />

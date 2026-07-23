@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import SaaSAnalyticsContent from "./_components/SaaSAnalyticsContent";
 
 export const dynamic = "force-dynamic";

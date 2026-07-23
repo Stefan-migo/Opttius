@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { productService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import { formatCurrency } from "@/lib/utils";
 
 import ProductFilters from "../components/ProductFilters";
@@ -196,7 +197,7 @@ export default function ProductListingSection({
       toast.success("Producto eliminado exitosamente");
       refetchProducts();
     } catch (error) {
-      console.error("Error deleting product:", error);
+      appLogger.error("Error deleting product:", error);
       toast.error("Error al eliminar el producto");
     } finally {
       setDeleteLoading(false);

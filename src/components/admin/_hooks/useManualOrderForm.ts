@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
-import type { OrderItem, ShippingInfo } from "../_components/ManualOrderFormTypes";
+import type { OrderItem } from "../_components/ManualOrderFormTypes";
 
 export function useCustomerSearch(customerSearch: string, currentBranchId: string | null) {
   const [customerResults, setCustomerResults] = useState<unknown[]>([]);
@@ -22,7 +23,7 @@ export function useCustomerSearch(customerSearch: string, currentBranchId: strin
           const data = await response.json();
           setCustomerResults(extractDataFromResponse(data));
         }
-      } catch (error) { console.error("Error searching customers:", error); }
+      } catch (error) { appLogger.error("Error searching customers:", error); }
       finally { setSearchingCustomers(false); }
     };
     const debounce = setTimeout(search, 300);
@@ -47,7 +48,7 @@ export function useProductSearch(productSearch: string) {
           const data = await response.json();
           setProductResults(extractDataFromResponse(data));
         }
-      } catch (error) { console.error("Error searching products:", error); }
+      } catch (error) { appLogger.error("Error searching products:", error); }
       finally { setSearchingProducts(false); }
     };
     const debounce = setTimeout(search, 300);

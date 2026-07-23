@@ -6,7 +6,7 @@
  * wrappers (which interact with toast and logger).
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks — hoisted before imports
@@ -20,14 +20,15 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 import { toast } from "sonner";
+
 import {
-  extractErrorMessage,
   classifyError,
   createStandardError,
-  handleApiError,
-  getUserFriendlyMessage,
-  withErrorHandling,
   ErrorService,
+  extractErrorMessage,
+  getUserFriendlyMessage,
+  handleApiError,
+  withErrorHandling,
 } from "@/lib/api/services/errorService";
 import { appLogger } from "@/lib/logger";
 

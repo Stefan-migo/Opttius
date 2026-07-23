@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
+
 import { SaaSCharts } from "./SaaSCharts";
 import { SaaSRecentActivity } from "./SaaSRecentActivity";
 import { SaaSStatsCards } from "./SaaSStatsCards";
@@ -70,7 +72,7 @@ export default function SaaSDashboardContent({
           setTelemetryEnabled(data.enabled);
         }
       } catch (err) {
-        console.error("Error fetching telemetry config:", err);
+        appLogger.error("Error fetching telemetry config:", err);
       }
     };
 
@@ -95,7 +97,7 @@ export default function SaaSDashboardContent({
       }
     } catch (err) {
       toast.error("Error al resetear la Óptica Demo");
-      console.error(err);
+      appLogger.error(err);
     } finally {
       setResettingDemo(false);
     }
@@ -124,7 +126,7 @@ export default function SaaSDashboardContent({
       }
     } catch (err) {
       toast.error("No se pudo actualizar la configuración de telemetría");
-      console.error(err);
+      appLogger.error(err);
     } finally {
       setUpdatingTelemetry(false);
     }
@@ -214,13 +216,13 @@ export default function SaaSDashboardContent({
       {metrics && <SaaSCharts metrics={metrics} />}
 
       <SaaSRecentActivity
+        resettingDemo={resettingDemo}
+        showResetDemoDialog={showResetDemoDialog}
         telemetryEnabled={telemetryEnabled}
-        onToggleTelemetry={handleToggleTelemetry}
         updatingTelemetry={updatingTelemetry}
         onResetDemo={handleResetDemo}
-        showResetDemoDialog={showResetDemoDialog}
         onShowResetDemoDialogChange={setShowResetDemoDialog}
-        resettingDemo={resettingDemo}
+        onToggleTelemetry={handleToggleTelemetry}
       />
     </div>
   );

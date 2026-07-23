@@ -12,12 +12,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  buildClosureParams,
-  buildOrderParams,
   buildCloseCashBody,
-  getTodayChileDate,
+  buildClosureParams,
   buildCreditNotesDateRange,
+  buildOrderParams,
   extractOrderCustomerName,
+  getTodayChileDate,
 } from "../cashOpsUtils";
 
 // Mock date-timezone to control getTodayChileDate

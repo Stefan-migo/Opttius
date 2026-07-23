@@ -12,10 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  type PersonalInfoForm,
+import {  type PersonalInfoForm,
   personalInfoSchema,
 } from "@/lib/api/validation/profile-schemas";
+import { appLogger } from '@/lib/logger';
 
 interface PersonalInfoTabProps {
   isEditing: boolean;
@@ -27,6 +27,7 @@ export function PersonalInfoTab({
   onEditingChange,
 }: PersonalInfoTabProps) {
   const { profile, updateProfile, refetchProfile } = useAuthContext();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<PersonalInfoForm>({
@@ -66,7 +67,7 @@ export function PersonalInfoTab({
       onEditingChange(false);
       toast.success("Información personal actualizada exitosamente");
     } catch (error) {
-      console.error("Error updating personal info:", error);
+      appLogger.error("Error updating personal info:", error);
       toast.error("Error al actualizar la información personal");
     } finally {
       setIsLoading(false);

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
 import { useTelemetry } from "./use-telemetry";
 
 interface AnalyticsOverview {
@@ -80,7 +82,7 @@ export function useAnalyticsData({
         context: "analytics_data_fetch",
         timeRange,
       });
-      console.error("Analytics data fetch error:", err);
+      appLogger.error("Analytics data fetch error:", err);
     } finally {
       setLoading(false);
     }

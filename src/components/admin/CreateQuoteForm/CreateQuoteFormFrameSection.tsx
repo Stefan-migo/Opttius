@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import { formatPrice } from "./CreateQuoteForm.constants";
 
 export interface CreateQuoteFormFrameSectionProps {
@@ -46,12 +47,12 @@ export interface CreateQuoteFormFrameSectionProps {
   onFrameSearchChange: (v: string) => void;
   onFrameSelect: (frame: unknown) => void;
   onFrameClear: () => void;
-  onFrameFormDataChange: (field: string, value: any) => void;
+  onFrameFormDataChange: (field: string, value: unknown) => void;
   onCustomerOwnNearFrameChange: (checked: boolean) => void;
   onNearFrameSearchChange: (v: string) => void;
   onNearFrameSelect: (frame: unknown) => void;
   onNearFrameClear: () => void;
-  onNearFrameFormDataChange: (field: string, value: any) => void;
+  onNearFrameFormDataChange: (field: string, value: unknown) => void;
 }
 
 export function CreateQuoteFormFrameSection({
@@ -142,21 +143,21 @@ export function CreateQuoteFormFrameSection({
             style={{ backgroundColor: "var(--admin-border-primary)" }}
           >
             <div>
-              <div className="font-medium">{(selectedFrame as any).name}</div>
+              <div className="font-medium">{(selectedFrame as unknown).name}</div>
               <div className="text-sm text-admin-text-tertiary">
-                {(selectedFrame as any).frame_brand}{" "}
-                {(selectedFrame as any).frame_model} · Stock:{" "}
-                {(selectedFrame as any).total_available_quantity !== undefined
-                  ? (selectedFrame as any).total_available_quantity
-                  : (selectedFrame as any).total_inventory_quantity !==
+                {(selectedFrame as unknown).frame_brand}{" "}
+                {(selectedFrame as unknown).frame_model} · Stock:{" "}
+                {(selectedFrame as unknown).total_available_quantity !== undefined
+                  ? (selectedFrame as unknown).total_available_quantity
+                  : (selectedFrame as unknown).total_inventory_quantity !==
                       undefined
-                    ? (selectedFrame as any).total_inventory_quantity
-                    : ((selectedFrame as any).available_quantity ??
-                      (selectedFrame as any).inventory_quantity ??
+                    ? (selectedFrame as unknown).total_inventory_quantity
+                    : ((selectedFrame as unknown).available_quantity ??
+                      (selectedFrame as unknown).inventory_quantity ??
                       0)}
               </div>
               <div className="text-sm font-semibold text-admin-success">
-                {formatPrice((selectedFrame as any).price)}
+                {formatPrice((selectedFrame as unknown).price)}
               </div>
             </div>
             <Button
@@ -184,7 +185,7 @@ export function CreateQuoteFormFrameSection({
                     <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                   </div>
                 ) : (frameResults || []).length > 0 ? (
-                  frameResults.map((frame: any) => (
+                  frameResults.map((frame: unknown) => (
                     <div
                       className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                       key={frame.id}
@@ -316,17 +317,17 @@ export function CreateQuoteFormFrameSection({
               >
                 <div>
                   <div className="font-medium">
-                    {(selectedNearFrame as any).name}
+                    {(selectedNearFrame as unknown).name}
                   </div>
                   <div className="text-sm text-admin-text-tertiary">
-                    {(selectedNearFrame as any).frame_brand}{" "}
-                    {(selectedNearFrame as any).frame_model} · Stock:{" "}
-                    {(selectedNearFrame as any).available_quantity ??
-                      (selectedNearFrame as any).inventory_quantity ??
+                    {(selectedNearFrame as unknown).frame_brand}{" "}
+                    {(selectedNearFrame as unknown).frame_model} · Stock:{" "}
+                    {(selectedNearFrame as unknown).available_quantity ??
+                      (selectedNearFrame as unknown).inventory_quantity ??
                       0}
                   </div>
                   <div className="text-sm font-semibold text-admin-success">
-                    {formatPrice((selectedNearFrame as any).price)}
+                    {formatPrice((selectedNearFrame as unknown).price)}
                   </div>
                 </div>
                 <Button
@@ -354,7 +355,7 @@ export function CreateQuoteFormFrameSection({
                         <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                       </div>
                     ) : (nearFrameResults || []).length > 0 ? (
-                      nearFrameResults.map((frame: any) => (
+                      nearFrameResults.map((frame: unknown) => (
                         <div
                           className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                           key={frame.id}

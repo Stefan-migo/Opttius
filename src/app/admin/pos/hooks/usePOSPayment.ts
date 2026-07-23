@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import type { POSPaymentMethod, POSCartItem } from "../types";
+import type { POSCartItem,POSPaymentMethod } from "../types";
 
 interface UsePOSPaymentProps {
   cart?: POSCartItem[];

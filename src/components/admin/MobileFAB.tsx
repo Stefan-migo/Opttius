@@ -1,17 +1,14 @@
 "use client";
 
 import {
-  Calendar,
   CalendarPlus,
   LucideIcon,
   Menu,
-  Plus,
   Search,
   ShoppingCart,
   UserPlus,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -22,7 +19,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useMobileView } from "@/hooks/useMobileView";
@@ -120,29 +116,29 @@ export function MobileFAB({ className }: MobileFABProps) {
               Busca clientes, productos o citas
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSearch} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSearch}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
               <Input
+                autoFocus
+                className="pl-10 h-12 rounded-xl"
                 placeholder="¿Qué buscas?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 rounded-xl"
-                autoFocus
               />
             </div>
             <div className="flex gap-2">
               <Button
+                className="flex-1 rounded-xl"
                 type="button"
                 variant="outline"
                 onClick={() => setShowSearch(false)}
-                className="flex-1 rounded-xl"
               >
                 Cancelar
               </Button>
               <Button
-                type="submit"
                 className="flex-1 bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl"
+                type="submit"
               >
                 Buscar
               </Button>
@@ -171,8 +167,6 @@ export function MobileFAB({ className }: MobileFABProps) {
         >
           {FAB_ACTIONS.map((action, index) => (
             <button
-              key={action.id}
-              onClick={() => handleActionClick(action)}
               className={cn(
                 "flex items-center gap-3",
                 "bg-admin-bg-secondary/95 backdrop-blur-sm",
@@ -183,7 +177,9 @@ export function MobileFAB({ className }: MobileFABProps) {
                 "transition-all duration-200",
                 "animate-in slide-in-from-right fade-in",
               )}
+              key={action.id}
               style={{ animationDelay: `${index * 50}ms` }}
+              onClick={() => handleActionClick(action)}
             >
               <span className="text-sm font-display font-bold whitespace-nowrap">
                 {action.label}

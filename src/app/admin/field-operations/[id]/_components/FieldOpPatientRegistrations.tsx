@@ -20,8 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatRUT } from "@/lib/utils/rut";
 import type { Customer } from "@/lib/api/services/customerService";
+import { formatRUT } from "@/lib/utils/rut";
 
 interface FieldOpPatientRegistrationsProps {
   customers: Customer[];

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { appLogger } from '@/lib/logger';
 
 import { AddOptionValueDialog } from "./_dialogs/AddOptionValueDialog";
 import { EditOptionValueDialog } from "./_dialogs/EditOptionValueDialog";
@@ -113,7 +114,7 @@ export default function FormOptionsConfig() {
       });
       setFieldsByFormType(grouped);
     } catch (error) {
-      console.error("Error fetching form options:", error);
+      appLogger.error("Error fetching form options:", error);
       toast.error("Error al cargar opciones de formularios");
     } finally {
       setLoading(false);
@@ -156,7 +157,7 @@ export default function FormOptionsConfig() {
         toast.error(data.error || "Error al agregar opción");
       }
     } catch (error) {
-      console.error("Error adding value:", error);
+      appLogger.error("Error adding value:", error);
       toast.error("Error al agregar opción");
     }
   };
@@ -193,7 +194,7 @@ export default function FormOptionsConfig() {
         toast.error(data.error || "Error al actualizar opción");
       }
     } catch (error) {
-      console.error("Error updating value:", error);
+      appLogger.error("Error updating value:", error);
       toast.error("Error al actualizar opción");
     }
   };
@@ -215,7 +216,7 @@ export default function FormOptionsConfig() {
         toast.error(data.error || "Error al eliminar opción");
       }
     } catch (error) {
-      console.error("Error deleting value:", error);
+      appLogger.error("Error deleting value:", error);
       toast.error("Error al eliminar opción");
     }
   };
@@ -241,7 +242,7 @@ export default function FormOptionsConfig() {
         toast.error("Error al actualizar opción");
       }
     } catch (error) {
-      console.error("Error toggling value:", error);
+      appLogger.error("Error toggling value:", error);
       toast.error("Error al actualizar opción");
     }
   };

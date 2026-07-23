@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { emailSchema, uuidOptionalSchema, dateISOOptionalSchema } from "./base";
+import { dateISOOptionalSchema,emailSchema, uuidOptionalSchema } from "./base";
 
 const guestCustomerSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido").max(100).trim(),

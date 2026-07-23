@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import SaaSDashboardContent from "./_components/SaaSDashboardContent";
 
 export const dynamic = "force-dynamic";

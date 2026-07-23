@@ -5,7 +5,7 @@
  * Mocks pino to verify the underlying pino instance calls.
  */
 
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 interface MockPinoInstance {
   debug: ReturnType<typeof vi.fn>;

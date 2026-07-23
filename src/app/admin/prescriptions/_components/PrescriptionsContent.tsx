@@ -16,7 +16,7 @@ import { PrescriptionDialogs } from "./PrescriptionDialogs";
 import { PrescriptionFilters } from "./PrescriptionFilters";
 import { usePrescriptions } from "./usePrescriptions";
 
-function formatRxShort(p: Record<string, any>, side: "od" | "os") {
+function formatRxShort(p: Record<string, unknown>, side: "od" | "os") {
   const s = side === "od" ? p.od_sphere : p.os_sphere;
   const c = side === "od" ? p.od_cylinder : p.os_cylinder;
   const a = side === "od" ? p.od_axis : p.os_axis;
@@ -55,7 +55,7 @@ export default function PrescriptionsContent() {
         </div>
       </div>
 
-      <PrescriptionFilters searchTerm={searchTerm} rutFilter={rutFilter} dateFrom={dateFrom} dateTo={dateTo} issuedBy={issuedBy} onSearchTermChange={setSearchTerm} onRutFilterChange={setRutFilter} onDateFromChange={setDateFrom} onDateToChange={setDateTo} onIssuedByChange={setIssuedBy} onSearch={fetchPrescriptions} />
+      <PrescriptionFilters dateFrom={dateFrom} dateTo={dateTo} issuedBy={issuedBy} rutFilter={rutFilter} searchTerm={searchTerm} onDateFromChange={setDateFrom} onDateToChange={setDateTo} onIssuedByChange={setIssuedBy} onRutFilterChange={setRutFilter} onSearch={fetchPrescriptions} onSearchTermChange={setSearchTerm} />
 
       <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
         <CardHeader className="p-4 sm:p-5 md:p-6 pb-2 sm:pb-2"><CardTitle className="text-base sm:text-lg">Recetas ({totalPrescriptions})</CardTitle></CardHeader>
@@ -122,7 +122,7 @@ export default function PrescriptionsContent() {
         </CardContent>
       </Card>
 
-      <PrescriptionDialogs viewPrescription={viewPrescription} editPrescription={editPrescription} deletePrescription={deletePrescription} deleting={deleting} onViewPrescriptionChange={setViewPrescription} onEditPrescriptionChange={setEditPrescription} onDeletePrescriptionChange={setDeletePrescription} onEditFromView={handleEditFromView} onDelete={handleDelete} onFetchPrescriptions={fetchPrescriptions} />
+      <PrescriptionDialogs deletePrescription={deletePrescription} deleting={deleting} editPrescription={editPrescription} viewPrescription={viewPrescription} onDelete={handleDelete} onDeletePrescriptionChange={setDeletePrescription} onEditFromView={handleEditFromView} onEditPrescriptionChange={setEditPrescription} onFetchPrescriptions={fetchPrescriptions} onViewPrescriptionChange={setViewPrescription} />
     </div>
   );
 }

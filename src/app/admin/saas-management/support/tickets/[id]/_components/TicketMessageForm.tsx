@@ -1,6 +1,6 @@
 import { FileText, Loader2, Send } from "lucide-react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-import type { UseFormRegister, FieldErrors } from "react-hook-form";
+import type { FieldErrors,UseFormRegister } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

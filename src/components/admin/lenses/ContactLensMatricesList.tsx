@@ -94,7 +94,7 @@ export default function ContactLensMatricesList() {
           </div>
         )}
 
-        <ContactLensMatrixDialog open={showDialog} editingMatrix={editingMatrix} families={families} formData={formData} onOpenChange={setShowDialog} onFormChange={setFormData} onSubmit={handleSubmit} />
+        <ContactLensMatrixDialog editingMatrix={editingMatrix} families={families} formData={formData} open={showDialog} onFormChange={setFormData} onOpenChange={setShowDialog} onSubmit={handleSubmit} />
       </CardContent>
     </Card>
   );

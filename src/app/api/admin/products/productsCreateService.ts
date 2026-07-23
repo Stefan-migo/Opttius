@@ -1,18 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { RateLimitError, ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   validateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { createProductSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { buildProductPayload, handleProductStock, VALID_PRODUCT_COLUMNS } from "./productsCreateHelpers";
+
+import { buildProductPayload, handleProductStock } from "./productsCreateHelpers";
 
 export async function createProduct(
   request: NextRequest,
@@ -193,7 +194,7 @@ export async function createProduct(
           const { data: existingSlug } = await supabase.from("products").select("id").eq("slug", productSlug).limit(1);
           if (existingSlug && existingSlug.length > 0) productSlug = `${productSlug}-${Date.now()}`;
 
-          const filteredProductData = buildProductPayload(validatedBody, body as Record<string, any>, productBranchId, organizationId, productSlug);
+          const filteredProductData = buildProductPayload(validatedBody, body as Record<string, unknown>, productBranchId, organizationId, productSlug);
 
           logger.debug("Prepared product data (sample)", {
             name: filteredProductData.name,
@@ -258,7 +259,7 @@ export async function createProduct(
           const createdProduct = data[0];
 
           // Handle stock creation
-          await handleProductStock(createdProduct, body as Record<string, any>, productBranchId, branchContext, organizationId);
+          await handleProductStock(createdProduct, body as Record<string, unknown>, productBranchId, branchContext, organizationId);
 
           logger.info("Product created successfully", {
             productId: createdProduct?.id,

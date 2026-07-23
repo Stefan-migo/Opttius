@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 export interface FormOptionValue {
   id: string;
   value: string;
@@ -74,7 +77,7 @@ export function useFormOptions(formType: FormType): UseFormOptionsReturn {
         setError(data.error || "Error al cargar opciones");
       }
     } catch (err) {
-      console.error("Error fetching form options:", err);
+      appLogger.error("Error fetching form options:", err);
       setError("Error al cargar opciones");
     } finally {
       setLoading(false);

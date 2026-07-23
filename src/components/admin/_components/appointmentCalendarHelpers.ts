@@ -4,7 +4,7 @@
  * No behavioral changes — pure extraction.
  */
 
-import { AlertCircle, Calendar as CalendarIcon, Clock, Eye, Package, Plus, RefreshCw, Truck, User, Wrench } from "lucide-react";
+import { AlertCircle, Calendar as CalendarIcon, Eye, Package, RefreshCw, Truck, User, Wrench } from "lucide-react";
 
 export interface Appointment {
   id: string;

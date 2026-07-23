@@ -11,8 +11,8 @@ interface PrescriptionManagementCardProps {
 
 export function PrescriptionManagementCard({ customer, section, onNew, onEdit }: PrescriptionManagementCardProps) {
   switch (section) {
-    case "prescriptions": return <PrescriptionsSection customer={customer} onNew={onNew} onEdit={onEdit} />;
-    case "appointments": return <AppointmentsSection customer={customer} onNew={onNew} onEdit={onEdit} />;
+    case "prescriptions": return <PrescriptionsSection customer={customer} onEdit={onEdit} onNew={onNew} />;
+    case "appointments": return <AppointmentsSection customer={customer} onEdit={onEdit} onNew={onNew} />;
     case "quotes": return <QuotesSection customer={customer} onNew={onNew} />;
     default: return null;
   }

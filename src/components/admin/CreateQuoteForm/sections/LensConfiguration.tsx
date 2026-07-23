@@ -13,9 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
-import {
-  ContactLensFamily,
+import {  ContactLensFamily,
   LensFamily,
   QuoteFormData,
 } from "../types/quote.types";
@@ -42,6 +42,7 @@ export function LensConfiguration({
   disabled = false,
 }: LensConfigurationProps) {
   const { currentBranchId } = useBranch();
+
   const [lensFamilies, setLensFamilies] = useState<LensFamily[]>([]);
   const [contactLensFamilies, setContactLensFamilies] = useState<
     ContactLensFamily[]
@@ -66,7 +67,7 @@ export function LensConfiguration({
           }
         }
       } catch (error) {
-        console.error("Error fetching lens families:", error);
+        appLogger.error("Error fetching lens families:", error);
       } finally {
         setLoadingFamilies(false);
       }
@@ -91,7 +92,7 @@ export function LensConfiguration({
           }
         }
       } catch (error) {
-        console.error("Error fetching contact lens families:", error);
+        appLogger.error("Error fetching contact lens families:", error);
       } finally {
         setLoadingContactLensFamilies(false);
       }

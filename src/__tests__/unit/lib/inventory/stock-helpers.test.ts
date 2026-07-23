@@ -6,7 +6,7 @@
  * `.rpc()` return values via the mock's resolved value.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks — hoisted before imports
@@ -52,8 +52,8 @@ function createMockSupabase() {
 }
 
 import {
-  getProductStock,
   getAvailableQuantity,
+  getProductStock,
   updateProductStock,
   upsertProductStock,
 } from "@/lib/inventory/stock-helpers";

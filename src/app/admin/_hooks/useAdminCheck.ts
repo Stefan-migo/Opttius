@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 
 /**
  * Hook that manages admin authentication check, role detection, and redirect logic.
@@ -132,7 +133,7 @@ export function useAdminCheck() {
             error.message !== "Admin check timeout" &&
             process.env.NODE_ENV === "development"
           ) {
-            console.error("❌ Error checking admin status:", error);
+            appLogger.error("❌ Error checking admin status:", error);
           }
           isAdminResult = false;
         } else {
@@ -148,11 +149,11 @@ export function useAdminCheck() {
         setIsAdminCheckInProgress(false);
       } catch (error: unknown) {
         if (error instanceof Error && error.message === "Admin check timeout") {
-          console.error("⏱️ Admin check timed out - assuming not admin");
+          appLogger.error("⏱️ Admin check timed out - assuming not admin");
         } else if (error instanceof Error) {
-          console.error("❌ Error checking admin status:", error);
+          appLogger.error("❌ Error checking admin status:", error);
         } else {
-          console.error("❌ Error checking admin status:", error);
+          appLogger.error("❌ Error checking admin status:", error);
         }
 
         setAdminState({

@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { appLogger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/client";
 
 type OrgStatus = {
@@ -74,7 +75,7 @@ export function LandingHeader() {
           setOrgStatus(null);
         }
       } catch (error) {
-        console.error("Error checking auth:", error);
+        appLogger.error("Error checking auth:", error);
         setIsAuthenticated(false);
         setOrgStatus(null);
       } finally {

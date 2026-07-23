@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 
 // Send contact form notification
@@ -58,7 +61,7 @@ Este mensaje fue enviado desde el formulario de contacto de la web.
       replyTo: data.email,
     });
   } catch (error) {
-    console.error("Error sending contact form notification:", error);
+    appLogger.error("Error sending contact form notification:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

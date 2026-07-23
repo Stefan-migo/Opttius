@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Customer } from "@/lib/api/services/customerService";
 
+import { useCustomers } from "../_hooks/useCustomers";
 import { CustomersFilters } from "./CustomersFilters";
 import { CustomersStatsCards } from "./CustomersStatsCards";
 import { CustomersTable } from "./CustomersTable";
-import { useCustomers } from "../_hooks/useCustomers";
 
 interface CustomersContentProps {
   initialCustomers: Customer[];
@@ -144,13 +144,13 @@ export default function CustomersContent({
 
       {/* Table */}
       <CustomersTable
-        customers={customers}
-        loading={loading}
-        error={error}
         currentPage={currentPage}
+        customers={customers}
+        error={error}
+        loading={loading}
         totalPages={totalPages}
-        onRetry={fetchCustomers}
         onPageChange={setCurrentPage}
+        onRetry={fetchCustomers}
       />
     </div>
   );

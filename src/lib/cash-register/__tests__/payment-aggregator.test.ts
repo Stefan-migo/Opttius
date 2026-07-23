@@ -11,11 +11,12 @@
  *   - coerceAmount: null, undefined, string, NaN, valid number
  */
 import { describe, expect, it } from "vitest";
+
+import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import {
   aggregatePayments,
   coerceAmount,
 } from "@/lib/cash-register/payment-aggregator";
-import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -436,8 +437,8 @@ describe("edge cases", () => {
 
 // ─── Closure Builder ─────────────────────────────────────────────────────────
 
-import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
+import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 
 describe("buildClosurePayload", () => {
   const baseParams: ClosurePayloadParams = {

@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           try {
             const result = await createAndStreamAgent(supabase, user.id, p, m, currentSessionId, resolvedOrgId, agentContext, baseConfig, enhancedPrompt, currentBranchId, userData, isSuperAdmin, userName, fileId ? `[Archivo adjunto: fileId="${fileId}"]\n\n${message}` : message, controller, encoder);
             return result.success;
-          } catch (error: any) {
+          } catch (error: unknown) {
             const msg = error.message || String(error);
             if (msg.includes("Too Many Requests") || msg.includes("429")) throw error; // Rate limit - don't fallback
             return false;
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           } else if (!success) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Error procesando la solicitud." })}\n\n`)); controller.close();
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           const msg = error.message || String(error);
           const isRateLimit = msg.includes("Too Many Requests") || msg.includes("429") || msg.includes("rate limit");
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: isRateLimit ? "Límite de solicitudes excedido." : msg })}\n\n`)); controller.close();

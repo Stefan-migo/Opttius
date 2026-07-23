@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { posService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 export function usePOSCashStatus(
   branchId: string | null,
@@ -21,7 +22,7 @@ export function usePOSCashStatus(
       const cashStatus = await posService.getCashStatus(branchId || undefined);
       setIsOpen(cashStatus?.isOpen ?? null);
     } catch (error) {
-      console.error("Error checking cash status:", error);
+      appLogger.error("Error checking cash status:", error);
     } finally {
       setChecking(false);
     }

@@ -11,6 +11,7 @@ import {
   type PasswordChangeForm,
   passwordChangeSchema,
 } from "@/lib/api/validation/profile-schemas";
+import { appLogger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/client";
 
 export function PasswordTab() {
@@ -51,7 +52,7 @@ export function PasswordTab() {
       setIsChangingPassword(false);
       toast.success("Contraseña cambiada exitosamente");
     } catch (error: unknown) {
-      console.error("Error changing password:", error);
+      appLogger.error("Error changing password:", error);
       toast.error(
         error instanceof Error
           ? error.message

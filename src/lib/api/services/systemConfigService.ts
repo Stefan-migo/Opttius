@@ -3,11 +3,10 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { mergeConfigsByScope } from "@/lib/admin/system-config-utils";
 import { createConfigValueSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-
-import { mergeConfigsByScope } from "@/lib/admin/system-config-utils";
 
 import {
   fetchLegacyConfigs, getAdminAuth, isLegacySchemaError, parseConfigValue, resolveScope,
@@ -15,12 +14,12 @@ import {
 
 function applyScopeFilters(query: ReturnType<ReturnType<typeof createServiceRoleClient>["from"]>, publicOnly: boolean, category: string, orgId: string | null, branchId: string | null) {
   let q = query.order("category", { ascending: true }).order("config_key", { ascending: true });
-  if (publicOnly) q = (q as any).eq("is_public", true);
-  if (category && category !== "all") q = (q as any).eq("category", category);
-  if (orgId != null) q = (q as any).eq("organization_id", orgId);
-  else q = (q as any).is("organization_id", null);
-  if (branchId != null) q = (q as any).eq("branch_id", branchId);
-  else q = (q as any).is("branch_id", null);
+  if (publicOnly) q = (q as unknown).eq("is_public", true);
+  if (category && category !== "all") q = (q as unknown).eq("category", category);
+  if (orgId != null) q = (q as unknown).eq("organization_id", orgId);
+  else q = (q as unknown).is("organization_id", null);
+  if (branchId != null) q = (q as unknown).eq("branch_id", branchId);
+  else q = (q as unknown).is("branch_id", null);
   return q;
 }
 
@@ -64,7 +63,7 @@ export async function getSystemConfigs(params: { category: string; publicOnly: b
     else if (!error) configs = mergeConfigsByScope([...(gRes.data || []), ...(oRes.data || [])]);
     if (branchId && orgId) {
       const bRes = await applyScopeFilters(supabaseAdmin.from("system_config").select("*"), publicOnly, category, orgId, branchId);
-      if (!bRes.error) configs = mergeConfigsByScope([...(configs as any[]), ...(bRes.data || [])]);
+      if (!bRes.error) configs = mergeConfigsByScope([...(configs as unknown[]), ...(bRes.data || [])]);
     }
   }
 
@@ -74,7 +73,7 @@ export async function getSystemConfigs(params: { category: string; publicOnly: b
   }
 
   if (error) { logger.error("Error fetching system config:", { error }); throw new Error("Failed to fetch system config"); }
-  return { configs: (configs || []).map((c: any) => ({ ...c, config_value: parseConfigValue(c.config_value) })) };
+  return { configs: (configs || []).map((c: unknown) => ({ ...c, config_value: parseConfigValue(c.config_value) })) };
 }
 
 export async function createSystemConfig(body: Record<string, unknown>, authClient?: SupabaseClient): Promise<{ config: Record<string, unknown> }> {
@@ -99,11 +98,11 @@ export async function createSystemConfig(body: Record<string, unknown>, authClie
       delete insertPayload.organization_id; delete insertPayload.branch_id;
       const retryRes = await supabase.from("system_config").insert(insertPayload).select().single();
       if (retryRes.error) { logger.error("Error creating system config:", { error: retryRes.error, config_key }); throw new Error("Failed to create system config"); }
-      return { config: { ...retryRes.data!, config_value: parseConfigValue((retryRes.data as any)?.config_value) } };
+      return { config: { ...retryRes.data!, config_value: parseConfigValue((retryRes.data as unknown)?.config_value) } };
     }
     logger.error("Error creating system config:", { error: configError, config_key }); throw new Error("Failed to create system config");
   }
-  return { config: { ...config!, config_value: parseConfigValue((config as any).config_value) } };
+  return { config: { ...config!, config_value: parseConfigValue((config as unknown).config_value) } };
 }
 
 export async function updateSystemConfigs(body: Record<string, unknown>, branchIdFromHeaders: string | null, authClient?: SupabaseClient): Promise<{ results: Array<Record<string, unknown>> }> {
@@ -123,15 +122,15 @@ export async function updateSystemConfigs(body: Record<string, unknown>, branchI
     try {
       let query = supabase.from("system_config").select("id, is_sensitive, category, value_type").eq("config_key", config_key);
       if (useLegacySchema !== true) {
-        if (targetOrgId == null) query = (query as any).is("organization_id", null).is("branch_id", null);
+        if (targetOrgId == null) query = (query as unknown).is("organization_id", null).is("branch_id", null);
         else {
-          query = (query as any).eq("organization_id", targetOrgId);
-          query = targetBranchId ? (query as any).eq("branch_id", targetBranchId) : (query as any).is("branch_id", null);
+          query = (query as unknown).eq("organization_id", targetOrgId);
+          query = targetBranchId ? (query as unknown).eq("branch_id", targetBranchId) : (query as unknown).is("branch_id", null);
         }
       }
       let existingConfig: Record<string, unknown> | null = null;
       let checkError: { message: string; code?: string } | null = null;
-      ({ data: existingConfig, error: checkError } = await (query as any).maybeSingle());
+      ({ data: existingConfig, error: checkError } = await (query as unknown).maybeSingle());
 
       if (checkError && isLegacySchemaError(checkError)) {
         useLegacySchema = true;

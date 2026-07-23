@@ -1,5 +1,6 @@
-import { appLogger as logger } from "@/lib/logger";
 import { Resend } from "resend";
+
+import { appLogger as logger } from "@/lib/logger";
 
 // Gracefully handle missing API key for development
 if (!process.env.RESEND_API_KEY) {

@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
 import type {
   ContactLensFamily,
   ContactLensPriceMatrix,
 } from "@/types/contact-lens";
 
-import { ContactLensMatrixDialog } from "./ContactLensMatrixDialog";
 import { ContactLensMatricesList } from "./ContactLensMatricesList";
+import { ContactLensMatrixDialog } from "./ContactLensMatrixDialog";
 
 interface ContactLensPriceMatrixWithFamily extends ContactLensPriceMatrix {
   contact_lens_families: ContactLensFamily;
@@ -67,7 +68,7 @@ export default function ContactLensMatricesContent() {
         setFamilies(data.families || []);
       }
     } catch (error) {
-      console.error("Error fetching families:", error);
+      appLogger.error("Error fetching families:", error);
     }
   };
 
@@ -82,7 +83,7 @@ export default function ContactLensMatricesContent() {
       const data = await response.json();
       setMatrices(data.matrices || []);
     } catch (error) {
-      console.error("Error fetching matrices:", error);
+      appLogger.error("Error fetching matrices:", error);
       toast.error("Error al cargar matrices de precios");
     } finally {
       setLoading(false);
@@ -197,24 +198,24 @@ export default function ContactLensMatricesContent() {
       </div>
 
       <ContactLensMatricesList
-        matrices={matrices}
         families={families}
         loading={loading}
-        onEdit={(matrix) => handleOpenDialog(matrix)}
-        onDelete={handleDelete}
+        matrices={matrices}
         onCreate={() => handleOpenDialog()}
+        onDelete={handleDelete}
+        onEdit={(matrix) => handleOpenDialog(matrix)}
         onRefresh={fetchMatrices}
       />
 
       <ContactLensMatrixDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
         editingMatrix={editingMatrix}
-        formData={formData}
         families={families}
-        onFormChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
-        onSubmit={handleSubmit}
+        formData={formData}
+        open={showDialog}
         onClose={handleCloseDialog}
+        onFormChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
+        onOpenChange={setShowDialog}
+        onSubmit={handleSubmit}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { completeRUTIfNeeded, isValidRUT, isValidRUTFormat } from "@/lib/utils/rut";
+import { completeRUTIfNeeded, isValidRUTFormat } from "@/lib/utils/rut";
 
 export const rutSchema = z.string().min(1, "El RUT es requerido").refine((v) => /^(\d{1,2}\.?\d{3}\.?\d{3}-)[\dKk]$/.test(v), { message: "Formato de RUT inválido" }).refine((v) => { const c = v.replace(/\./g, "").replace(/-/g, ""); const r = c.slice(0, -1); const d = c.slice(-1).toUpperCase(); let s = 0; let m = 2; for (let i = r.length - 1; i >= 0; i--) { s += parseInt(r[i]) * m; m = m === 7 ? 2 : m + 1; } const e = 11 - (s % 11); const cd = e === 11 ? "0" : e === 10 ? "K" : e.toString(); return cd === d; }, { message: "RUT inválido" });
 export const emailSchema = z.string().min(1, "El email es requerido").email("Email inválido");

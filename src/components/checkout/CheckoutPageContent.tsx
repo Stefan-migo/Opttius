@@ -17,10 +17,10 @@ import {
 import { useAuthContext } from "@/contexts/AuthContext";
 import { type SubscriptionTier, TIER_LIMITS } from "@/lib/saas/tier-config";
 
-import { CheckoutHeader } from "./_components/CheckoutHeader";
 import { CheckoutCurrentPlan } from "./_components/CheckoutCurrentPlan";
-import { CheckoutPlanSelector } from "./_components/CheckoutPlanSelector";
+import { CheckoutHeader } from "./_components/CheckoutHeader";
 import { CheckoutPaymentSection } from "./_components/CheckoutPaymentSection";
+import { CheckoutPlanSelector } from "./_components/CheckoutPlanSelector";
 import { CheckoutSummary } from "./_components/CheckoutSummary";
 
 interface Tier {
@@ -364,11 +364,11 @@ export function CheckoutPageContent() {
             <CheckoutPlanSelector
               currentSubscription={currentSubscription}
               getTierChangeType={getTierChangeType}
-              onTierSelect={handleTierSelect}
               selectedTier={selectedTier}
               tierLabels={tierLabels}
               tierOrder={tierOrder}
               tiers={tiers}
+              onTierSelect={handleTierSelect}
             />
 
             <CheckoutPaymentSection
@@ -380,9 +380,6 @@ export function CheckoutPageContent() {
             <CheckoutSummary
               amount={amount}
               error={error}
-              onCreateIntent={handleCreateIntent}
-              onPaymentSubmit={handlePaymentSubmit}
-              onSaveCardChange={setSaveCard}
               paymentId={paymentId}
               processing={processing}
               saveCard={saveCard}
@@ -390,6 +387,9 @@ export function CheckoutPageContent() {
               selectedTier={selectedTier}
               tierLabels={tierLabels}
               userEmail={user?.email}
+              onCreateIntent={handleCreateIntent}
+              onPaymentSubmit={handlePaymentSubmit}
+              onSaveCardChange={setSaveCard}
             />
           </div>
         </div>

@@ -22,7 +22,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { type SubscriptionTier } from "@/lib/saas/tier-config";
-import { cn } from "@/lib/utils";
 
 interface CheckoutSummaryProps {
   selectedTier: SubscriptionTier | null;

@@ -25,8 +25,6 @@ export function PreviewBlock({ block, onAction }: Props) {
         <div className="mt-2 flex flex-wrap gap-2">
           {block.actions.map((a, i) => (
             <button
-              key={i}
-              type="button"
               className={cn(
                 "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
                 a.variant === "primary" &&
@@ -36,6 +34,8 @@ export function PreviewBlock({ block, onAction }: Props) {
                 a.variant === "ghost" &&
                   "border border-gray-300 text-gray-600 hover:bg-gray-50",
               )}
+              key={i}
+              type="button"
               onClick={() => onAction?.(a.action, a.params)}
             >
               {a.label}

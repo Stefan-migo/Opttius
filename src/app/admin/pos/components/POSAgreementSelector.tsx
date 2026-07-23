@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
 import { Building2, Check, Search } from "lucide-react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,20 +52,20 @@ export function POSAgreementSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
           className={cn(
             "w-full justify-between gap-2",
             !selectedAgreement && "text-muted-foreground",
           )}
           disabled={disabled}
+          role="combobox"
+          variant="outline"
         >
           {selectedAgreement ? (
             <div className="flex items-center gap-2 truncate">
               <Building2 className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{selectedAgreement.name}</span>
               {selectedAgreement.discount_percentage && (
-                <Badge variant="secondary" className="ml-auto flex-shrink-0">
+                <Badge className="ml-auto flex-shrink-0" variant="secondary">
                   -{selectedAgreement.discount_percentage}%
                 </Badge>
               )}
@@ -79,7 +78,7 @@ export function POSAgreementSelector({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent align="start" className="w-[300px] p-0">
         <Command>
           <CommandInput placeholder="Buscar convenios..." />
           <CommandList>
@@ -111,7 +110,7 @@ export function POSAgreementSelector({
                     )}
                   </div>
                   {agreement.discount_percentage && (
-                    <Badge variant="secondary" className="ml-auto">
+                    <Badge className="ml-auto" variant="secondary">
                       -{agreement.discount_percentage}%
                     </Badge>
                   )}

@@ -16,9 +16,10 @@ vi.mock("@/lib/logger", () => ({
   appLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+import type { Mock } from "vitest";
+
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import type { Mock } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -2,7 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import type { UpdateProductData } from "@/lib/api/services";
 import { productService } from "@/lib/api/services";
-import { appLogger } from "@/lib/logger";
+import { appLogger } from '@/lib/logger';
 
 import type { FormState } from "./types";
 export async function handleSubmitProduct(

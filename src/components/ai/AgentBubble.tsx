@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { Block, BubbleState } from "@/lib/ai/types";
 
@@ -314,6 +314,9 @@ export function AgentBubble({
       {isOpen ? (
         <div className="relative">
           <BubblePanel
+            inputDisabled={isLoading}
+            inputValue={inputValue}
+            messages={messages}
             state={
               state === "docked"
                 ? "docked"
@@ -321,36 +324,33 @@ export function AgentBubble({
                   ? "repose"
                   : "conversation"
             }
-            title={title}
-            messages={messages}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSend={handleSend}
-            onClose={handleClose}
-            onToggleDock={handleToggleDock}
-            onAction={handleAction}
-            onPreferences={handlePreferencesToggle}
-            onAttach={handleAttach}
             suggestions={suggestions}
-            inputDisabled={isLoading}
+            title={title}
+            onAction={handleAction}
+            onAttach={handleAttach}
+            onClose={handleClose}
+            onInputChange={setInputValue}
+            onPreferences={handlePreferencesToggle}
+            onSend={handleSend}
+            onToggleDock={handleToggleDock}
           />
           {/* Preferences overlay */}
           {showPreferences && (
             <div className="absolute inset-0 z-10 rounded-xl bg-white">
               <AgentPreferencesPanel
-                userId={agentCtx.userId}
                 prefs={prefs}
-                onUpdate={updatePrefs}
+                userId={agentCtx.userId}
                 onClose={handlePreferencesToggle}
                 onReset={resetPrefs}
+                onUpdate={updatePrefs}
               />
             </div>
           )}
         </div>
       ) : (
         <BubbleFloatingButton
-          state={state}
           badgeCount={badgeCount}
+          state={state}
           onClick={handleOpen}
         />
       )}

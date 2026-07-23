@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { appLogger } from '@/lib/logger';
 
 export default function OnboardingChoicePage() {
   const router = useRouter();
@@ -64,7 +65,7 @@ export default function OnboardingChoicePage() {
 
         setHasOrganization(false);
       } catch (err) {
-        console.error("Error checking organization status:", err);
+        appLogger.error("Error checking organization status:", err);
         setHasOrganization(false);
       }
     };

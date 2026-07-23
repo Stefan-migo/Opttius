@@ -1,8 +1,9 @@
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -13,6 +14,7 @@ export async function sendAppointmentConfirmation(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+
     const template = await loadEmailTemplate(
       "appointment_confirmation",
       true,
@@ -56,7 +58,7 @@ export async function sendAppointmentConfirmation(
       fromDisplayName: orgInfo?.resolvedDisplayName,
     });
   } catch (error) {
-    console.error("Error sending appointment confirmation:", error);
+    appLogger.error("Error sending appointment confirmation:", error);
     return { success: false, error: "Error sending email" };
   }
 }
@@ -109,7 +111,7 @@ export async function sendAppointmentReminder(
       fromDisplayName: orgInfo?.resolvedDisplayName,
     });
   } catch (error) {
-    console.error("Error sending appointment reminder:", error);
+    appLogger.error("Error sending appointment reminder:", error);
     return { success: false, error: "Error sending email" };
   }
 }

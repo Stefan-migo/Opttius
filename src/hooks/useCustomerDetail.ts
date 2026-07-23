@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import type { Appointment, Customer, Prescription } from "@/lib/api/services";
 import { customerService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 // Local Customer interface for the form state - extended with additional fields
 export interface CustomerFormData extends Partial<Customer> {
@@ -61,7 +62,7 @@ export function useCustomerDetail() {
       setCustomer(customerData);
       setError(null);
     } catch (err) {
-      console.error("Error fetching customer:", err);
+      appLogger.error("Error fetching customer:", err);
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { useBranch } from "@/hooks/useBranch";
 import { quoteService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 import { buildQuotePrintContent } from "./printTemplate";
 import type { Quote } from "./types";
@@ -45,7 +46,7 @@ export function useQuote() {
       const quoteResult = await quoteService.getQuote(quoteId);
       setQuote(quoteResult as unknown as Quote | null);
     } catch (error) {
-      console.error("Error fetching quote:", error);
+      appLogger.error("Error fetching quote:", error);
       toast.error("Error al cargar el presupuesto");
     } finally {
       setLoading(false);
@@ -63,7 +64,7 @@ export function useQuote() {
     try {
       router.push(`/admin/pos?quoteId=${quoteId}`);
     } catch (error: unknown) {
-      console.error("Error loading quote to POS:", error);
+      appLogger.error("Error loading quote to POS:", error);
       toast.error("Error al cargar presupuesto al POS");
     } finally {
       setLoadingToPos(false);

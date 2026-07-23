@@ -16,14 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
+import {  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { appLogger } from '@/lib/logger';
 
 interface ContactLensFamily {
   id: string;
@@ -57,6 +57,7 @@ const MODALITIES = [
 
 export default function ContactLensFamiliesList() {
   const router = useRouter();
+
   const [families, setFamilies] = useState<ContactLensFamily[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,7 +92,7 @@ export default function ContactLensFamiliesList() {
         toast.error("Error al cargar familias de lentes de contacto");
       }
     } catch (error) {
-      console.error("Error fetching families:", error);
+      appLogger.error("Error fetching families:", error);
       toast.error("Error al cargar familias de lentes de contacto");
     } finally {
       setLoading(false);

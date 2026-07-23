@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { appLogger } from '@/lib/logger';
 
 import { SEOManagerAnalyticsTab } from "./SEOManagerAnalyticsTab";
 import { SEOManagerGeneralTab } from "./SEOManagerGeneralTab";
@@ -34,7 +35,7 @@ export default function SEOManager() {
         toast.error("Error al cargar configuración SEO");
       }
     } catch (error) {
-      console.error("Error fetching SEO config:", error);
+      appLogger.error("Error fetching SEO config:", error);
       toast.error("Error al cargar configuración SEO");
     } finally {
       setLoading(false);
@@ -60,7 +61,7 @@ export default function SEOManager() {
         toast.error(error.error || "Error al guardar configuración");
       }
     } catch (error) {
-      console.error("Error saving SEO config:", error);
+      appLogger.error("Error saving SEO config:", error);
       toast.error("Error al guardar configuración");
     } finally {
       setSaving(false);
@@ -108,11 +109,11 @@ export default function SEOManager() {
         </TabsList>
 
         <TabsContent className="space-y-6" value="general">
-          <SEOManagerGeneralTab config={config} baseUrl={baseUrl} onUpdate={handleUpdate} />
+          <SEOManagerGeneralTab baseUrl={baseUrl} config={config} onUpdate={handleUpdate} />
         </TabsContent>
 
         <TabsContent className="space-y-6" value="social">
-          <SEOManagerSocialTab config={config} baseUrl={baseUrl} onUpdate={handleUpdate} />
+          <SEOManagerSocialTab baseUrl={baseUrl} config={config} onUpdate={handleUpdate} />
         </TabsContent>
 
         <TabsContent className="space-y-6" value="analytics">

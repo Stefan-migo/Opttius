@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
 import type { ContactLensModality, ContactLensPackaging, ContactLensUseType } from "@/types/contact-lens";
 
 import type { ContactLensMatrixFormData } from "./ContactLensMatrixManager";
@@ -57,7 +58,7 @@ export function useContactLensFamilyWizard(familyId?: string) {
             })),
           });
         })
-        .catch((err) => { console.error(err); toast.error("Error al cargar familia"); })
+        .catch((err) => { appLogger.error(err); toast.error("Error al cargar familia"); })
         .finally(() => setInitialLoading(false));
     }
   }, [familyId]);
@@ -82,7 +83,7 @@ export function useContactLensFamilyWizard(familyId?: string) {
       if (!response.ok) { const err = await response.json(); throw new Error(err.error || (familyId ? "Error al actualizar familia" : "Error al crear familia")); }
       toast.success(familyId ? "Familia actualizada exitosamente" : "Familia de lentes de contacto creada exitosamente");
       router.push("/admin/products?tab=contact-lens-families");
-    } catch (error: unknown) { console.error(error); toast.error(error instanceof Error ? error.message : "Error al guardar"); }
+    } catch (error: unknown) { appLogger.error(error); toast.error(error instanceof Error ? error.message : "Error al guardar"); }
     finally { setLoading(false); }
   };
 

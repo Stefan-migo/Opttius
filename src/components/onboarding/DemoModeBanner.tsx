@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { appLogger } from '@/lib/logger';
 
 // Tiempo en milisegundos antes de volver a mostrar el banner (24 horas)
 const BANNER_REAPPEAR_DELAY = 24 * 60 * 60 * 1000; // 24 horas
@@ -46,7 +47,7 @@ export function DemoModeBanner() {
           }
         }
       } catch (err) {
-        console.error("Error checking demo mode:", err);
+        appLogger.error("Error checking demo mode:", err);
       }
     };
 

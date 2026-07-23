@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import type {
   LLMConfig,
   LLMMessage,
@@ -31,14 +34,14 @@ export async function* streamText(
 
   // Log the tools being sent to DeepSeek
   if (tools) {
-    console.log("DeepSeek request - tools count:", tools.length);
-    console.log(
+    appLogger.info("DeepSeek request - tools count:", tools.length);
+    appLogger.info(
       "DeepSeek request - tool names:",
       tools.map((t) => t.function?.name).join(", "),
     );
     // Log first tool schema as example
     if (tools[0]) {
-      console.log(
+      appLogger.info(
         "DeepSeek request - sample tool:",
         JSON.stringify(tools[0], null, 2).substring(0, 500),
       );
@@ -80,16 +83,16 @@ export async function* streamText(
   while (true) {
     const { done, value } = await reader.read();
     if (done) {
-      console.log("=== DEEPSEEK STREAM ENDED (reader.done) ===");
+      appLogger.info("=== DEEPSEEK STREAM ENDED (reader.done) ===");
       // Process any remaining accumulated tool calls
       const finalToolCalls: ToolCall[] = [];
-      console.log(
+      appLogger.info(
         "Accumulated tool calls at stream end:",
         accumulatedToolCalls.size,
       );
 
       for (const [id, acc] of accumulatedToolCalls.entries()) {
-        console.log("Processing at stream end:", {
+        appLogger.info("Processing at stream end:", {
           id,
           name: acc.name,
           bufferLength: acc.argumentsBuffer.length,
@@ -102,9 +105,9 @@ export async function* streamText(
           if (acc.argumentsBuffer && acc.argumentsBuffer.trim()) {
             try {
               args = JSON.parse(acc.argumentsBuffer);
-              console.log("Parsed args at stream end:", args);
+              appLogger.info("Parsed args at stream end:", args);
             } catch (e) {
-              console.warn(
+              appLogger.warn(
                 "Failed to parse tool arguments:",
                 acc.argumentsBuffer,
               );
@@ -120,7 +123,7 @@ export async function* streamText(
       }
 
       if (finalToolCalls.length > 0) {
-        console.log(
+        appLogger.info(
           "Yielding stream end tool calls:",
           finalToolCalls.map((tc) => ({
             name: tc.name,
@@ -148,14 +151,14 @@ export async function* streamText(
         if (data === "[DONE]") {
           // Process accumulated tool calls before finishing
           const finalToolCalls: ToolCall[] = [];
-          console.log("=== DEEPSEEK [DONE] PROCESSING ===");
-          console.log(
+          appLogger.info("=== DEEPSEEK [DONE] PROCESSING ===");
+          appLogger.info(
             "Accumulated tool calls map size:",
             accumulatedToolCalls.size,
           );
 
           for (const [id, acc] of accumulatedToolCalls.entries()) {
-            console.log("Processing accumulated:", {
+            appLogger.info("Processing accumulated:", {
               id,
               name: acc.name,
               argumentsBufferLength: acc.argumentsBuffer.length,
@@ -168,9 +171,9 @@ export async function* streamText(
               if (acc.argumentsBuffer && acc.argumentsBuffer.trim()) {
                 try {
                   args = JSON.parse(acc.argumentsBuffer);
-                  console.log("Parsed arguments successfully:", args);
+                  appLogger.info("Parsed arguments successfully:", args);
                 } catch (e) {
-                  console.warn(
+                  appLogger.warn(
                     "Failed to parse tool arguments on [DONE]:",
                     acc.argumentsBuffer,
                   );
@@ -180,14 +183,14 @@ export async function* streamText(
                     const cleaned = acc.argumentsBuffer.trim();
                     if (cleaned.startsWith("{") && !cleaned.endsWith("}")) {
                       args = JSON.parse(cleaned + "}");
-                      console.log("Parsed with added closing brace:", args);
+                      appLogger.info("Parsed with added closing brace:", args);
                     }
                   } catch (e2) {
-                    console.warn("Could not recover arguments:", e2);
+                    appLogger.warn("Could not recover arguments:", e2);
                   }
                 }
               }
-              console.log("Final tool call:", { name: acc.name, args });
+              appLogger.info("Final tool call:", { name: acc.name, args });
               finalToolCalls.push({
                 id: acc.id,
                 name: acc.name.trim(),
@@ -195,18 +198,18 @@ export async function* streamText(
               });
             }
           }
-          console.log("=================================");
+          appLogger.info("=================================");
 
           if (finalToolCalls.length > 0) {
-            console.log("=== DEEPSEEK FINAL TOOL CALLS ===");
+            appLogger.info("=== DEEPSEEK FINAL TOOL CALLS ===");
             for (const tc of finalToolCalls) {
-              console.log("Tool call:", tc.name);
-              console.log(
+              appLogger.info("Tool call:", tc.name);
+              appLogger.info(
                 "Tool arguments:",
                 JSON.stringify(tc.arguments, null, 2),
               );
             }
-            console.log("================================");
+            appLogger.info("================================");
             yield {
               content: "",
               done: false,
@@ -226,8 +229,8 @@ export async function* streamText(
 
           // Log if this is a finish chunk
           if (finishReason) {
-            console.log("DeepSeek finish_reason:", finishReason);
-            console.log(
+            appLogger.info("DeepSeek finish_reason:", finishReason);
+            appLogger.info(
               "DeepSeek accumulated tool calls at finish:",
               Array.from(accumulatedToolCalls.entries()).map(([id, acc]) => ({
                 id,
@@ -240,7 +243,7 @@ export async function* streamText(
 
           // Log raw chunk for debugging
           if (delta?.tool_calls) {
-            console.log("DeepSeek RAW chunk:", data.substring(0, 500));
+            appLogger.info("DeepSeek RAW chunk:", data.substring(0, 500));
           }
 
           if (delta?.content) {
@@ -251,13 +254,13 @@ export async function* streamText(
           }
 
           if (delta?.tool_calls) {
-            console.log(
+            appLogger.info(
               "DeepSeek tool_calls delta:",
               JSON.stringify(delta.tool_calls, null, 2),
             );
             // Accumulate tool calls incrementally
             for (const tc of delta.tool_calls) {
-              console.log("DeepSeek processing tc:", JSON.stringify(tc));
+              appLogger.info("DeepSeek processing tc:", JSON.stringify(tc));
 
               // IMPORTANT: DeepSeek sends id only in the first chunk, subsequent chunks only have index
               // We MUST use index as the primary key to accumulate all chunks together
@@ -270,7 +273,7 @@ export async function* streamText(
                   name: "",
                   argumentsBuffer: "",
                 });
-                console.log(
+                appLogger.info(
                   "DeepSeek created new tool accumulator for index:",
                   tcIndex,
                 );
@@ -281,13 +284,13 @@ export async function* streamText(
               // Update ID if we get a real one (first chunk has the real id)
               if (tc.id) {
                 acc.id = tc.id;
-                console.log("DeepSeek set tool call ID to:", tc.id);
+                appLogger.info("DeepSeek set tool call ID to:", tc.id);
               }
 
               // Accumulate name (comes in first chunk)
               if (tc.function?.name) {
                 acc.name = tc.function.name.trim();
-                console.log("DeepSeek tool name received:", acc.name);
+                appLogger.info("DeepSeek tool name received:", acc.name);
               }
 
               // Accumulate arguments (may come in multiple chunks as string)
@@ -296,7 +299,7 @@ export async function* streamText(
                 tc.function?.arguments !== null
               ) {
                 const argValue = tc.function.arguments;
-                console.log(
+                appLogger.info(
                   "DeepSeek raw arguments value:",
                   JSON.stringify(argValue),
                   "type:",
@@ -309,13 +312,13 @@ export async function* streamText(
                   // If it's already an object, convert to string and append
                   acc.argumentsBuffer += JSON.stringify(argValue);
                 }
-                console.log(
+                appLogger.info(
                   "DeepSeek arguments buffer now:",
                   acc.argumentsBuffer,
                 );
               }
 
-              console.log("DeepSeek accumulator state:", {
+              appLogger.info("DeepSeek accumulator state:", {
                 key: mapKey,
                 id: acc.id,
                 name: acc.name,
@@ -324,7 +327,7 @@ export async function* streamText(
             }
           }
         } catch (e) {
-          console.warn("DeepSeek JSON parse error:", e);
+          appLogger.warn("DeepSeek JSON parse error:", e);
           // Skip invalid JSON
         }
       }

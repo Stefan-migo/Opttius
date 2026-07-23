@@ -1,6 +1,9 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
+import { appLogger } from '@/lib/logger';
+
+
 export interface ParsedDocument {
   id: string;
   title: string;
@@ -70,7 +73,7 @@ export class DocumentParser {
         const document = await this.parseDocument(filePath, options);
         documents.push(document);
       } catch (error) {
-        console.warn(`Failed to parse document ${file}:`, error);
+        appLogger.warn(`Failed to parse document ${file}:`, error);
       }
     }
     

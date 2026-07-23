@@ -7,13 +7,13 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ImportProduct } from "@/lib/inventory/import-service";
 import {
   generateUniqueSlug,
   processProducts,
   resolveCategoryId,
 } from "@/lib/inventory/import-service";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import type { ImportProduct } from "@/lib/inventory/import-service";
 
 // Mock dependencies
 vi.mock("@/utils/supabase/service-role");

@@ -1,5 +1,3 @@
-import { appLogger as logger } from "@/lib/logger";
-
 /**
  * POS Service - Centralized API operations for Point of Sale
  *
@@ -9,9 +7,9 @@ import { appLogger as logger } from "@/lib/logger";
  * - Pending balance orders
  * - Payment processing
  */
-
 import { handleApiError } from "@/lib/api/services/errorService";
 import { success } from "@/lib/api/services/notificationService";
+import { appLogger as logger } from "@/lib/logger";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 import { ApiClient, isError, isSuccess, unwrapData } from "../client-helpers";

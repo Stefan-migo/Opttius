@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { DEFAULT_LOW_STOCK_THRESHOLD, getProductStock, updateProductStock } from "@/lib/inventory/stock-helpers";
-import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest, createServiceRoleClient } from "@/utils/supabase/server";
 
 function generateSlug(name: string): string {
@@ -14,7 +13,7 @@ function generateSlug(name: string): string {
   return slug || `product-${Date.now()}`;
 }
 
-function buildProductData(body: any, slug: string): Record<string, any> {
+function buildProductData(body: unknown, slug: string): Record<string, unknown> {
   return {
     name: body.name.trim(),
     slug,
@@ -78,13 +77,13 @@ function buildProductData(body: any, slug: string): Record<string, any> {
 
 export async function getProduct(request: NextRequest, id: string) {
   const { client: supabase, getUser } = await createClientFromRequest(request);
-  const authResult = await getUser() as any;
+  const authResult = await getUser() as unknown;
   const user = authResult?.data?.user ?? null;
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
   const userOrganizationId = adminUserRes.data?.organization_id;
-  const branchContext = await getBranchContext(request, user.id, supabase as any);
+  const branchContext = await getBranchContext(request, user.id, supabase as unknown);
   const includeArchived = new URL(request.url).searchParams.get("include_archived") === "true";
   const currentBranchId = branchContext?.branchId;
 
@@ -103,7 +102,7 @@ export async function getProduct(request: NextRequest, id: string) {
   }
 
   // Multi-tenancy safety check
-  const p = product as any;
+  const p = product as unknown;
   if (userOrganizationId && !branchContext.isSuperAdmin && p.organization_id !== userOrganizationId) {
     return NextResponse.json({ error: "Forbidden: You don't have access to this product" }, { status: 403 });
   }
@@ -111,7 +110,7 @@ export async function getProduct(request: NextRequest, id: string) {
   // Filter stock by branch
   if (currentBranchId && p.product_branch_stock) {
     if (Array.isArray(p.product_branch_stock)) {
-      const filteredStock = p.product_branch_stock.filter((s: any) => s?.branch_id === currentBranchId);
+      const filteredStock = p.product_branch_stock.filter((s: unknown) => s?.branch_id === currentBranchId);
       p.product_branch_stock = filteredStock.length > 0 ? filteredStock : null;
     } else if (p.product_branch_stock.branch_id !== currentBranchId) {
       p.product_branch_stock = null;
@@ -135,10 +134,10 @@ export async function updateProduct(request: NextRequest, id: string) {
   const user = data?.user as { id: string } | null;
   if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as any);
+  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as unknown);
   if (!isAdmin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
   const userOrganizationId = adminUserRes.data?.organization_id;
   const body = await request.json();
 
@@ -166,12 +165,12 @@ export async function updateProduct(request: NextRequest, id: string) {
   const productData = buildProductData(body, slug);
 
   // Verify access
-  let checkQuery: any = supabase.from("products").select("id, organization_id").eq("id", id).single();
+  let checkQuery: unknown = supabase.from("products").select("id, organization_id").eq("id", id).single();
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as any;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
     if (!isSuperAdmin) checkQuery = checkQuery.eq("organization_id", userOrganizationId);
   }
-  const { data: existingProduct, error: checkError } = await checkQuery as any;
+  const { data: existingProduct, error: checkError } = await checkQuery as unknown;
   if (checkError || !existingProduct) {
     return NextResponse.json({ error: checkError?.code === "PGRST116" ? "Product not found" : "Forbidden: You don't have access to this product" }, { status: checkError?.code === "PGRST116" ? 404 : 403 });
   }
@@ -179,19 +178,19 @@ export async function updateProduct(request: NextRequest, id: string) {
   // Update
   let updateQuery = supabase.from("products").update(productData).eq("id", id);
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as any;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
     if (!isSuperAdmin) updateQuery = updateQuery.eq("organization_id", userOrganizationId);
   }
-  let { data: updatedProduct, error } = await updateQuery.select().single() as any;
+  let { data: updatedProduct, error } = await updateQuery.select().single() as unknown;
 
   if (error && error.code === "42501") {
     const serviceSupabase = createServiceRoleClient();
     let serviceQuery = serviceSupabase.from("products").update(productData).eq("id", id);
     if (userOrganizationId) {
-      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as any;
+      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
       if (!isSuperAdmin) serviceQuery = serviceQuery.eq("organization_id", userOrganizationId);
     }
-    const serviceResult = await serviceQuery.select().single() as any;
+    const serviceResult = await serviceQuery.select().single() as unknown;
     updatedProduct = serviceResult.data;
     error = serviceResult.error;
   }
@@ -238,22 +237,22 @@ export async function deleteProduct(request: NextRequest, id: string) {
   const user = data?.user as { id: string } | null;
   if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as any);
+  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as unknown);
   if (!isAdmin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as any;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
   const userOrganizationId = adminUserRes.data?.organization_id;
 
   let deleteQuery = supabase.from("products").delete().eq("id", id);
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as any;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
     if (!isSuperAdmin) deleteQuery = deleteQuery.eq("organization_id", userOrganizationId);
   }
-  let { error } = await deleteQuery as any;
+  let { error } = await deleteQuery as unknown;
 
   if (error && error.code === "42501") {
     const serviceSupabase = createServiceRoleClient();
-    ({ error } = await serviceSupabase.from("products").delete().eq("id", id) as any);
+    ({ error } = await serviceSupabase.from("products").delete().eq("id", id) as unknown);
   }
   if (error) return NextResponse.json({ error: error.message || "Failed to delete product" }, { status: 500 });
 

@@ -1,10 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { appLogger } from '@/lib/logger';
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { sendEmail } from "../client";
 import { incrementTemplateUsage } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -26,6 +27,7 @@ export async function sendMarketingEmail(
 }> {
   try {
     const client = supabase ?? createServiceRoleClient();
+
     const { data: template, error } = await client
       .from("system_email_templates")
       .select("*")
@@ -107,7 +109,7 @@ export async function sendMarketingEmail(
       errors,
     };
   } catch (error) {
-    console.error("Error sending marketing email:", error);
+    appLogger.error("Error sending marketing email:", error);
     return {
       success: false,
       results: [],

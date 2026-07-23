@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import type { Category } from "@/app/admin/products/hooks/useCategories";
 import { productService } from "@/lib/api/services";
-import { appLogger } from "@/lib/logger";
+import { appLogger } from '@/lib/logger';
 
 import type { FormState } from "./types";
 export function useProductData(

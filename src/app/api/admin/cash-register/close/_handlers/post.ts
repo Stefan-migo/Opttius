@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  alignDateWithSession,
+  buildClosureInput,
+  calculateOrderTotals,
+} from "@/lib/cash-register/_helpers/closure-utils";
 import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 import {
   aggregateClosurePayments,
@@ -8,12 +13,6 @@ import {
   getOpenSession,
   getSessionPayments,
 } from "@/lib/cash-register/closure-service";
-import {
-  alignDateWithSession,
-  buildClosureInput,
-  calculateOrderTotals,
-} from "@/lib/cash-register/_helpers/closure-utils";
-import { handleClosureError } from "@/lib/cash-register/_helpers/closure-types";
 import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import { appLogger as logger } from "@/lib/logger";
 

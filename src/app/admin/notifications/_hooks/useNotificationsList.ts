@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { appLogger } from '@/lib/logger';
+
+
 interface AdminNotification {
   id: string;
   type: string;
@@ -36,7 +39,7 @@ export function useNotificationsList(fetchParams?: { limit?: number }) {
         setTotalCount(data.totalCount ?? 0);
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      appLogger.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,7 @@ export function useNotificationsList(fetchParams?: { limit?: number }) {
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      appLogger.error("Error marking notification as read:", error);
     } finally {
       setMarkingAsRead(null);
     }
@@ -84,7 +87,7 @@ export function useNotificationsList(fetchParams?: { limit?: number }) {
         setUnreadCount(0);
       }
     } catch (error) {
-      console.error("Error marking all as read:", error);
+      appLogger.error("Error marking all as read:", error);
     }
   };
 
@@ -101,7 +104,7 @@ export function useNotificationsList(fetchParams?: { limit?: number }) {
         if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error("Error deleting notification:", error);
+      appLogger.error("Error deleting notification:", error);
     }
   };
 

@@ -7,8 +7,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
+import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 
 // ---------------------------------------------------------------------------
 // Helpers

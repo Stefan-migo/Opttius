@@ -3,8 +3,8 @@
  */
 import { appLogger as logger } from "@/lib/logger";
 
-import { ApplicationError, BusinessLogicError, ConflictError, DatabaseError, generateRequestId, ValidationError } from "./error-classes";
-export { ApplicationError, AuthenticationError, AuthorizationError, BusinessLogicError, ConflictError, DatabaseError, ExternalServiceError, NotFoundError, PaymentError, RateLimitError, ValidationError, generateRequestId } from "./error-classes";
+import { ApplicationError, BusinessLogicError, ConflictError, DatabaseError, ValidationError } from "./error-classes";
+export { ApplicationError, AuthenticationError, AuthorizationError, BusinessLogicError, ConflictError, DatabaseError, ExternalServiceError, generateRequestId,NotFoundError, PaymentError, RateLimitError, ValidationError } from "./error-classes";
 
 interface ErrorResponse { error: { code: string; message: string; details?: Record<string, unknown>; timestamp: string; requestId?: string }; }
 
@@ -44,11 +44,11 @@ export function safeExecute<T>(fn: () => T, options?: { suppressLogs?: boolean; 
   }
 }
 
-export function handleDatabaseError(error: any, context: string, details?: Record<string, unknown>): DatabaseError {
+export function handleDatabaseError(error: unknown, context: string, details?: Record<string, unknown>): DatabaseError {
   return new DatabaseError(error.message || "Database operation failed", { context, hint: error.hint, details: error.details, ...details }, error);
 }
 
-export function mapPostgresError(error: any): ApplicationError {
+export function mapPostgresError(error: unknown): ApplicationError {
   switch (error.code) {
     case "23505": return new ConflictError("Resource already exists", { constraint: error.constraint });
     case "23503": return new BusinessLogicError("Referenced resource does not exist", { constraint: error.constraint });

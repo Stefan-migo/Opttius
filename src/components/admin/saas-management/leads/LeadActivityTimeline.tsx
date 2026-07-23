@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Clock, Mail, Phone, Star, Video } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 interface Activity {
   id: string;
@@ -157,7 +158,7 @@ export function LeadActivityTimeline({
   return (
     <div className="space-y-0 divide-y divide-white/10">
       {activities.map((activity) => (
-        <ActivityItem key={activity.id} activity={activity} />
+        <ActivityItem activity={activity} key={activity.id} />
       ))}
     </div>
   );

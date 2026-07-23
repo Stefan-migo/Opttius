@@ -2,8 +2,8 @@
  * Product Creation Helpers
  * Extracted data construction and stock handling for product creation
  */
-import { appLogger as logger } from "@/lib/logger";
 import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const VALID_PRODUCT_COLUMNS = [
@@ -19,8 +19,8 @@ export const VALID_PRODUCT_COLUMNS = [
 ];
 
 export function buildProductPayload(
-  validatedBody: Record<string, any>,
-  body: Record<string, any>,
+  validatedBody: Record<string, unknown>,
+  body: Record<string, unknown>,
   productBranchId: string | null,
   organizationId: string,
   slug?: string,
@@ -115,8 +115,8 @@ export function buildProductPayload(
 }
 
 export async function handleProductStock(
-  createdProduct: Record<string, any>,
-  body: Record<string, any>,
+  createdProduct: Record<string, unknown>,
+  body: Record<string, unknown>,
   productBranchId: string | null,
   branchContext: { isSuperAdmin: boolean },
   organizationId: string,

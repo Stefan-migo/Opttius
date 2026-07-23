@@ -100,9 +100,9 @@ export default function AdminNotificationDropdown({
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             <NotificationListPanel
               notifications={notifications}
-              onMarkAsRead={markAsRead}
-              onClose={() => setIsOpen(false)}
               variant="sheet"
+              onClose={() => setIsOpen(false)}
+              onMarkAsRead={markAsRead}
             />
           </div>
         </SheetContent>
@@ -144,8 +144,8 @@ export default function AdminNotificationDropdown({
         </div>
         <NotificationListPanel
           notifications={notifications}
-          onMarkAsRead={markAsRead}
           variant="dropdown"
+          onMarkAsRead={markAsRead}
         />
       </DropdownMenuContent>
     </DropdownMenu>

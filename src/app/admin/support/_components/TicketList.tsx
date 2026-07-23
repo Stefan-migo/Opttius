@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
   categoryLabels,
-  type FiltersState,
   type PaginationState,
   priorityColors,
   priorityLabels,

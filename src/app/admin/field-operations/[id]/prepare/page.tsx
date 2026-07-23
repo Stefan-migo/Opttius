@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface Product {
@@ -104,7 +105,7 @@ export default function PrepareFieldOperationPage() {
       setProductStocks(stocks);
       setQuantities({});
     } catch (e) {
-      console.error("Error fetching products:", e);
+      appLogger.error("Error fetching products:", e);
     }
   };
 

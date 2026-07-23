@@ -223,20 +223,20 @@ export default function WorkOrderDetailContent() {
   return (
     <div className="space-y-6">
       <WorkOrderHeader
-        workOrderNumber={workOrder.work_order_number}
         customerName={customerName}
         workOrder={workOrder}
+        workOrderNumber={workOrder.work_order_number}
         onBack={() => router.back()}
-        onPrint={handlePrint}
         onDelete={() => setDeleteDialogOpen(true)}
+        onPrint={handlePrint}
       />
 
       <WorkOrderTimeline
-        workOrder={workOrder}
         setDeliveryDialogOpen={setDeliveryDialogOpen}
-        setShowStatusDialog={setShowStatusDialog}
         setNewStatus={setNewStatus}
+        setShowStatusDialog={setShowStatusDialog}
         setStatusDialogOpenedFromTimeline={setStatusDialogOpenedFromTimeline}
+        workOrder={workOrder}
       />
 
       {/* Main Content */}
@@ -250,9 +250,9 @@ export default function WorkOrderDetailContent() {
 
         <TabsContent className="space-y-6" value="overview">
           <WorkOrderOverviewTab
-            workOrder={workOrder}
             customerName={customerName}
             getPaymentStatusBadge={getPaymentStatusBadge}
+            workOrder={workOrder}
           />
         </TabsContent>
 
@@ -266,9 +266,9 @@ export default function WorkOrderDetailContent() {
 
         <TabsContent className="space-y-6" value="history">
           <WorkOrderHistoryTab
-            statusHistory={statusHistory}
             currentStatus={workOrder.status}
             getStatusLabel={getStatusLabel}
+            statusHistory={statusHistory}
           />
         </TabsContent>
       </Tabs>
@@ -276,21 +276,21 @@ export default function WorkOrderDetailContent() {
       {/* Delete Confirmation Dialog */}
       <WorkOrderDeleteDialog
         deleteDialogOpen={deleteDialogOpen}
-        setDeleteDialogOpen={setDeleteDialogOpen}
-        handleDelete={handleDelete}
         deleting={deleting}
+        handleDelete={handleDelete}
+        setDeleteDialogOpen={setDeleteDialogOpen}
         workOrder={workOrder}
       />
 
       {/* Delivery Dialog with Balance Check */}
       <DeliveryDialog
-        deliveryDialogOpen={deliveryDialogOpen}
-        setDeliveryDialogOpen={setDeliveryDialogOpen}
-        deliveryError={deliveryError}
-        setDeliveryError={setDeliveryError}
         delivering={delivering}
-        workOrder={workOrder}
+        deliveryDialogOpen={deliveryDialogOpen}
+        deliveryError={deliveryError}
         handleDeliver={handleDeliver}
+        setDeliveryDialogOpen={setDeliveryDialogOpen}
+        setDeliveryError={setDeliveryError}
+        workOrder={workOrder}
       />
     </div>
   );

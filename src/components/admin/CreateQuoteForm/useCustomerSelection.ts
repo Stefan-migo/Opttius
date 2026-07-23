@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 
 export function useCustomerSelection(
   effectiveBranchId: string | undefined,
@@ -32,7 +33,7 @@ export function useCustomerSelection(
       const customer = await customerService.getCustomer(customerId);
       setSelectedCustomer(customer);
     } catch (error) {
-      console.error("Error fetching customer:", error);
+      appLogger.error("Error fetching customer:", error);
     }
   };
 
@@ -52,7 +53,7 @@ export function useCustomerSelection(
         );
         setCustomerResults(customers || []);
       } catch (error) {
-        console.error("Error searching customers:", error);
+        appLogger.error("Error searching customers:", error);
       } finally {
         setSearchingCustomers(false);
       }

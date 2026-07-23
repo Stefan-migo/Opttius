@@ -1,7 +1,10 @@
 "use client";
 
 import { Clock, Plus } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
+import type { Appointment, ScheduleSettings } from "./appointmentCalendarHelpers";
 import {
   CUSTOM_SCROLLBAR_CSS,
   getAppointmentsForDate,
@@ -12,7 +15,6 @@ import {
   isSlotAvailableForDate,
   isToday,
 } from "./appointmentCalendarHelpers";
-import type { Appointment, ScheduleSettings } from "./appointmentCalendarHelpers";
 
 interface CalendarDayViewProps {
   currentDate: Date;

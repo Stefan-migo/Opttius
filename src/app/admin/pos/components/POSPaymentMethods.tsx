@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-
-import { Banknote, CreditCard, Smartphone, Building2 } from "lucide-react";
+import { Banknote, Building2,CreditCard, Smartphone } from "lucide-react";
+import { useCallback,useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -122,15 +121,15 @@ export function POSPaymentMethods({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    type="button"
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
                     className={cn(
                       "flex-1 gap-2 transition-all",
                       isSelected && "ring-2 ring-primary ring-offset-2",
                     )}
-                    onClick={() => onChange(method.id)}
                     disabled={disabled}
+                    size="sm"
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    onClick={() => onChange(method.id)}
                   >
                     <Icon className="h-4 w-4" />
                     {showLabels && (
@@ -169,7 +168,6 @@ export function POSPaymentMethods({
             <Tooltip key={method.id}>
               <TooltipTrigger asChild>
                 <button
-                  type="button"
                   className={cn(
                     "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all",
                     isSelected
@@ -177,8 +175,9 @@ export function POSPaymentMethods({
                       : "border-border hover:border-primary/50 hover:bg-muted/50",
                     disabled && "opacity-50 cursor-not-allowed",
                   )}
-                  onClick={() => onChange(method.id)}
                   disabled={disabled}
+                  type="button"
+                  onClick={() => onChange(method.id)}
                 >
                   <Icon
                     className={cn(

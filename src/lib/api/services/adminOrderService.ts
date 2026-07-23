@@ -2,7 +2,8 @@
  * Admin Order Service
  * Server-side business logic for admin order operations
  */
-import { SupabaseClient } from "@supabase/supabase-js";
+
+import { NextRequest, NextResponse } from "next/server";
 
 import {
   getBranchContext,
@@ -11,16 +12,14 @@ import {
 import {
   AuthenticationError,
   AuthorizationError,
-  RateLimitError,
 } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createPaginatedResponse } from "@/lib/api/response";
 import { sendOrderConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { getLocalDateBoundsUTC } from "@/lib/utils/date-timezone";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClientFromRequest } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function listOrders(request: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -126,7 +125,7 @@ export async function listOrders(request: NextRequest) {
 }
 
 async function getOrderStats(
-  supabase: any,
+  supabase: unknown,
   userOrganizationId: string | undefined,
   branchContext: Awaited<ReturnType<typeof getBranchContext>>,
 ) {
@@ -205,7 +204,7 @@ async function getOrderStats(
 }
 
 async function createManualOrder(
-  supabase: any,
+  supabase: unknown,
   user: { id: string },
   body: { orderData?: Record<string, unknown> },
 ): Promise<{ success: boolean; order: unknown }> {
@@ -220,7 +219,7 @@ async function createManualOrder(
   let dbStatus = (orderData.status as string) || "pending";
   if (dbStatus === "completed") dbStatus = "delivered";
 
-  const { data: newOrder, error: orderError } = await (supabase as any)
+  const { data: newOrder, error: orderError } = await (supabase as unknown)
     .from("orders")
     .insert({
       order_number: orderNumber,
@@ -307,9 +306,9 @@ export async function handleOrderPost(request: NextRequest): Promise<NextRespons
     request,
     async () => {
   const { client: supabaseRaw, getUser } = await createClientFromRequest(request);
-  const supabase = supabaseRaw as any;
+  const supabase = supabaseRaw as unknown;
 
-      const authResult2 = await getUser() as any;
+      const authResult2 = await getUser() as unknown;
       const user2 = authResult2?.data?.user ?? null;
       if (!user2) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -363,9 +362,9 @@ export async function deleteAllOrders(request: NextRequest): Promise<NextRespons
   logger.warn("Admin Orders API DELETE called - Deleting all orders");
 
   const { client: supabaseRaw, getUser } = await createClientFromRequest(request);
-  const supabase = supabaseRaw as any;
+  const supabase = supabaseRaw as unknown;
 
-  const authResult3 = await getUser() as any;
+  const authResult3 = await getUser() as unknown;
   const user3 = authResult3?.data?.user ?? null;
   if (!user3) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

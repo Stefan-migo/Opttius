@@ -1,5 +1,6 @@
-import type { Order } from "./types";
-import { formatCurrency, getPaymentMethodLabel } from "./types";
+
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
@@ -7,6 +8,8 @@ import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
+import type { Order } from "./types";
+import { formatCurrency, getPaymentMethodLabel } from "./types";
 
 // Send payment success notification (using custom template or fallback)
 export async function sendPaymentSuccess(
@@ -34,7 +37,7 @@ export async function sendPaymentSuccess(
     }
 
     if (!template) {
-      console.warn("⚠️ No active payment template found, skipping email");
+      appLogger.warn("⚠️ No active payment template found, skipping email");
       return { success: false, error: "No active template found" };
     }
 
@@ -90,7 +93,7 @@ export async function sendPaymentSuccess(
 
     return result;
   } catch (error) {
-    console.error("Error sending payment success email:", error);
+    appLogger.error("Error sending payment success email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -112,7 +115,7 @@ export async function sendPaymentFailed(
     );
 
     if (!template) {
-      console.warn(
+      appLogger.warn(
         "⚠️ No active payment_failed template found, skipping email",
       );
       return { success: false, error: "No active template found" };
@@ -159,7 +162,7 @@ export async function sendPaymentFailed(
 
     return result;
   } catch (error) {
-    console.error("Error sending payment failed email:", error);
+    appLogger.error("Error sending payment failed email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

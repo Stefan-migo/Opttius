@@ -2,8 +2,9 @@
  * Quote submission logic and form validation.
  * Extracted from CreateQuoteForm.tsx.
  */
-import type { QuoteFormData, QuoteSettings } from "./CreateQuoteForm.types";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+
+import type { QuoteFormData } from "./CreateQuoteForm.types";
 
 // ─── Payload preparation ─────────────────────────────────────────────────────
 

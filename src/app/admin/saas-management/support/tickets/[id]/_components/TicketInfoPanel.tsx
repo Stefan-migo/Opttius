@@ -1,7 +1,7 @@
 import { Calendar, Clock, User } from "lucide-react";
 
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 interface TicketInfo {
   created_at: string;

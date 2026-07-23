@@ -4,8 +4,8 @@
  * Service for managing quote settings and configurations.
  */
 
-import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
+import { appLogger as logger } from "@/lib/logger";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 

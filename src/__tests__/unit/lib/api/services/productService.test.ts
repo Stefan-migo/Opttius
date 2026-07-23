@@ -7,7 +7,7 @@
  * exportProducts and importProductsFile use raw fetch — mocked via vi.stubGlobal.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -57,15 +57,15 @@ function getMockClient() {
 
 // Import AFTER mocks
 import {
-  productService,
-  getProducts,
-  getProduct,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  searchProducts,
-  updateProductStock,
   bulkProductOperations,
+  createProduct,
+  deleteProduct,
+  getProduct,
+  getProducts,
+  productService,
+  searchProducts,
+  updateProduct,
+  updateProductStock,
 } from "@/lib/api/services/productService";
 
 const mockProduct = {

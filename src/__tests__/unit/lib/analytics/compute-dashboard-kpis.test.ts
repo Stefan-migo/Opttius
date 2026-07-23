@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  type MvKpiRow,
   computeDashboardKpis,
+  type MvKpiRow,
 } from "@/lib/analytics/compute-dashboard-kpis";
 
 describe("computeDashboardKpis", () => {

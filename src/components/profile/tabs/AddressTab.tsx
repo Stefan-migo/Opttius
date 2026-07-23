@@ -11,10 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  type AddressForm,
+import {  type AddressForm,
   addressSchema,
 } from "@/lib/api/validation/profile-schemas";
+import { appLogger } from '@/lib/logger';
 
 interface AddressTabProps {
   isEditing: boolean;
@@ -23,6 +23,7 @@ interface AddressTabProps {
 
 export function AddressTab({ isEditing, onEditingChange }: AddressTabProps) {
   const { profile, updateProfile, refetchProfile } = useAuthContext();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<AddressForm>({
@@ -66,7 +67,7 @@ export function AddressTab({ isEditing, onEditingChange }: AddressTabProps) {
       onEditingChange(false);
       toast.success("Dirección actualizada exitosamente");
     } catch (error) {
-      console.error("Error updating address:", error);
+      appLogger.error("Error updating address:", error);
       toast.error("Error al actualizar la dirección");
     } finally {
       setIsLoading(false);

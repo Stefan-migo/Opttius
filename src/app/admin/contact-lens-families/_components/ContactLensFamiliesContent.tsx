@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
 import type { ContactLensFamily } from "@/types/contact-lens";
 
 import { ContactLensFamiliesList } from "./ContactLensFamiliesList";
@@ -66,7 +67,7 @@ export default function ContactLensFamiliesContent() {
         toast.error("Error al cargar familias de lentes de contacto");
       }
     } catch (error) {
-      console.error("Error fetching families:", error);
+      appLogger.error("Error fetching families:", error);
       toast.error("Error al cargar familias de lentes de contacto");
     } finally {
       setLoading(false);
@@ -180,21 +181,21 @@ export default function ContactLensFamiliesContent() {
       <ContactLensFamiliesList
         families={families}
         loading={loading}
-        onEdit={handleOpenDialog}
-        onDelete={handleDelete}
         onCreate={() => handleOpenDialog()}
+        onDelete={handleDelete}
+        onEdit={handleOpenDialog}
         onRefresh={fetchFamilies}
       />
 
       <ContactLensFamilyDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
+        categories={categories}
         editingFamily={editingFamily}
         formData={formData}
-        categories={categories}
-        onFormChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
-        onSubmit={handleSubmit}
+        open={showDialog}
         onClose={handleCloseDialog}
+        onFormChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
+        onOpenChange={setShowDialog}
+        onSubmit={handleSubmit}
       />
     </div>
   );

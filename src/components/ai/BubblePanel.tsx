@@ -64,8 +64,8 @@ export function BubblePanel({
         state={state}
         title={title}
         onClose={onClose}
-        onToggleDock={onToggleDock}
         onPreferences={onPreferences}
+        onToggleDock={onToggleDock}
       />
 
       <BubbleMessages messages={messages} onAction={onAction} />
@@ -76,16 +76,16 @@ export function BubblePanel({
       )}
 
       <BubbleInput
-        value={inputValue}
-        onChange={onInputChange}
-        onSend={onSend}
-        onAttach={onAttach}
         disabled={inputDisabled}
         placeholder={
           state === "repose"
             ? "Haz una pregunta o selecciona una opción..."
             : "Escribe un mensaje..."
         }
+        value={inputValue}
+        onAttach={onAttach}
+        onChange={onInputChange}
+        onSend={onSend}
       />
     </div>
   );

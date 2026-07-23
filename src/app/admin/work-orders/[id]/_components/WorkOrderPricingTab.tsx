@@ -3,8 +3,8 @@
 import { DollarSign } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
 import type { WorkOrder } from "@/hooks/useWorkOrder";
+import { formatCurrency } from "@/lib/utils";
 
 interface WorkOrderPricingTabProps {
   workOrder: WorkOrder;

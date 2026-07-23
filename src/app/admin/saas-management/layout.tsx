@@ -1,13 +1,12 @@
+import { Menu } from "lucide-react";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
+import { SaasManagementSidebar } from "@/components/admin/saas-management/SaasManagementSidebar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { SaasManagementSidebar } from "@/components/admin/saas-management/SaasManagementSidebar";
-
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 
 interface SaasManagementLayoutProps {
   children: ReactNode;
@@ -54,16 +53,16 @@ export default async function SaasManagementLayout({
           <Sheet>
             <SheetTrigger asChild>
               <Button
-                variant="ghost"
-                size="icon"
                 className="text-white hover:bg-white/10"
+                size="icon"
+                variant="ghost"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent
-              side="left"
               className="p-0 w-[300px] bg-[#0D1117] border-r border-white/10"
+              side="left"
             >
               <SaasManagementSidebar />
             </SheetContent>
@@ -72,16 +71,16 @@ export default async function SaasManagementLayout({
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#C5A059] to-[#8B7355] flex items-center justify-center">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
+                className="text-[#0D1117]"
                 fill="none"
+                height="18"
                 stroke="currentColor"
-                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-[#0D1117]"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>

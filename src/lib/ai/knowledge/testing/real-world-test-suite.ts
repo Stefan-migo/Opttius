@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import { getKnowledgeBase, KnowledgeContext } from "../base/knowledge-manager";
 
 /**
@@ -171,9 +174,9 @@ export class RealWorldTestingSuite {
   }
 
   private async runSingleTest(testCase: TestCase): Promise<TestResult> {
-    console.log(`\n🧪 Running Test: ${testCase.id} - ${testCase.description}`);
-    console.log(`👤 User Role: ${testCase.userRole || "unspecified"}`);
-    console.log(`💬 Query: "${testCase.userQuery}"`);
+    appLogger.info(`\n🧪 Running Test: ${testCase.id} - ${testCase.description}`);
+    appLogger.info(`👤 User Role: ${testCase.userRole || "unspecified"}`);
+    appLogger.info(`💬 Query: "${testCase.userQuery}"`);
 
     try {
       const context: KnowledgeContext = {
@@ -202,12 +205,12 @@ export class RealWorldTestingSuite {
         executionTime: Date.now(),
       };
 
-      console.log(
+      appLogger.info(
         `✅ Test ${validation.passed ? "PASSED" : "FAILED"} (Score: ${validation.score}/100)`,
       );
       return result;
     } catch (error) {
-      console.error(`❌ Test Failed with Error:`, error);
+      appLogger.error(`❌ Test Failed with Error:`, error);
       return {
         testCaseId: testCase.id,
         passed: false,
@@ -317,14 +320,14 @@ export class RealWorldTestingSuite {
       recommendations: this.generateRecommendations(results),
     };
 
-    console.log("\n" + "=".repeat(60));
-    console.log("📊 TEST SUITE SUMMARY");
-    console.log("=".repeat(60));
-    console.log(`Total Tests: ${totalTests}`);
-    console.log(`Passed: ${passedTests} (${summary.passRate.toFixed(1)}%)`);
-    console.log(`Failed: ${failedTests}`);
-    console.log(`Average Score: ${averageScore.toFixed(1)}/100`);
-    console.log("=".repeat(60));
+    appLogger.info("\n" + "=".repeat(60));
+    appLogger.info("📊 TEST SUITE SUMMARY");
+    appLogger.info("=".repeat(60));
+    appLogger.info(`Total Tests: ${totalTests}`);
+    appLogger.info(`Passed: ${passedTests} (${summary.passRate.toFixed(1)}%)`);
+    appLogger.info(`Failed: ${failedTests}`);
+    appLogger.info(`Average Score: ${averageScore.toFixed(1)}/100`);
+    appLogger.info("=".repeat(60));
 
     return summary;
   }

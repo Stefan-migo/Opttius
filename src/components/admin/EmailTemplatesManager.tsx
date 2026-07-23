@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import { ESSENTIAL_TYPES, getTypeLabel, TYPE_DESCRIPTIONS } from "./_components/EmailTemplatesConstants";
+import { useEmailTemplates } from "./_hooks/useEmailTemplates";
 import { EmailTemplateDeleteDialog } from "./EmailTemplateDeleteDialog";
 import EmailTemplateEditor from "./EmailTemplateEditor";
 import { EmailTemplatePreviewDialog } from "./EmailTemplatePreviewDialog";
 import { EmailTemplateTestDialog } from "./EmailTemplateTestDialog";
-import { ESSENTIAL_TYPES, getTypeLabel, TYPE_DESCRIPTIONS } from "./_components/EmailTemplatesConstants";
-import { useEmailTemplates } from "./_hooks/useEmailTemplates";
 
 interface EmailTemplatesManagerProps {
   mode?: "organization" | "saas";
@@ -156,7 +156,7 @@ export default function EmailTemplatesManager({ mode = "organization", organizat
       {showEditDialog && selectedTemplate && <EmailTemplateEditor mode={mode} open={showEditDialog} organizationId={organizationId} template={selectedTemplate} onOpenChange={setShowEditDialog} onSave={() => { setShowEditDialog(false); fetchTemplates(); }} />}
       {showCreateDialog && <EmailTemplateEditor initialType={createInitialType} mode={mode} open={showCreateDialog} organizationId={organizationId} onOpenChange={(open) => { if (!open) setCreateInitialType(undefined); setShowCreateDialog(open); }} onSave={() => { setShowCreateDialog(false); setCreateInitialType(undefined); fetchTemplates(); }} />}
       {showPreviewDialog && selectedTemplate && <EmailTemplatePreviewDialog open={showPreviewDialog} template={selectedTemplate} onOpenChange={setShowPreviewDialog} />}
-      <EmailTemplateDeleteDialog open={showDeleteDialog} template={templateToDelete} deleting={deleting} onOpenChange={(open) => { setShowDeleteDialog(open); if (!open) setTemplateToDelete(null); }} onConfirm={confirmDelete} />
+      <EmailTemplateDeleteDialog deleting={deleting} open={showDeleteDialog} template={templateToDelete} onConfirm={confirmDelete} onOpenChange={(open) => { setShowDeleteDialog(open); if (!open) setTemplateToDelete(null); }} />
       {showTestDialog && selectedTemplate && <EmailTemplateTestDialog open={showTestDialog} template={selectedTemplate} testing={testing} onOpenChange={setShowTestDialog} onSend={(id, email) => confirmTestEmailWith(id, email)} />}
     </div>
   );

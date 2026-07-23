@@ -3,8 +3,8 @@
 import { Factory } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate } from "@/lib/utils";
 import type { WorkOrder } from "@/hooks/useWorkOrder";
+import { formatDate } from "@/lib/utils";
 
 interface LabDeliveryCardProps {
   workOrder: WorkOrder;

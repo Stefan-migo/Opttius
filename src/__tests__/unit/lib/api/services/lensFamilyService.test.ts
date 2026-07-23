@@ -6,7 +6,7 @@
  * isSuccess and unwrapData are re-implemented inline as pure functions.
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock ApiClient — share mock client instance via globalThis
@@ -47,8 +47,8 @@ function getMockClient() {
 }
 
 // Import AFTER mocks
-import { lensFamilyService } from "@/lib/api/services/lensFamilyService";
 import type { LensFamily } from "@/lib/api/services/lensFamilyService";
+import { lensFamilyService } from "@/lib/api/services/lensFamilyService";
 
 const mockFamily: LensFamily = {
   id: "family-001",

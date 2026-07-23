@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import ContactLensFamiliesContent from "./_components/ContactLensFamiliesContent";
 
 export const dynamic = "force-dynamic";

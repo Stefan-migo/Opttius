@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, Badge as BadgeIcon, Sparkles } from "lucide-react";
+import { Award, Sparkles } from "lucide-react";
 
 import AvatarUpload from "@/components/ui/AvatarUpload";
 import { Badge } from "@/components/ui/badge";

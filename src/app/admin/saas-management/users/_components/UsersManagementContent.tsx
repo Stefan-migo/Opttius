@@ -10,6 +10,7 @@ import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 import { ChangeOrgDialog } from "./ChangeOrgDialog";
 import { CreateUserDialog } from "./CreateUserDialog";
@@ -81,7 +82,7 @@ export default function UsersManagementContent() {
         setOrganizations(data.organizations || []);
       }
     } catch (err) {
-      console.error("Error fetching organizations:", err);
+      appLogger.error("Error fetching organizations:", err);
     }
   };
 
@@ -181,10 +182,10 @@ export default function UsersManagementContent() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
+          className="text-white hover:bg-white/10"
           size="icon"
           title="Volver al dashboard"
           variant="ghost"
-          className="text-white hover:bg-white/10"
           onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
@@ -207,69 +208,69 @@ export default function UsersManagementContent() {
       </div>
 
       <UsersFilters
+        organizationFilter={organizationFilter}
+        organizations={organizations}
+        roleFilter={roleFilter}
         searchTerm={searchTerm}
+        statusFilter={statusFilter}
+        onOrganizationFilterChange={setOrganizationFilter}
+        onRoleFilterChange={setRoleFilter}
         onSearchChange={(value) => {
           setSearchTerm(value);
           setCurrentPage(1);
         }}
-        organizationFilter={organizationFilter}
-        onOrganizationFilterChange={setOrganizationFilter}
-        organizations={organizations}
-        roleFilter={roleFilter}
-        onRoleFilterChange={setRoleFilter}
-        statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
       />
 
       <UsersTable
-        users={users}
-        loading={loading}
-        error={error}
-        totalCount={totalCount}
         currentPage={currentPage}
+        error={error}
+        loading={loading}
+        totalCount={totalCount}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        onViewUser={(userId) =>
-          router.push(`/admin/saas-management/users/${userId}`)
-        }
+        users={users}
         onActivate={(userId) => handleAction(userId, "activate")}
-        onDeactivate={(userId) => handleAction(userId, "deactivate")}
         onChangeOrgClick={(user) => {
           setSelectedUser(user);
           setShowChangeOrgDialog(true);
         }}
-        onResetPassword={(userId) => handleAction(userId, "reset_password")}
+        onDeactivate={(userId) => handleAction(userId, "deactivate")}
         onDeleteClick={(user) => {
           setUserToDelete(user);
           setDeleteDialogOpen(true);
         }}
+        onPageChange={setCurrentPage}
+        onResetPassword={(userId) => handleAction(userId, "reset_password")}
+        onViewUser={(userId) =>
+          router.push(`/admin/saas-management/users/${userId}`)
+        }
       />
 
       <CreateUserDialog
         open={showCreateUserDialog}
-        onOpenChange={setShowCreateUserDialog}
         organizations={organizations}
+        onOpenChange={setShowCreateUserDialog}
         onUserCreated={handleUserCreated}
       />
 
       <ChangeOrgDialog
         open={showChangeOrgDialog}
+        organizations={organizations}
+        user={selectedUser}
+        onChangeOrg={handleOrgChanged}
         onOpenChange={(open) => {
           setShowChangeOrgDialog(open);
           if (!open) setSelectedUser(null);
         }}
-        organizations={organizations}
-        user={selectedUser}
-        onChangeOrg={handleOrgChanged}
       />
 
       <DeleteUserDialog
         open={deleteDialogOpen}
+        user={userToDelete}
         onOpenChange={(open) => {
           setDeleteDialogOpen(open);
           if (!open) setUserToDelete(null);
         }}
-        user={userToDelete}
         onUserDeleted={handleUserDeleted}
       />
     </div>

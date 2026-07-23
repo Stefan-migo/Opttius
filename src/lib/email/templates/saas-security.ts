@@ -1,10 +1,11 @@
 /**
  * SaaS security and onboarding email templates
  */
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
+import {  getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
 
@@ -14,6 +15,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 export interface SaaSSecurityData {
@@ -57,7 +59,7 @@ export async function sendSaaSSecurityAlert(
     const template = await loadEmailTemplate("saas_security_alert", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_security_alert template found");
+      appLogger.warn("⚠️ No saas_security_alert template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -104,7 +106,7 @@ export async function sendSaaSSecurityAlert(
 
     return result;
   } catch (error) {
-    console.error("Error sending security alert:", error);
+    appLogger.error("Error sending security alert:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -119,7 +121,7 @@ export async function sendSaaSOnboardingStep(
     const template = await loadEmailTemplate("saas_onboarding", true);
 
     if (!template) {
-      console.warn("⚠️ No saas_onboarding template found");
+      appLogger.warn("⚠️ No saas_onboarding template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -155,7 +157,7 @@ export async function sendSaaSOnboardingStep(
 
     return result;
   } catch (error) {
-    console.error("Error sending onboarding email:", error);
+    appLogger.error("Error sending onboarding email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

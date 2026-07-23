@@ -14,9 +14,10 @@
  *   - Combined: frame + lens + treatments + labor
  */
 import { describe, expect, it } from "vitest";
-import { buildCartItems } from "../posCartBuilder";
+
+import type { Treatment } from "../POSAdvancedSale.types";
 import type { CartBuilderInput } from "../posCartBuilder";
-import type { OrderFormData, Treatment } from "../POSAdvancedSale.types";
+import { buildCartItems } from "../posCartBuilder";
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
 

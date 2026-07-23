@@ -11,6 +11,7 @@ vi.mock("@supabase/ssr", () => ({
 }));
 
 import { createBrowserClient } from "@supabase/ssr";
+
 import { createClient } from "@/utils/supabase/client";
 
 describe("createClient", () => {

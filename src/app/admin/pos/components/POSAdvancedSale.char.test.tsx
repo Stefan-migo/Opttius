@@ -4,9 +4,9 @@
  * Captures current behavior before/after extraction.
  * Tests public API of each extracted module.
  */
-import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock all external dependencies at module level
 vi.mock("@/lib/api/services/customerService", () => ({
@@ -202,28 +202,27 @@ import {
   DEFAULT_LENS_FAMILIES,
   DEFAULT_TREATMENTS,
 } from "./POSAdvancedSale.constants";
+import type {
+  ExternalPrescriptionData,
+  OrderFormData,
+  POSAdvancedSaleProps,
+  POSProduct,
+  Treatment,
+} from "./POSAdvancedSale.types";
+import { buildCartItems } from "./posCartBuilder";
 import {
+  createSearchFramesAction,
+  loadPrescriptionsAction,
+  loadSettingsAction,
+} from "./posDataLoader";
+import {
+  computeDiscountAmount,
   computeLensPrice,
   computeNearLensPrice,
   computeTotalPrice,
-  computeDiscountAmount,
   computeTreatmentsPrice,
   filterTreatmentsByLensType,
 } from "./posPricingUtils";
-import { buildCartItems } from "./posCartBuilder";
-import type { CartItem } from "./posCartBuilder";
-import {
-  createSearchFramesAction,
-  loadSettingsAction,
-  loadPrescriptionsAction,
-} from "./posDataLoader";
-import type {
-  POSProduct,
-  OrderFormData,
-  ExternalPrescriptionData,
-  Treatment,
-  POSAdvancedSaleProps,
-} from "./POSAdvancedSale.types";
 
 const defaultProps = {
   customer: null,
@@ -563,7 +562,7 @@ describe("posDataLoader", () => {
       treatment_prices: {
         anti_reflective: 20000,
         scratch_resistant: 18000,
-      } as any,
+      } as unknown,
       default_labor_cost: 15000,
       default_discount_percentage: 0,
       default_tax_percentage: 0,
@@ -599,7 +598,7 @@ describe("posDataLoader", () => {
 
     await loadPrescriptionsAction(
       "cust-1",
-      () => Promise.resolve(prescriptions as any),
+      () => Promise.resolve(prescriptions as unknown),
       onPrescriptionsLoaded,
       onCurrentPrescriptionFound,
       onSetLoading,
@@ -633,7 +632,7 @@ describe("posDataLoader", () => {
 
     await loadPrescriptionsAction(
       undefined,
-      () => Promise.resolve([] as any),
+      () => Promise.resolve([] as unknown),
       onPrescriptionsLoaded,
       onCurrentPrescriptionFound,
       onSetLoading,

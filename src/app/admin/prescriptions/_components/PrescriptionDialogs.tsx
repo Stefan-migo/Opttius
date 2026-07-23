@@ -1,8 +1,12 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import dynamic from "next/dynamic";
 
+import {
+  type PrescriptionDisplayData,
+  PrescriptionFullDisplay,
+} from "@/components/admin/PrescriptionFullDisplay";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,10 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  type PrescriptionDisplayData,
-  PrescriptionFullDisplay,
-} from "@/components/admin/PrescriptionFullDisplay";
 import { formatDate } from "@/lib/utils";
 
 const CreatePrescriptionForm = dynamic(

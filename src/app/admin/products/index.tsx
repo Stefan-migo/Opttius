@@ -1,6 +1,6 @@
 "use client";
 
-import { Package, Plus, PackagePlus } from "lucide-react";
+import { Package, PackagePlus,Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 import QuickActions from "./components/QuickActions";
 import { useProductStats } from "./hooks/useProductStats";
@@ -80,7 +81,7 @@ export default function ProductsPage() {
         .then((data) => {
           setContactLensFamilies(data.data || data.families || []);
         })
-        .catch((err) => console.error("Error loading families:", err));
+        .catch((err) => appLogger.error("Error loading families:", err));
     }
   }, [currentBranchId]);
 
@@ -234,9 +235,9 @@ export default function ProductsPage() {
             {/* Sub-tabs for Contactología */}
             <div className="flex gap-2 border-b border-admin-border-primary/20 pb-2">
               <Button
-                variant={contactLensSubTab === "families" ? "default" : "ghost"}
-                size="sm"
                 className="rounded-lg text-xs uppercase tracking-wide"
+                size="sm"
+                variant={contactLensSubTab === "families" ? "default" : "ghost"}
                 onClick={() => {
                   setContactLensSubTab("families");
                   router.replace(
@@ -248,11 +249,11 @@ export default function ProductsPage() {
                 Familias
               </Button>
               <Button
+                className="rounded-lg text-xs uppercase tracking-wide"
+                size="sm"
                 variant={
                   contactLensSubTab === "inventory" ? "default" : "ghost"
                 }
-                size="sm"
-                className="rounded-lg text-xs uppercase tracking-wide"
                 onClick={() => {
                   setContactLensSubTab("inventory");
                   router.replace(
@@ -271,8 +272,8 @@ export default function ProductsPage() {
               <ContactLensFamiliesList />
             ) : (
               <ContactLensInventoryManager
-                families={contactLensFamilies}
                 branchId={currentBranchId}
+                families={contactLensFamilies}
               />
             )}
           </div>

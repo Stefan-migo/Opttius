@@ -31,9 +31,9 @@ export function ContactLensFamilySelector({
       <div>
         <Label>Marca y Familia</Label>
         <Select
+          disabled={loadingFamilies}
           value={selectedFamilyId}
           onValueChange={onSelect}
-          disabled={loadingFamilies}
         >
           <SelectTrigger>
             <SelectValue

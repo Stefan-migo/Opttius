@@ -1,5 +1,5 @@
-import Agent from "./agent";
 import type { AgentOptions } from "./agent";
+import Agent from "./agent";
 
 export interface AgentConfig {
   systemPrompt?: string;

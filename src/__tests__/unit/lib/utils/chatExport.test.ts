@@ -1,13 +1,13 @@
-import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  copyToClipboard,
+  downloadFile,
+  exportConversation,
+  exportToCSV,
   exportToJSON,
   exportToMarkdown,
   exportToTXT,
-  exportToCSV,
-  downloadFile,
-  copyToClipboard,
-  exportConversation,
 } from "@/lib/utils/chatExport";
 
 // Mock the logger
@@ -244,7 +244,7 @@ describe("copyToClipboard", () => {
     });
 
     // jsdom doesn't implement execCommand, add it
-    (document as any).execCommand = vi.fn().mockReturnValue(false);
+    (document as unknown).execCommand = vi.fn().mockReturnValue(false);
 
     const result = await copyToClipboard(mockData, "txt");
     expect(result).toBe(false);

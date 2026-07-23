@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 interface Product {
   id: string;
@@ -85,7 +86,7 @@ export default function ProductPage() {
         setSelectedImage(data.product.gallery[0]);
       }
     } catch (err) {
-      console.error("Error fetching product:", err);
+      appLogger.error("Error fetching product:", err);
       setError("Error al cargar el producto");
     } finally {
       setLoading(false);

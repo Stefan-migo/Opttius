@@ -3,11 +3,11 @@
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuoteActionsCard } from "@/components/admin/QuoteActionsCard";
 import { QuoteInfoCard } from "@/components/admin/QuoteInfoCard";
 import { QuoteItemsCard } from "@/components/admin/QuoteItemsCard";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuote } from "@/hooks/useQuote";
 
 export default function QuoteDetailPage() {
@@ -64,17 +64,17 @@ export default function QuoteDetailPage() {
   return (
     <div className="space-y-6">
       <QuoteActionsCard
-        quote={quote}
         loadingToPos={loadingToPos}
+        quote={quote}
+        sendEmail={sendEmail}
         sending={sending}
         showSendDialog={showSendDialog}
-        sendEmail={sendEmail}
+        onBack={() => router.back()}
         onLoadToPOS={handleLoadToPOS}
         onPrint={handlePrint}
+        onSendEmailChange={setSendEmail}
         onSendQuote={handleSendQuote}
         onShowSendDialog={setShowSendDialog}
-        onSendEmailChange={setSendEmail}
-        onBack={() => router.back()}
       />
 
       {/* Main Content */}
@@ -86,7 +86,7 @@ export default function QuoteDetailPage() {
         </TabsList>
 
         <TabsContent className="space-y-6" value="overview">
-          <QuoteInfoCard quote={quote} getCustomerId={getCustomerId} />
+          <QuoteInfoCard getCustomerId={getCustomerId} quote={quote} />
         </TabsContent>
 
         <TabsContent className="space-y-6" value="details">

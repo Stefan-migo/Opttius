@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 interface ChatSession {
@@ -77,7 +78,7 @@ export function ChatHistorySidebar({
         setSessions(data.sessions || []);
       }
     } catch (error) {
-      console.error("Error loading sessions:", error);
+      appLogger.error("Error loading sessions:", error);
     } finally {
       setLoading(false);
     }
@@ -106,7 +107,7 @@ export function ChatHistorySidebar({
         }
       }
     } catch (error) {
-      console.error("Error deleting session:", error);
+      appLogger.error("Error deleting session:", error);
     } finally {
       setDeletingId(null);
     }

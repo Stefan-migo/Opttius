@@ -5,7 +5,7 @@
  * Mocks logger to verify calls without side effects.
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks — vi.mock is hoisted, this import will get the mocked version
@@ -25,17 +25,16 @@ vi.mock("@/lib/logger", () => ({
 // ---------------------------------------------------------------------------
 
 import {
+  ErrorBoundaryReporter,
+  getErrorReportingStatus,
   initializeErrorReporting,
-  reportError,
   reportApiError,
   reportDatabaseError,
+  reportError,
   reportUnhandledError,
-  ErrorBoundaryReporter,
   setupGlobalErrorHandlers,
   updateErrorReportingConfig,
-  getErrorReportingStatus,
 } from "@/lib/error-reporting/core";
-
 // Re-import to get the mocked logger reference for assertions
 // vi.mock hoisting ensures this is the mock, not the real module
 import { appLogger as mockLogger } from "@/lib/logger";
@@ -160,7 +159,7 @@ describe("reportError", () => {
         custom: { endpoint: "", enabled: false },
       },
     });
-    (global.fetch as any).mockRejectedValueOnce(new Error("network error"));
+    (global.fetch as unknown).mockRejectedValueOnce(new Error("network error"));
 
     await reportError({
       error: makeError("datadog fail"),
@@ -185,7 +184,7 @@ describe("reportError", () => {
         },
       },
     });
-    (global.fetch as any).mockRejectedValueOnce(new Error("timeout"));
+    (global.fetch as unknown).mockRejectedValueOnce(new Error("timeout"));
 
     await reportError({
       error: makeError("custom fail"),

@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
-import { LensMatrixHeader } from "./LensMatrixHeader";
-import { LensMatrixFilters } from "./LensMatrixFilters";
-import { LensMatrixTable } from "./LensMatrixTable";
-import { LensMatrixFormDialog } from "./LensMatrixFormDialog";
 import { ImportCSVDialog } from "./ImportCSVDialog";
-import type { LensFamily, LensPriceMatrix, LensMatrixFormData } from "./lensMatricesTypes";
+import type { LensFamily, LensMatrixFormData,LensPriceMatrix } from "./lensMatricesTypes";
+import { LensMatrixFilters } from "./LensMatrixFilters";
+import { LensMatrixFormDialog } from "./LensMatrixFormDialog";
+import { LensMatrixHeader } from "./LensMatrixHeader";
+import { LensMatrixTable } from "./LensMatrixTable";
 
 export default function LensMatricesContent() {
   const [matrices, setMatrices] = useState<LensPriceMatrix[]>([]);
@@ -57,7 +58,7 @@ export default function LensMatricesContent() {
         setFamilies(data.families || []);
       }
     } catch (error) {
-      console.error("Error fetching families:", error);
+      appLogger.error("Error fetching families:", error);
     }
   };
 
@@ -80,7 +81,7 @@ export default function LensMatricesContent() {
       const data = await response.json();
       setMatrices(data.matrices || []);
     } catch (error) {
-      console.error("Error fetching matrices:", error);
+      appLogger.error("Error fetching matrices:", error);
       toast.error("Error al cargar matrices de precios");
     } finally {
       setLoading(false);
@@ -215,53 +216,53 @@ export default function LensMatricesContent() {
   return (
     <div className="container mx-auto px-4 py-8">
       <LensMatrixHeader
-        onNew={() => handleOpenDialog()}
         onImport={() => setShowImportDialog(true)}
+        onNew={() => handleOpenDialog()}
       />
 
       <Card>
         <CardContent>
           <LensMatrixFilters
+            families={families}
+            includeInactive={includeInactive}
             searchTerm={searchTerm}
             selectedFamilyId={selectedFamilyId}
-            includeInactive={includeInactive}
-            families={families}
-            onSearchChange={setSearchTerm}
             onFamilyChange={setSelectedFamilyId}
-            onToggleInactive={() => setIncludeInactive(!includeInactive)}
             onRefresh={fetchMatrices}
+            onSearchChange={setSearchTerm}
+            onToggleInactive={() => setIncludeInactive(!includeInactive)}
           />
 
           <LensMatrixTable
-            matrices={paginatedMatrices}
-            loading={loading}
-            totalMatrices={totalMatrices}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
+            loading={loading}
+            matrices={paginatedMatrices}
+            totalMatrices={totalMatrices}
             totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={setItemsPerPage}
-            onEdit={(matrix) => handleOpenDialog(matrix)}
             onDelete={handleDelete}
+            onEdit={(matrix) => handleOpenDialog(matrix)}
+            onItemsPerPageChange={setItemsPerPage}
+            onPageChange={setCurrentPage}
           />
         </CardContent>
       </Card>
 
       <LensMatrixFormDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
         editingMatrix={editingMatrix}
-        formData={formData}
-        setFormData={setFormData}
         families={families}
-        onSubmit={handleSubmit}
+        formData={formData}
+        open={showDialog}
+        setFormData={setFormData}
         onClose={handleCloseDialog}
+        onOpenChange={setShowDialog}
+        onSubmit={handleSubmit}
       />
 
       <ImportCSVDialog
         open={showImportDialog}
-        onOpenChange={setShowImportDialog}
         onImportComplete={fetchMatrices}
+        onOpenChange={setShowImportDialog}
       />
     </div>
   );

@@ -6,13 +6,13 @@ export { POSCashInput } from "./POSCashInput";
 export { POSCustomerSearch } from "./POSCustomerSearch";
 export { POSHeader } from "./POSHeader";
 export {
-  POSLayout,
   POSAdvancedSaleLayout,
+  POSLayout,
   POSQuickSaleLayout,
 } from "./POSLayout";
-export { POSPendingBalanceDialog } from "./POSPendingBalanceDialog";
 export { POSPaymentDialog } from "./POSPaymentDialog";
 export { POSPaymentMethods } from "./POSPaymentMethods";
+export { POSPendingBalanceDialog } from "./POSPendingBalanceDialog";
 export { POSProductSearch } from "./POSProductSearch";
 export { POSQuickSale } from "./POSQuickSale";
 export { POSRefundDialog } from "./POSRefundDialog";
@@ -25,10 +25,10 @@ export { POSSidebar } from "./POSSidebar";
 
 // Re-export types for convenience
 export type {
-  POSProduct,
   POSCartItem,
   POSCustomer,
-  POSQuote,
   POSPaymentMethod,
+  POSProduct,
+  POSQuote,
 } from "../types";
 

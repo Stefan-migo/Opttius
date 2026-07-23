@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { appLogger } from '@/lib/logger';
 
 import {
   LensFamilyBasicForm,
@@ -94,7 +95,7 @@ export function LensFamilyWizard() {
       toast.success("Familia de lentes creada exitosamente");
       router.push("/admin/products?tab=lens-families");
     } catch (error: unknown) {
-      console.error(error);
+      appLogger.error(error);
       toast.error(error.message || "Error al guardar");
     } finally {
       setLoading(false);

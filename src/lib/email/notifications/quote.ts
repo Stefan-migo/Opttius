@@ -1,4 +1,6 @@
-import { formatCurrency } from "./types";
+
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
 import { loadEmailTemplate } from "../template-loader";
@@ -6,6 +8,7 @@ import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "../template-utils";
+import { formatCurrency } from "./types";
 
 // Send quote sent
 export async function sendQuoteSent(
@@ -57,7 +60,7 @@ export async function sendQuoteSent(
       fromDisplayName: orgInfo?.resolvedDisplayName,
     });
   } catch (error) {
-    console.error("Error sending quote email:", error);
+    appLogger.error("Error sending quote email:", error);
     return { success: false, error: "Error sending email" };
   }
 }

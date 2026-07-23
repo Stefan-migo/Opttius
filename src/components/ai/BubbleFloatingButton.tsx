@@ -23,7 +23,6 @@ export function BubbleFloatingButton({
 
   return (
     <button
-      type="button"
       aria-label={
         hasNotification
           ? `${badgeCount} notificaciones del agente`
@@ -36,6 +35,7 @@ export function BubbleFloatingButton({
         "focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2",
         hasNotification && "animate-[pulse_2s_ease-in-out_infinite]",
       )}
+      type="button"
       onClick={onClick}
     >
       {/* Agent icon — sparkle */}
@@ -47,9 +47,9 @@ export function BubbleFloatingButton({
         viewBox="0 0 24 24"
       >
         <path
+          d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
         />
       </svg>
 

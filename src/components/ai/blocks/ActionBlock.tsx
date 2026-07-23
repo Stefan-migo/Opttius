@@ -9,7 +9,6 @@ interface Props {
 export function ActionBlock({ block, onClick }: Props) {
   return (
     <button
-      type="button"
       className={cn(
         "w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors",
         block.variant === "primary" &&
@@ -18,6 +17,7 @@ export function ActionBlock({ block, onClick }: Props) {
         block.variant === "ghost" &&
           "border border-gray-300 text-gray-700 hover:bg-gray-50",
       )}
+      type="button"
       onClick={onClick}
     >
       {block.label}

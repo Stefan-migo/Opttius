@@ -5,9 +5,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireRoot } from "@/lib/api/root-middleware";
+import { sendEmail } from "@/lib/email/client";
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { sendEmail } from "@/lib/email/client";
 
 export const dynamic = "force-dynamic";
 

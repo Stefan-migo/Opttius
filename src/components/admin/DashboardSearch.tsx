@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { appLogger } from '@/lib/logger';
 
 interface SearchResult {
   id: string;
@@ -88,7 +89,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
         }
       }
     } catch (error) {
-      console.error("Error searching:", error);
+      appLogger.error("Error searching:", error);
     } finally {
       setLoading(false);
     }

@@ -109,9 +109,9 @@ export function ContactLensPriceStock({
         {!stockInfo.inStock && (
           <div className="mt-2">
             <Button
+              className="w-full"
               size="sm"
               variant="outline"
-              className="w-full"
               onClick={onRequestEncargo}
             >
               Solicitar encargo

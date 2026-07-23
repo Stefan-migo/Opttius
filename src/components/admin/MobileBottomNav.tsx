@@ -3,7 +3,6 @@
 import {
   BarChart3,
   Bell,
-  Calendar,
   CalendarPlus,
   LayoutDashboard,
   LucideIcon,
@@ -27,7 +26,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useMobileView } from "@/hooks/useMobileView";
 import { cn } from "@/lib/utils";
@@ -178,8 +176,6 @@ export function MobileBottomNav({
             if (item.variant === "button") {
               return (
                 <button
-                  key={item.label}
-                  onClick={() => handleToolAction(item)}
                   className={cn(
                     "flex flex-col items-center justify-center",
                     "min-w-[64px] min-h-[44px] py-1 px-2",
@@ -189,6 +185,8 @@ export function MobileBottomNav({
                       ? "text-[#C5A059]" // Solo dorado cuando el menú Más está abierto
                       : "text-[#F9F7F2]/70 hover:text-[#F9F7F2] hover:bg-white/10",
                   )}
+                  key={item.label}
+                  onClick={() => handleToolAction(item)}
                 >
                   <Icon className="h-5 w-5 mb-0.5" />
                   <span className="text-[8px] font-display uppercase tracking-wider font-medium">
@@ -200,8 +198,6 @@ export function MobileBottomNav({
 
             return (
               <Link
-                key={item.href}
-                href={item.href || "/admin"}
                 className={cn(
                   "flex flex-col items-center justify-center",
                   "min-w-[64px] min-h-[44px] py-1 px-2",
@@ -211,6 +207,8 @@ export function MobileBottomNav({
                     ? "text-[#C5A059]"
                     : "text-[#F9F7F2]/70 hover:text-[#F9F7F2] hover:bg-white/10",
                 )}
+                href={item.href || "/admin"}
+                key={item.href}
               >
                 {active && (
                   <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#C5A059] rounded-full" />
@@ -238,8 +236,8 @@ export function MobileBottomNav({
       {/* Menú "Más" - Sheet desplegable */}
       <Sheet open={moreMenuOpen} onOpenChange={setMoreMenuOpen}>
         <SheetContent
-          side="bottom"
           className="rounded-t-2xl max-h-[80vh] overflow-y-auto bg-[#1A2B23] border-t border-white/10"
+          side="bottom"
         >
           <SheetHeader className="px-4 py-3 border-b border-white/10">
             <SheetTitle className="text-lg font-display font-bold uppercase tracking-wide text-[#F9F7F2]">
@@ -259,9 +257,6 @@ export function MobileBottomNav({
 
                 return (
                   <Link
-                    key={item.href}
-                    href={item.href || "/admin"}
-                    onClick={() => setMoreMenuOpen(false)}
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-xl",
                       "border transition-all duration-200",
@@ -269,6 +264,9 @@ export function MobileBottomNav({
                         ? "bg-[#C5A059]/10 border-[#C5A059]/30 text-[#C5A059]"
                         : "bg-[#1A2B23]/50 border-white/10 text-[#F9F7F2] hover:border-[#C5A059]/30 hover:bg-[#1A2B23]/80",
                     )}
+                    href={item.href || "/admin"}
+                    key={item.href}
+                    onClick={() => setMoreMenuOpen(false)}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
                     <span className="text-sm font-display font-medium">
@@ -287,9 +285,9 @@ export function MobileBottomNav({
             </p>
             <div className="grid grid-cols-3 gap-2">
               <Link
+                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#1A2B23]/50 border border-white/10 hover:border-[#C5A059]/30"
                 href="/admin/appointments?action=new"
                 onClick={() => setMoreMenuOpen(false)}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#1A2B23]/50 border border-white/10 hover:border-[#C5A059]/30"
               >
                 <CalendarPlus className="h-5 w-5 text-[#C5A059] mb-1" />
                 <span className="text-[10px] font-display font-bold uppercase text-[#C5A059]">
@@ -297,9 +295,9 @@ export function MobileBottomNav({
                 </span>
               </Link>
               <Link
+                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/20 hover:border-[#C5A059]/30"
                 href="/admin/customers/new"
                 onClick={() => setMoreMenuOpen(false)}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/20 hover:border-[#C5A059]/30"
               >
                 <Plus className="h-5 w-5 text-[#C5A059] mb-1" />
                 <span className="text-[10px] font-display font-bold uppercase text-[#C5A059]">
@@ -307,9 +305,9 @@ export function MobileBottomNav({
                 </span>
               </Link>
               <Link
+                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#F9F7F2]/10 border border-white/10 hover:border-white/20"
                 href="/admin/pos?action=sale"
                 onClick={() => setMoreMenuOpen(false)}
-                className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#F9F7F2]/10 border border-white/10 hover:border-white/20"
               >
                 <ShoppingCart className="h-5 w-5 text-[#F9F7F2] mb-1" />
                 <span className="text-[10px] font-display font-bold uppercase">
@@ -322,7 +320,7 @@ export function MobileBottomNav({
       </Sheet>
 
       {/* Spacer */}
-      <div className="h-16 lg:hidden" aria-hidden="true" />
+      <div aria-hidden="true" className="h-16 lg:hidden" />
     </>
   );
 }

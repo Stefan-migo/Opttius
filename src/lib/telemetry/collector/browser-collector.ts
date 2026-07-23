@@ -31,7 +31,7 @@ export class TelemetryCollector {
   trackApiResponse(data: { requestId: string; statusCode: number; duration: number; responseBodySize?: string }): void { this.queue(this.makeEvent("api_response", "api", { statusCode: data.statusCode, duration: data.duration, responseBodySize: data.responseBodySize }, undefined, undefined, data.requestId, { performance: { responseTime: data.duration } })); }
   trackApiError(data: { requestId: string; error: string; stack?: string; duration: number }): void { this.queue(this.makeEvent("api_error", "api", { error: data.error, stack: data.stack, duration: data.duration }, undefined, undefined, data.requestId)); }
   trackUserInteraction(data: { element: string; action: string; target?: string; value?: string; userId?: string }): string { return this.queue(this.makeEvent("user_interaction", "frontend", { element: data.element, action: data.action, target: data.target, value: data.value }, data.userId)); }
-  trackNavigationTiming(timing: any): void { this.queue(this.makeEvent("navigation_timing", "frontend", timing, undefined, undefined, undefined, { performance: { fcp: timing.domContentLoadedEventEnd - timing.navigationStart, ttfb: timing.responseStart - timing.navigationStart } })); }
+  trackNavigationTiming(timing: unknown): void { this.queue(this.makeEvent("navigation_timing", "frontend", timing, undefined, undefined, undefined, { performance: { fcp: timing.domContentLoadedEventEnd - timing.navigationStart, ttfb: timing.responseStart - timing.navigationStart } })); }
 
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
@@ -43,7 +43,7 @@ export class TelemetryCollector {
   forceFlush(): Promise<void> { return this.flushEvents(); }
   stop(): void { if (this.flushTimer) { clearInterval(this.flushTimer); this.flushTimer = null; } this.flushEvents(); }
 
-  private makeEvent(eventType: string, source: TelemetryEvent["source"], payload: any, userId?: string, context?: any, eventId?: string, extraMeta?: any): TelemetryEvent {
+  private makeEvent(eventType: string, source: TelemetryEvent["source"], payload: unknown, userId?: string, context?: unknown, eventId?: string, extraMeta?: unknown): TelemetryEvent {
     return { eventId: eventId || uuidv4(), timestamp: new Date(), userId, sessionId: this.getSessionId(), eventType, source, payload, metadata: { userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined, deviceInfo: this.getDeviceInfo(), ...extraMeta }, context: context || {} };
   }
 

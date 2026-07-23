@@ -6,13 +6,14 @@ import { useEffect } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { appLogger } from '@/lib/logger';
 
 export default function UnauthorizedPage() {
   const router = useRouter();
 
   useEffect(() => {
     // Optional: Add analytics tracking for unauthorized access attempts
-    console.log("Unauthorized access attempt recorded");
+    appLogger.info("Unauthorized access attempt recorded");
   }, []);
 
   const handleGoHome = () => {

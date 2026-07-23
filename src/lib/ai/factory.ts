@@ -1,3 +1,6 @@
+
+import { appLogger } from '@/lib/logger';
+
 import { getAIConfig, getProviderConfig } from "./config";
 import { getProvider } from "./providers";
 import type { LLMConfig, LLMProvider, LLMProviderInterface } from "./types";
@@ -71,7 +74,7 @@ export class LLMFactory {
           }
         }
       } catch (error) {
-        console.warn(`Failed to initialize provider ${provider}:`, error);
+        appLogger.warn(`Failed to initialize provider ${provider}:`, error);
         continue;
       }
     }

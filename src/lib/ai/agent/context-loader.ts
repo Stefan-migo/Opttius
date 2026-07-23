@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { appLogger } from "@/lib/logger";
+import { appLogger } from '@/lib/logger';
 
 import type { OrganizationalMemory } from "../memory/organizational";
 import type { LLMMessage } from "../types";

@@ -16,8 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { posService } from "@/lib/api/services";
-import { orderService } from "@/lib/api/services";
+import { orderService,posService  } from "@/lib/api/services";
+import { appLogger } from '@/lib/logger';
 import { formatCurrency } from "@/lib/utils";
 
 interface OrderItem {
@@ -81,7 +81,7 @@ export function POSRefundDialog({
       });
       setRefundQuantities(initial);
     } catch (err: unknown) {
-      console.error("Error fetching order:", err);
+      appLogger.error("Error fetching order:", err);
       const errorMessage =
         err instanceof Error ? err.message : "Error al cargar la orden";
       setError(errorMessage);

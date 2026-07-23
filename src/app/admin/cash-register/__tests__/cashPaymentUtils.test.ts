@@ -9,12 +9,13 @@
  *   - computeCashDifference: null, valid, zero, negative
  */
 import { describe, expect, it } from "vitest";
+
 import {
-  PAYMENT_METHOD_FILTER_MAP,
-  STATUS_BADGE_CONFIG,
-  resolveClosureStatus,
-  formatPaymentMethod,
   computeCashDifference,
+  formatPaymentMethod,
+  PAYMENT_METHOD_FILTER_MAP,
+  resolveClosureStatus,
+  STATUS_BADGE_CONFIG,
 } from "../cashPaymentUtils";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

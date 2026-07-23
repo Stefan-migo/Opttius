@@ -1,12 +1,12 @@
 /**
  * SaaS demo lifecycle email templates — approved, expiring, expired, post-meeting
  */
+import { appLogger } from '@/lib/logger';
+
 import { sendEmail } from "../client";
 import { wrapInModernLayout } from "../layout";
 import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
-import {
-  getDefaultVariables,
-  replaceTemplateVariables,
+import {  replaceTemplateVariables,
 } from "../template-utils";
 
 function htmlToText(html: string): string {
@@ -15,6 +15,7 @@ function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n\s*\n/g, "\n")
     .trim();
+
 }
 
 export interface DemoApprovedData {
@@ -52,7 +53,7 @@ export async function sendDemoApprovedEmail(
       "saas",
     );
     if (!template) {
-      console.warn("⚠️ No demo_approved template found");
+      appLogger.warn("⚠️ No demo_approved template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -82,7 +83,7 @@ export async function sendDemoApprovedEmail(
     if (result.success) await incrementTemplateUsage(template.id);
     return result;
   } catch (error) {
-    console.error("Error sending demo approved email:", error);
+    appLogger.error("Error sending demo approved email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -101,7 +102,7 @@ export async function sendDemoExpiringEmail(
       "saas",
     );
     if (!template) {
-      console.warn("⚠️ No demo_expiring template found");
+      appLogger.warn("⚠️ No demo_expiring template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -132,7 +133,7 @@ export async function sendDemoExpiringEmail(
     if (result.success) await incrementTemplateUsage(template.id);
     return result;
   } catch (error) {
-    console.error("Error sending demo expiring email:", error);
+    appLogger.error("Error sending demo expiring email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -151,7 +152,7 @@ export async function sendDemoExpiredEmail(
       "saas",
     );
     if (!template) {
-      console.warn("⚠️ No demo_expired template found");
+      appLogger.warn("⚠️ No demo_expired template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -179,7 +180,7 @@ export async function sendDemoExpiredEmail(
     if (result.success) await incrementTemplateUsage(template.id);
     return result;
   } catch (error) {
-    console.error("Error sending demo expired email:", error);
+    appLogger.error("Error sending demo expired email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -198,7 +199,7 @@ export async function sendDemoPostMeetingFollowupEmail(
       "saas",
     );
     if (!template) {
-      console.warn("⚠️ No demo_post_meeting_followup template found");
+      appLogger.warn("⚠️ No demo_post_meeting_followup template found");
       return { success: false, error: "Template not found" };
     }
 
@@ -226,7 +227,7 @@ export async function sendDemoPostMeetingFollowupEmail(
     if (result.success) await incrementTemplateUsage(template.id);
     return result;
   } catch (error) {
-    console.error("Error sending demo post-meeting followup email:", error);
+    appLogger.error("Error sending demo post-meeting followup email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { calculatePriceWithTax } from "@/lib/utils/tax";
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 
-import { DEFAULT_QUOTE_SETTINGS, roundCurrency } from "./CreateQuoteForm.constants";
+import { roundCurrency } from "./CreateQuoteForm.constants";
 import type { QuoteFormData, QuoteSettings } from "./CreateQuoteForm.types";
 import { buildAvailableTreatments } from "./quotePricingUtils";
 

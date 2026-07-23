@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import POSBillingSettingsContent from "./_components/POSBillingSettingsContent";
 
 export const dynamic = "force-dynamic";

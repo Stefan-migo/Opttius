@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -286,7 +287,7 @@ export function MessageBubble({
       setTimeout(() => setCopied(false), 2000);
       onCopy?.();
     } catch (err) {
-      console.error("Failed to copy:", err);
+      appLogger.error("Failed to copy:", err);
     }
   };
 
@@ -357,7 +358,7 @@ export function MessageBubble({
                 const result =
                   toolResultsData?.[tc.id] || toolResultsData?.[index];
                 if (result && result.success === false) {
-                  console.error(
+                  appLogger.error(
                     `Tool Execution Error [${tc.name}]:`,
                     result.error || "Unknown error",
                     result,

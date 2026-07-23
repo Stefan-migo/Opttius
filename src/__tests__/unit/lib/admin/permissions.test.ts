@@ -6,11 +6,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { AdminRole } from "@/lib/admin/permissions";
 import {
   ACTION_LABELS,
-  PERMISSION_RESOURCES,
   getDefaultPermissions,
+  PERMISSION_RESOURCES,
 } from "@/lib/admin/permissions";
 
 // ---------------------------------------------------------------------------

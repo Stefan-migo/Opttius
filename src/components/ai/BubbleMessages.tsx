@@ -33,9 +33,9 @@ export function BubbleMessages({ messages, onAction }: BubbleMessagesProps) {
   return (
     <div className="flex-1 space-y-3 overflow-y-auto p-4">
       {messages.map((group, i) => (
-        <div key={i} className="space-y-2">
+        <div className="space-y-2" key={i}>
           {group.map((block, j) => (
-            <BlockRenderer key={j} block={block} onAction={onAction} />
+            <BlockRenderer block={block} key={j} onAction={onAction} />
           ))}
         </div>
       ))}

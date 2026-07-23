@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { appLogger } from '@/lib/logger';
 import type { ContactLensFamily, ContactLensPriceMatrix } from "@/types/contact-lens";
 
 interface MatrixWithFamily extends ContactLensPriceMatrix {
@@ -31,7 +32,7 @@ export function useContactLensMatrices() {
       if (includeInactive) params.append("include_inactive", "true");
       const response = await fetch(`/api/admin/contact-lens-families?${params}`);
       if (response.ok) { const data = await response.json(); setFamilies(data.families || []); }
-    } catch (error) { console.error("Error fetching families:", error); }
+    } catch (error) { appLogger.error("Error fetching families:", error); }
   }, [includeInactive]);
 
   const fetchMatrices = useCallback(async () => {

@@ -11,11 +11,11 @@ import { Glasses, Sparkles, Tag, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import type { POSAdvancedSaleProps } from "./POSAdvancedSale.types";
-import { usePOSAdvancedSale } from "./usePOSAdvancedSale";
 import { POSAdvancedSaleCustomerTab } from "./POSAdvancedSaleCustomerTab";
 import { POSAdvancedSaleFrameTab } from "./POSAdvancedSaleFrameTab";
 import { POSAdvancedSaleLensesTab } from "./POSAdvancedSaleLensesTab";
 import { POSAdvancedSalePricingTab } from "./POSAdvancedSalePricingTab";
+import { usePOSAdvancedSale } from "./usePOSAdvancedSale";
 
 export function POSAdvancedSale(props: POSAdvancedSaleProps) {
   const s = usePOSAdvancedSale(props);
@@ -50,96 +50,96 @@ export function POSAdvancedSale(props: POSAdvancedSaleProps) {
           <TabsContent className="h-auto m-0 p-4" value="customer">
             <POSAdvancedSaleCustomerTab
               customer={props.customer}
-              onCustomerChange={props.onCustomerChange}
-              quickCustomerName={props.quickCustomerName}
-              quickCustomerRUT={props.quickCustomerRUT}
-              quickCustomerEmail={props.quickCustomerEmail}
-              quickCustomerPhone={props.quickCustomerPhone}
-              prescriptions={s.prescriptions}
-              selectedPrescription={s.selectedPrescription}
-              setSelectedPrescription={s.setSelectedPrescription}
-              loadingPrescriptions={s.loadingPrescriptions}
-              useExternalPrescription={s.useExternalPrescription}
-              setUseExternalPrescription={s.setUseExternalPrescription}
               externalPrescriptionData={s.externalPrescriptionData}
-              setExternalPrescriptionData={s.setExternalPrescriptionData}
+              loadingPrescriptions={s.loadingPrescriptions}
               orderFormData={s.orderFormData}
+              prescriptions={s.prescriptions}
+              quickCustomerEmail={props.quickCustomerEmail}
+              quickCustomerName={props.quickCustomerName}
+              quickCustomerPhone={props.quickCustomerPhone}
+              quickCustomerRUT={props.quickCustomerRUT}
+              selectedPrescription={s.selectedPrescription}
+              setExternalPrescriptionData={s.setExternalPrescriptionData}
               setOrderFormData={s.setOrderFormData}
+              setSelectedPrescription={s.setSelectedPrescription}
+              setUseExternalPrescription={s.setUseExternalPrescription}
               suggestLensFamily={s.suggestLensFamily}
+              useExternalPrescription={s.useExternalPrescription}
+              onCustomerChange={props.onCustomerChange}
               onNextTab={() => s.setOrderFormTab("frame")}
             />
           </TabsContent>
 
           <TabsContent className="h-auto m-0 p-4" value="frame">
             <POSAdvancedSaleFrameTab
-              orderFormData={s.orderFormData}
-              setOrderFormData={s.setOrderFormData}
-              selectedFrame={s.selectedFrame}
-              setSelectedFrame={s.setSelectedFrame}
-              frameSearchTerm={s.frameSearchTerm}
-              setFrameSearchTerm={s.setFrameSearchTerm}
-              frameResults={s.frameResults}
-              frameLoading={s.frameLoading}
-              nearFrameSearchTerm={s.nearFrameSearchTerm}
-              setNearFrameSearchTerm={s.setNearFrameSearchTerm}
-              nearFrameResults={s.nearFrameResults}
-              nearFrameLoading={s.nearFrameLoading}
-              selectedNearFrame={s.selectedNearFrame}
-              setSelectedNearFrame={s.setSelectedNearFrame}
               customerOwnNearFrame={s.customerOwnNearFrame}
+              frameLoading={s.frameLoading}
+              frameResults={s.frameResults}
+              frameSearchTerm={s.frameSearchTerm}
+              nearFrameLoading={s.nearFrameLoading}
+              nearFrameResults={s.nearFrameResults}
+              nearFrameSearchTerm={s.nearFrameSearchTerm}
+              orderFormData={s.orderFormData}
+              selectedFrame={s.selectedFrame}
+              selectedNearFrame={s.selectedNearFrame}
               setCustomerOwnNearFrame={s.setCustomerOwnNearFrame}
-              onPrevTab={() => s.setOrderFormTab("customer")}
+              setFrameSearchTerm={s.setFrameSearchTerm}
+              setNearFrameSearchTerm={s.setNearFrameSearchTerm}
+              setOrderFormData={s.setOrderFormData}
+              setSelectedFrame={s.setSelectedFrame}
+              setSelectedNearFrame={s.setSelectedNearFrame}
               onNextTab={() => s.setOrderFormTab("lenses")}
+              onPrevTab={() => s.setOrderFormTab("customer")}
             />
           </TabsContent>
 
           <TabsContent className="h-auto m-0 p-4" value="lenses">
             <POSAdvancedSaleLensesTab
-              orderFormData={s.orderFormData}
-              setOrderFormData={s.setOrderFormData}
-              lensFamilies={s.lensFamilies}
-              filteredTreatments={s.filteredTreatments}
-              toggleTreatment={s.toggleTreatment}
-              handleUpdateTreatmentPrice={s.handleUpdateTreatmentPrice}
-              nearLensPriceValue={s.nearLensPriceValue}
-              contactLensConfig={s.contactLensConfig}
-              setContactLensConfig={s.setContactLensConfig}
-              selectedPrescription={s.selectedPrescription}
-              customer={props.customer}
               branchId={props.branchId}
-              onPrevTab={() => s.setOrderFormTab("frame")}
+              contactLensConfig={s.contactLensConfig}
+              customer={props.customer}
+              filteredTreatments={s.filteredTreatments}
+              handleUpdateTreatmentPrice={s.handleUpdateTreatmentPrice}
+              lensFamilies={s.lensFamilies}
+              nearLensPriceValue={s.nearLensPriceValue}
+              orderFormData={s.orderFormData}
+              selectedPrescription={s.selectedPrescription}
+              setContactLensConfig={s.setContactLensConfig}
+              setOrderFormData={s.setOrderFormData}
+              toggleTreatment={s.toggleTreatment}
               onNextTab={() => s.setOrderFormTab("pricing")}
+              onPrevTab={() => s.setOrderFormTab("frame")}
             />
           </TabsContent>
 
           <TabsContent className="h-auto m-0 p-4" value="pricing">
             <POSAdvancedSalePricingTab
+              creatingQuote={s.creatingQuote}
               customer={props.customer}
-              quickCustomerName={props.quickCustomerName}
-              quickCustomerRUT={props.quickCustomerRUT}
-              quickCustomerEmail={props.quickCustomerEmail}
-              quickCustomerPhone={props.quickCustomerPhone}
-              selectedPrescription={s.selectedPrescription}
-              useExternalPrescription={s.useExternalPrescription}
-              orderFormData={s.orderFormData}
-              selectedFrame={s.selectedFrame}
               customerOwnNearFrame={s.customerOwnNearFrame}
-              selectedNearFrame={s.selectedNearFrame}
-              lensFamilies={s.lensFamilies}
-              treatments={s.treatments}
-              lensPrice={s.lensPrice}
-              nearLensPriceValue={s.nearLensPriceValue}
-              treatmentsPrice={s.treatmentsPrice}
-              totalPrice={s.totalPrice}
               discountAmount={s.discountAmount}
               discountType={s.discountType}
-              setDiscountType={s.setDiscountType}
               discountValue={s.discountValue}
-              setDiscountValue={s.setDiscountValue}
               handleAddToCart={s.handleAddToCart}
               handleCreateQuote={s.handleCreateQuote}
-              creatingQuote={s.creatingQuote}
+              lensFamilies={s.lensFamilies}
+              lensPrice={s.lensPrice}
+              nearLensPriceValue={s.nearLensPriceValue}
+              orderFormData={s.orderFormData}
+              quickCustomerEmail={props.quickCustomerEmail}
+              quickCustomerName={props.quickCustomerName}
+              quickCustomerPhone={props.quickCustomerPhone}
+              quickCustomerRUT={props.quickCustomerRUT}
+              selectedFrame={s.selectedFrame}
+              selectedNearFrame={s.selectedNearFrame}
+              selectedPrescription={s.selectedPrescription}
+              setDiscountType={s.setDiscountType}
+              setDiscountValue={s.setDiscountValue}
               setOrderFormData={s.setOrderFormData}
+              totalPrice={s.totalPrice}
+              treatments={s.treatments}
+              treatmentsPrice={s.treatmentsPrice}
+              useExternalPrescription={s.useExternalPrescription}
               onPrevTab={() => s.setOrderFormTab("lenses")}
             />
           </TabsContent>

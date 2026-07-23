@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { appLogger } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 
 interface Tool {
@@ -49,7 +50,7 @@ export function ToolBrowser({
         setToolsByCategory(data.toolsByCategory || {});
       }
     } catch (error) {
-      console.error("Error loading tools:", error);
+      appLogger.error("Error loading tools:", error);
     } finally {
       setLoading(false);
     }

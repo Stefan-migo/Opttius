@@ -10,27 +10,27 @@
 
 import { NextRequest } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
 import {
   getBranchContext,
   getFieldOperationFromRequest,
   validateBranchAccess,
 } from "@/lib/api/branch-middleware";
+import type {
+  CreditNoteMovementRow,
+  OrderPaymentRow,
+  PaymentAggregatorInput,
+  PaymentSummary,
+} from "@/lib/cash-register/payment-aggregator";
 import {
   aggregatePayments,
   coerceAmount,
 } from "@/lib/cash-register/payment-aggregator";
-import type {
-  PaymentSummary,
-  PaymentAggregatorInput,
-  OrderPaymentRow,
-  CreditNoteMovementRow,
-} from "@/lib/cash-register/payment-aggregator";
+import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-import { ClosureError } from "./_helpers/closure-types";
 import type { ClosureContext } from "./_helpers/closure-types";
+import { ClosureError } from "./_helpers/closure-types";
 export { getPreviousClosure, resolveGetSession } from "./_helpers/closure-utils";
 
 // ─── Auth + Branch + Field Op Resolution ────────────────────────────────────
@@ -114,7 +114,7 @@ export async function getOpenSession(ctx: ClosureContext): Promise<{
 export async function getClosureOrders(
   ctx: ClosureContext,
   dateStr: string,
-): Promise<any[]> {
+): Promise<unknown[]> {
   let ordersQuery = ctx.supabaseServiceRole
     .from("orders")
     .select("*")
@@ -218,14 +218,14 @@ export async function getSessionPayments(
 export async function aggregateClosurePayments(
   ctx: ClosureContext,
   sessionPayments: PaymentAggregatorInput["sessionPayments"],
-  orders: any[],
+  orders: unknown[],
 ): Promise<PaymentSummary> {
   if (sessionPayments.length > 0) {
     return aggregatePayments({ sessionPayments, orders: [] });
   }
 
   if (orders.length > 0) {
-    const orderIds = orders.map((o: any) => o.id);
+    const orderIds = orders.map((o: unknown) => o.id);
     const { data: orderPayments } = await ctx.supabaseServiceRole
       .from("order_payments")
       .select("amount, payment_method")
@@ -242,7 +242,7 @@ export async function aggregateClosurePayments(
     // Final fallback: use mp_payment_method from orders
     return aggregatePayments({
       sessionPayments: [],
-      orders: orders.map((o: any) => ({
+      orders: orders.map((o: unknown) => ({
         id: o.id,
         total_amount: coerceAmount(o.total_amount),
         mp_payment_method: o.mp_payment_method,

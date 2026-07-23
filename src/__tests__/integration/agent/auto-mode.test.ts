@@ -66,7 +66,7 @@ describe("auto-mode trigger engine", () => {
       });
 
       const events = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: ORG_ID,
         branchId: BRANCH_ID,
         lowStockThreshold: 5,
@@ -108,7 +108,7 @@ describe("auto-mode trigger engine", () => {
 
       // Use a unique org to avoid cooldown from previous test
       const events = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: "org-critical-test",
         branchId: BRANCH_ID,
         lowStockThreshold: 5,
@@ -148,7 +148,7 @@ describe("auto-mode trigger engine", () => {
       });
 
       const events = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: "org-apt-test",
         branchId: BRANCH_ID,
       });
@@ -190,7 +190,7 @@ describe("auto-mode trigger engine", () => {
       });
 
       const events = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: "org-wo-test",
         branchId: null,
       });
@@ -227,7 +227,7 @@ describe("auto-mode trigger engine", () => {
 
       // First call — should produce events
       const first = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: "cooldown-org",
         branchId: null,
         lowStockThreshold: 5,
@@ -238,7 +238,7 @@ describe("auto-mode trigger engine", () => {
 
       // Second call immediately after — cooldown active, no new low_stock events
       const second = await checkTriggers({
-        supabase: supabase as any,
+        supabase: supabase as unknown,
         orgId: "cooldown-org",
         branchId: null,
         lowStockThreshold: 5,

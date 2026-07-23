@@ -16,12 +16,10 @@ vi.mock("@/lib/logger", () => ({
   appLogger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import {
   incrementTemplateUsage,
   loadEmailTemplate,
 } from "@/lib/email/template-loader";
-
 // Re-exports (tested in template-utils.test.ts)
 import {
   formatOrderItemsHTML,
@@ -29,6 +27,7 @@ import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "@/lib/email/template-loader";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 interface Chain {
   then: ReturnType<typeof vi.fn>;

@@ -233,10 +233,10 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper functions
-function getLatestMetrics(metrics: Record<string, any>[]) {
-  const latest: Record<string, any> = {};
+function getLatestMetrics(metrics: Record<string, unknown>[]) {
+  const latest: Record<string, unknown> = {};
 
-  metrics.forEach((metric: Record<string, any>) => {
+  metrics.forEach((metric: Record<string, unknown>) => {
     const key = metric.metric_name;
     if (
       !latest[key] ||
@@ -249,12 +249,12 @@ function getLatestMetrics(metrics: Record<string, any>[]) {
   return Object.values(latest);
 }
 
-function calculateHealthStatus(latestMetrics: Record<string, any>[]) {
+function calculateHealthStatus(latestMetrics: Record<string, unknown>[]) {
   let overallStatus = "healthy";
-  const warnings: Record<string, any>[] = [];
-  const criticals: Record<string, any>[] = [];
+  const warnings: Record<string, unknown>[] = [];
+  const criticals: Record<string, unknown>[] = [];
 
-  latestMetrics.forEach((metric: Record<string, any>) => {
+  latestMetrics.forEach((metric: Record<string, unknown>) => {
     if (
       metric.threshold_critical &&
       metric.metric_value >= metric.threshold_critical
@@ -281,14 +281,14 @@ function calculateHealthStatus(latestMetrics: Record<string, any>[]) {
     last_check:
       latestMetrics.length > 0
         ? Math.max(
-            ...latestMetrics.map((m: Record<string, any>) => new Date(m.collected_at).getTime()),
+            ...latestMetrics.map((m: Record<string, unknown>) => new Date(m.collected_at).getTime()),
           )
         : null,
   };
 }
 
-function groupMetricsByCategory(metrics: Record<string, any>[]) {
-  const grouped = metrics.reduce((acc: Record<string, any>, metric: Record<string, any>) => {
+function groupMetricsByCategory(metrics: Record<string, unknown>[]) {
+  const grouped = metrics.reduce((acc: Record<string, unknown>, metric: Record<string, unknown>) => {
     const category = metric.category || "general";
 
     if (!acc[category]) {
@@ -307,13 +307,13 @@ function groupMetricsByCategory(metrics: Record<string, any>[]) {
     });
 
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, unknown>);
 
   // Sort each metric array by time
   Object.keys(grouped).forEach((category) => {
     Object.keys(grouped[category]).forEach((metricName) => {
       grouped[category][metricName].sort(
-        (a: Record<string, any>, b: Record<string, any>) =>
+        (a: Record<string, unknown>, b: Record<string, unknown>) =>
           new Date(a.collected_at).getTime() -
           new Date(b.collected_at).getTime(),
       );

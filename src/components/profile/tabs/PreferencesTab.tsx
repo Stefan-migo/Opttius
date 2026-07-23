@@ -23,6 +23,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
+import { appLogger } from '@/lib/logger';
 
 export function PreferencesTab() {
   const { profile, updateProfile, refetchProfile } = useAuthContext();
@@ -58,7 +59,7 @@ export function PreferencesTab() {
       await refetchProfile();
       toast.success("Preferencias actualizadas exitosamente");
     } catch (error) {
-      console.error("Error updating preferences:", error);
+      appLogger.error("Error updating preferences:", error);
       toast.error("Error al actualizar las preferencias");
     } finally {
       setIsLoading(false);

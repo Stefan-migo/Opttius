@@ -1,3 +1,5 @@
+
+import { appLogger } from '@/lib/logger';
 import { Tables } from "@/types/database";
 import { createClient } from "@/utils/supabase/client";
 
@@ -27,19 +29,19 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
 
     if (error) {
       if (error.message === "Profile fetch timeout") {
-        console.warn(
+        appLogger.warn(
           "⚠️ Profile fetch timed out - normal for new users or slow connections",
         );
         return null;
       }
       if (error.code === "PGRST116") {
-        console.log(
+        appLogger.info(
           "📝 Profile not found - will be created automatically on first update",
         );
         return null;
       }
       if (error.code !== "42P01") {
-        console.error("❌ Profile fetch error:", error);
+        appLogger.error("❌ Profile fetch error:", error);
       }
       return null;
     }
@@ -47,9 +49,9 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
     return data;
   } catch (error) {
     if (error instanceof Error && error.message === "Profile fetch timeout") {
-      console.warn("⚠️ Profile fetch timeout - continuing without profile");
+      appLogger.warn("⚠️ Profile fetch timeout - continuing without profile");
     } else {
-      console.error("❌ Unexpected profile fetch error:", error);
+      appLogger.error("❌ Unexpected profile fetch error:", error);
     }
     return null;
   }

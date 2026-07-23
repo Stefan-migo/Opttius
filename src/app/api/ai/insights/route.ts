@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { InsightSectionSchema } from "@/lib/ai/insights/schemas";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { parseAndValidateQuery } from "@/lib/api/validation/zod-helpers";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 const querySchema = z.object({
