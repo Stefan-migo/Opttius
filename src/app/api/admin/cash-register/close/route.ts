@@ -3,18 +3,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
 import {
   aggregateClosurePayments,
-  alignDateWithSession,
-  buildClosureInput,
-  calculateCashInflowsOutflows,
-  calculateOrderTotals,
   getClosureContext,
   getClosureOrders,
   getOpenSession,
   getPreviousClosure,
   getSessionPayments,
-  handleClosureError,
   resolveGetSession,
 } from "@/lib/cash-register/closure-service";
+import {
+  alignDateWithSession,
+  buildClosureInput,
+  calculateCashInflowsOutflows,
+  calculateOrderTotals,
+} from "@/lib/cash-register/_helpers/closure-utils";
+import { handleClosureError } from "@/lib/cash-register/_helpers/closure-types";
 import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import { appLogger as logger } from "@/lib/logger";
 
