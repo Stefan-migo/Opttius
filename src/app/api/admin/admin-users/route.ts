@@ -3,520 +3,109 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDefaultPermissions } from "@/lib/admin/permissions";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import type {
-  GetAdminRoleParams,
-  GetAdminRoleResult,
-  IsSuperAdminParams,
-  IsSuperAdminResult,
-} from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
+import { checkAuth, verifyAdmin } from "./_helpers/adminUserHelpers";
+
 export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const auth = await checkAuth(supabase);
+    if (auth.error) return auth.error;
+    const adminCheck = await verifyAdmin(supabase, auth.user!.id);
+    if (adminCheck) return adminCheck;
+
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role") || "";
     const status = searchParams.get("status") || "";
     const search = searchParams.get("search") || "";
-    const limit = Math.min(
-      Math.max(1, parseInt(searchParams.get("limit") || "20", 10)),
-      100,
-    );
+    const limit = Math.min(Math.max(1, parseInt(searchParams.get("limit") || "20", 10)), 100);
     const offset = Math.max(0, parseInt(searchParams.get("offset") || "0", 10));
 
-    const supabase = await createClient();
+    const { data: currentAdmin } = await supabase.from("admin_users").select("role, organization_id").eq("id", auth.user!.id).single();
+    if (!currentAdmin) return NextResponse.json({ error: "Failed to verify user permissions" }, { status: 500 });
 
-    // Check admin authorization (only admins can manage admin users)
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const isRoot = currentAdmin.role === "root" || currentAdmin.role === "dev";
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: auth.user!.id }) as any;
+    const { data: userOrgId } = await supabase.rpc("get_user_organization_id", { user_id: auth.user!.id });
+    const effectiveOrgId = userOrgId || currentAdmin.organization_id;
 
-    const { data: adminRole } = (await supabase.rpc("get_admin_role", {
-      user_id: user.id,
-    } as GetAdminRoleParams)) as {
-      data: GetAdminRoleResult | null;
-      error: Error | null;
-    };
+    let query = supabase.from("admin_users").select("id, email, role, permissions, is_active, last_login, created_at, updated_at, organization_id, admin_branch_access (id, branch_id, role, is_primary, branches (id, name, code))", { count: "exact" });
 
-    // Verificar que el usuario tiene algún rol administrativo
-    if (
-      !adminRole ||
-      !["admin", "super_admin", "root", "dev", "employee", "vendedor"].includes(
-        adminRole,
-      )
-    ) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
-    }
+    if (!isRoot && effectiveOrgId) query = query.eq("organization_id", effectiveOrgId);
+    else if (!isRoot && !effectiveOrgId) return NextResponse.json({ adminUsers: [], pagination: { total: 0, page: 1, limit: 20, totalPages: 0 } });
 
-    // Obtener información del usuario actual para determinar si es root/dev o super admin
-    const { data: currentAdminUser, error: currentAdminError } = await supabase
-      .from("admin_users")
-      .select("role, organization_id")
-      .eq("id", user.id)
-      .single();
-
-    if (currentAdminError) {
-      logger.error("Error fetching current admin user", currentAdminError);
-      return NextResponse.json(
-        { error: "Failed to verify user permissions" },
-        { status: 500 },
-      );
-    }
-
-    // Verificar si es root/dev (tiene acceso a todas las organizaciones)
-    const isRoot =
-      currentAdminUser?.role === "root" || currentAdminUser?.role === "dev";
-
-    // Verificar si es super admin (basado en admin_branch_access)
-    const { data: isSuperAdmin } = (await supabase.rpc("is_super_admin", {
-      user_id: user.id,
-    } as IsSuperAdminParams)) as {
-      data: IsSuperAdminResult | null;
-      error: Error | null;
-    };
-
-    // Obtener organization_id del usuario actual
-    const { data: userOrgId } = await supabase.rpc("get_user_organization_id", {
-      user_id: user.id,
-    });
-
-    // CRITICAL: Use organization_id from currentAdminUser as fallback
-    const effectiveOrgId = userOrgId || currentAdminUser?.organization_id;
-
-    let query = supabase.from("admin_users").select(
-      `
-        id,
-        email,
-        role,
-        permissions,
-        is_active,
-        last_login,
-        created_at,
-        updated_at,
-        organization_id,
-        admin_branch_access (
-          id,
-          branch_id,
-          role,
-          is_primary,
-          branches (
-            id,
-            name,
-            code
-          )
-        )
-      `,
-      { count: "exact" },
-    );
-
-    // CRITICAL: Apply organization filter - only root/dev can see all organizations
-    // Super admins within an organization should only see users from their organization
-    if (!isRoot && effectiveOrgId) {
-      // Filter by organization_id - CRITICAL for multi-tenancy isolation
-      query = query.eq("organization_id", effectiveOrgId);
-      logger.debug("Filtering admin users by organization_id", {
-        organizationId: effectiveOrgId,
-        isRoot,
-        isSuperAdmin,
-      });
-    } else if (!isRoot && !effectiveOrgId) {
-      // If not root and no organization_id, return empty (shouldn't happen but safety check)
-      logger.warn("User has no organization_id and is not root", {
-        userId: user.id,
-        role: currentAdminUser?.role,
-      });
-      return NextResponse.json({
-        adminUsers: [],
-        pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
-      });
-    }
-    // Root/dev users can see all admin users (no filter applied)
-
-    // Apply filters
-    if (role && role !== "all") {
-      query = query.eq("role", role);
-    }
-
-    if (status && status !== "all") {
-      const isActive = status === "active";
-      query = query.eq("is_active", isActive);
-    }
-
+    if (role && role !== "all") query = query.eq("role", role);
+    if (status && status !== "all") query = query.eq("is_active", status === "active");
     if (search.trim()) {
-      const searchPattern = `%${search.trim()}%`;
-      const { data: matchingProfiles, error: profileSearchError } =
-        await supabase
-          .from("profiles")
-          .select("id")
-          .or(
-            `email.ilike.${searchPattern},first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`,
-          );
-      if (profileSearchError) {
-        query = query.ilike("email", searchPattern);
-      } else {
-        const matchingIds = matchingProfiles?.map((p) => p.id) ?? [];
-        if (matchingIds.length > 0) {
-          query = query.in("id", matchingIds);
-        } else {
-          query = query.eq("id", "00000000-0000-0000-0000-000000000000");
-        }
-      }
+      const pattern = `%${search.trim()}%`;
+      const { data: matchingProfiles } = await supabase.from("profiles").select("id").or(`email.ilike.${pattern},first_name.ilike.${pattern},last_name.ilike.${pattern}`);
+      if (matchingProfiles && matchingProfiles.length > 0) query = query.in("id", matchingProfiles.map((p) => p.id));
+      else query = query.eq("id", "00000000-0000-0000-0000-000000000000");
     }
 
-    const {
-      data: adminUsers,
-      error,
-      count,
-    } = await query
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+    const { data: adminUsers, error, count } = await query.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+    if (error) { logger.error("Error fetching admin users", error); return NextResponse.json({ error: "Failed to fetch admin users" }, { status: 500 }); }
 
-    if (error) {
-      logger.error("Error fetching admin users", error);
-      return NextResponse.json(
-        { error: "Failed to fetch admin users" },
-        { status: 500 },
-      );
-    }
+    const { data: activityStats } = await supabase.from("admin_activity_log").select("admin_user_id, created_at").gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    const activityMap = (activityStats || []).reduce((acc: any, a: any) => { acc[a.admin_user_id] = (acc[a.admin_user_id] || 0) + 1; return acc; }, {});
+    const adminIds = (adminUsers || []).map((a: any) => a.id);
+    const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, phone").in("id", adminIds);
+    const profilesMap = (profiles || []).reduce((acc: any, p: any) => { acc[p.id] = p; return acc; }, {});
 
-    // Get activity stats for each admin user
-    const { data: activityStats } = await supabase
-      .from("admin_activity_log")
-      .select("admin_user_id, created_at")
-      .gte(
-        "created_at",
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      ); // Last 30 days
-
-    const activityMap =
-      activityStats?.reduce((acc: unknown, activity) => {
-        if (!acc[activity.admin_user_id]) {
-          acc[activity.admin_user_id] = 0;
-        }
-        acc[activity.admin_user_id]++;
-        return acc;
-      }, {}) || {};
-
-    // Get profiles for full names
-    const adminIds = adminUsers?.map((admin) => admin.id) || [];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, first_name, last_name, phone")
-      .in("id", adminIds);
-
-    const profilesMap =
-      profiles?.reduce((acc: unknown, profile) => {
-        acc[profile.id] = profile;
-        return acc;
-      }, {}) || {};
-
-    // Enhance admin users with analytics and branch info
-    const adminUsersWithStats =
-      adminUsers?.map((admin: unknown) => {
-        const branchAccess = admin.admin_branch_access || [];
-        const isSuperAdmin = branchAccess.some(
-          (access: unknown) => access.branch_id === null,
-        );
-        const branches = branchAccess
-          .filter((access: unknown) => access.branch_id !== null)
-          .map((access: unknown) => ({
-            id: access.branch_id,
-            name: access.branches?.name || "N/A",
-            code: access.branches?.code || "N/A",
-            is_primary: access.is_primary,
-          }));
-
-        const profile = profilesMap[admin.id];
-        const fullName = profile
-          ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() ||
-            null
-          : null;
-
-        return {
-          ...admin,
-          is_super_admin: isSuperAdmin,
-          branches: branches,
-          analytics: {
-            activityCount30Days: activityMap[admin.id] || 0,
-            lastActivity: admin.last_login,
-            fullName: fullName,
-          },
-          profiles: profile
-            ? {
-                first_name: profile.first_name,
-                last_name: profile.last_name,
-                phone: profile.phone,
-              }
-            : null,
-        };
-      }) || [];
+    const adminUsersWithStats = (adminUsers || []).map((admin: any) => {
+      const branchAccess = admin.admin_branch_access || [];
+      const profile = profilesMap[admin.id];
+      return { ...admin, is_super_admin: branchAccess.some((a: any) => a.branch_id === null), branches: branchAccess.filter((a: any) => a.branch_id !== null).map((a: any) => ({ id: a.branch_id, name: a.branches?.name || "N/A", code: a.branches?.code || "N/A", is_primary: a.is_primary })), analytics: { activityCount30Days: activityMap[admin.id] || 0, lastActivity: admin.last_login, fullName: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || null : null }, profiles: profile ? { first_name: profile.first_name, last_name: profile.last_name, phone: profile.phone } : null };
+    });
 
     const total = count ?? adminUsersWithStats.length;
-    const page = Math.floor(offset / limit) + 1;
-    const totalPages = Math.ceil(total / limit);
-
-    return NextResponse.json({
-      adminUsers: adminUsersWithStats,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages,
-      },
-    });
+    return NextResponse.json({ adminUsers: adminUsersWithStats, pagination: { total, page: Math.floor(offset / limit) + 1, limit, totalPages: Math.ceil(total / limit) } });
   } catch (error) {
     logger.error("Error in admin users API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      email,
-      role,
-      permissions,
-      is_active = true,
-      is_super_admin = false,
-      branch_ids = [],
-    } = body;
-
     const supabase = await createClient();
+    const auth = await checkAuth(supabase);
+    if (auth.error) return auth.error;
+    const adminCheck = await verifyAdmin(supabase, auth.user!.id);
+    if (adminCheck) return adminCheck;
 
-    // Check admin authorization
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const body = await request.json();
+    const { email, role, permissions, is_active = true, is_super_admin = false, branch_ids = [] } = body;
+    const branchContext = await getBranchContext(request, auth.user!.id);
 
-    const { data: adminRole } = (await supabase.rpc("get_admin_role", {
-      user_id: user.id,
-    } as GetAdminRoleParams)) as {
-      data: GetAdminRoleResult | null;
-      error: Error | null;
-    };
-    if (adminRole !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
-    }
+    if (is_super_admin && !branchContext.isSuperAdmin) return NextResponse.json({ error: "Solo los super administradores pueden otorgar permisos de super administrador" }, { status: 403 });
+    if (!is_super_admin && (!branch_ids || branch_ids.length === 0)) return NextResponse.json({ error: "Debe asignar al menos una sucursal al administrador" }, { status: 400 });
+    if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
 
-    // Get branch context to check if requester is super admin
-    const branchContext = await getBranchContext(request, user.id);
+    const { data: existingUser } = await supabase.from("profiles").select("id, email").eq("email", email).maybeSingle();
+    if (!existingUser) return NextResponse.json({ error: "User must be registered first. The user needs to sign up before being granted admin access." }, { status: 400 });
 
-    // Only super admins can create super admins
-    if (is_super_admin && !branchContext.isSuperAdmin) {
-      return NextResponse.json(
-        {
-          error:
-            "Solo los super administradores pueden otorgar permisos de super administrador",
-        },
-        { status: 403 },
-      );
-    }
+    const { data: existingAdmin } = await supabase.from("admin_users").select("id, email").eq("email", email).maybeSingle();
+    if (existingAdmin) return NextResponse.json({ error: "User is already an admin" }, { status: 400 });
 
-    // Validate: if not super admin, must have at least one branch
-    if (!is_super_admin && (!branch_ids || branch_ids.length === 0)) {
-      return NextResponse.json(
-        {
-          error: "Debe asignar al menos una sucursal al administrador",
-        },
-        { status: 400 },
-      );
-    }
+    const { data: newAdmin, error: createError } = await supabase.from("admin_users").insert({ id: existingUser.id, email: existingUser.email, role: "admin", permissions: permissions || getDefaultPermissions("admin"), is_active }).select("id, email, role, permissions, is_active, created_at, updated_at").single();
+    if (createError) { logger.error("Error creating admin user", createError); return NextResponse.json({ error: "Failed to create admin user", details: createError.message }, { status: 500 }); }
 
-    // Validate input
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
-
-    // Set role to 'admin' (simplified system)
-    const finalRole = "admin";
-
-    // Check if user exists in profiles table (linked to auth.users)
-    const { data: existingUser, error: userCheckError } = await supabase
-      .from("profiles")
-      .select("id, email")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (userCheckError) {
-      logger.error("Error checking user existence", userCheckError);
-      return NextResponse.json(
-        {
-          error: "Error verifying user. Please try again.",
-        },
-        { status: 500 },
-      );
-    }
-
-    if (!existingUser) {
-      return NextResponse.json(
-        {
-          error:
-            "User must be registered first. The user needs to sign up before being granted admin access.",
-        },
-        { status: 400 },
-      );
-    }
-
-    // Check if user is already an admin
-    const { data: existingAdmin, error: adminCheckError } = await supabase
-      .from("admin_users")
-      .select("id, email")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (adminCheckError) {
-      logger.error("Error checking admin existence", adminCheckError);
-      return NextResponse.json(
-        {
-          error: "Error verifying admin status. Please try again.",
-        },
-        { status: 500 },
-      );
-    }
-
-    if (existingAdmin) {
-      return NextResponse.json(
-        { error: "User is already an admin" },
-        { status: 400 },
-      );
-    }
-
-    // Default permissions for admin role (full access)
-    const defaultPermissions = getDefaultPermissions("admin");
-    const finalPermissions = permissions || defaultPermissions;
-
-    // Create admin user
-    const { data: newAdmin, error: createError } = await supabase
-      .from("admin_users")
-      .insert({
-        id: existingUser.id,
-        email: existingUser.email,
-        role: finalRole,
-        permissions: finalPermissions,
-        is_active,
-      })
-      .select(
-        `
-        id,
-        email,
-        role,
-        permissions,
-        is_active,
-        created_at,
-        updated_at
-      `,
-      )
-      .single();
-
-    if (createError) {
-      logger.error("Error creating admin user", createError);
-      return NextResponse.json(
-        {
-          error: "Failed to create admin user",
-          details: createError.message,
-        },
-        { status: 500 },
-      );
-    }
-
-    // Assign branch access
     if (is_super_admin) {
-      // Create super admin access (branch_id = null)
-      const { error: accessError } = await supabase
-        .from("admin_branch_access")
-        .insert({
-          admin_user_id: newAdmin.id,
-          branch_id: null,
-          role: "manager",
-          is_primary: true,
-        });
-
-      if (accessError) {
-        logger.error("Error assigning super admin access", accessError);
-        // Rollback admin user creation
-        await supabase.from("admin_users").delete().eq("id", newAdmin.id);
-        return NextResponse.json(
-          {
-            error: "Failed to assign super admin access",
-            details: accessError.message,
-          },
-          { status: 500 },
-        );
-      }
-    } else {
-      // Assign branch access for each branch
-      if (branch_ids && branch_ids.length > 0) {
-        const accessRecords = branch_ids.map(
-          (branchId: string, index: number) => ({
-            admin_user_id: newAdmin.id,
-            branch_id: branchId,
-            role: "manager",
-            is_primary: index === 0, // First branch is primary
-          }),
-        );
-
-        const { error: accessError } = await supabase
-          .from("admin_branch_access")
-          .insert(accessRecords);
-
-        if (accessError) {
-          logger.error("Error assigning branch access", accessError);
-          // Rollback admin user creation
-          await supabase.from("admin_users").delete().eq("id", newAdmin.id);
-          return NextResponse.json(
-            {
-              error: "Failed to assign branch access",
-              details: accessError.message,
-            },
-            { status: 500 },
-          );
-        }
-      }
+      const { error: ae } = await supabase.from("admin_branch_access").insert({ admin_user_id: newAdmin.id, branch_id: null, role: "manager", is_primary: true });
+      if (ae) { await supabase.from("admin_users").delete().eq("id", newAdmin.id); return NextResponse.json({ error: "Failed to assign super admin access", details: ae.message }, { status: 500 }); }
+    } else if (branch_ids.length > 0) {
+      const { error: ae } = await supabase.from("admin_branch_access").insert(branch_ids.map((bid: string, i: number) => ({ admin_user_id: newAdmin.id, branch_id: bid, role: "manager", is_primary: i === 0 })));
+      if (ae) { await supabase.from("admin_users").delete().eq("id", newAdmin.id); return NextResponse.json({ error: "Failed to assign branch access", details: ae.message }, { status: 500 }); }
     }
 
-    // Log admin activity (don't fail if logging fails)
-    try {
-      await supabase.rpc("log_admin_activity", {
-        action: "create_admin_user",
-        resource_type: "admin_user",
-        resource_id: newAdmin.id,
-        details: {
-          new_admin_email: email,
-          role: "admin",
-          is_super_admin,
-          branch_ids: is_super_admin ? null : branch_ids,
-          created_by: user.email,
-        },
-      });
-    } catch (logError) {
-      logger.warn("Error logging admin activity (non-critical)", logError);
-      // Continue anyway, logging failure shouldn't block admin creation
-    }
-
+    try { await supabase.rpc("log_admin_activity", { action: "create_admin_user", resource_type: "admin_user", resource_id: newAdmin.id, details: { new_admin_email: email, role: "admin", is_super_admin, branch_ids: is_super_admin ? null : branch_ids, created_by: auth.user!.email } }); } catch { }
     return NextResponse.json({ adminUser: newAdmin });
   } catch (error) {
     logger.error("Error in create admin user API", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
