@@ -1,155 +1,25 @@
 "use client";
 
-import {
-  CheckCircle,
-  Edit,
-  Glasses,
-  Layers,
-  Package,
-  Plus,
-  Tag,
-  Trash2,
-} from "lucide-react";
+import { Glasses, Layers, Plus, Tag } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 
 import type { Category } from "../hooks/useCategories";
 import { useCategories } from "../hooks/useCategories";
+import { CategorySection } from "./_components/_components/CategoryCard";
+import { CategoryDialog } from "./_components/_components/CategoryDialog";
 
 const SORT_ORDER_THRESHOLD = 10;
 
 function groupCategories(categories: Category[]) {
-  const principales = categories.filter(
-    (c) => c.sort_order == null || c.sort_order < SORT_ORDER_THRESHOLD,
-  );
-  const especializadas = categories.filter(
-    (c) => c.sort_order != null && c.sort_order >= SORT_ORDER_THRESHOLD,
-  );
-  return { principales, especializadas };
-}
-
-function CategoryCard({
-  category,
-  onEdit,
-  onDelete,
-}: {
-  category: Category;
-  onEdit: (c: Category) => void;
-  onDelete: (c: Category) => void;
-}) {
-  return (
-    <Card className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-xl shadow-none group hover:shadow-lg hover:border-admin-accent-primary/20 transition-all duration-300">
-      <CardHeader className="p-4 sm:p-5 pb-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 space-y-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm sm:text-base font-display font-bold text-admin-text-primary uppercase tracking-tight truncate">
-                {category.name}
-              </h4>
-              {category.sort_order != null && (
-                <span className="text-[9px] font-mono text-admin-text-tertiary shrink-0">
-                  #{category.sort_order}
-                </span>
-              )}
-            </div>
-            <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] bg-admin-border-primary/5 px-2 py-0.5 inline-block border border-admin-border-primary/10 rounded">
-              {category.slug}
-            </p>
-          </div>
-          <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
-            <Button
-              className="h-8 w-8 p-0 rounded-lg hover:bg-admin-accent-primary/10 text-epoch-primary"
-              size="sm"
-              variant="ghost"
-              onClick={() => onEdit(category)}
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              className="h-8 w-8 p-0 rounded-lg hover:bg-admin-error/10 text-admin-error"
-              size="sm"
-              variant="ghost"
-              onClick={() => onDelete(category)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 sm:p-5 pt-0">
-        {category.description ? (
-          <p className="text-[11px] font-serif italic text-admin-text-secondary line-clamp-2 leading-relaxed">
-            {category.description}
-          </p>
-        ) : (
-          <p className="text-[10px] font-serif italic text-admin-text-tertiary">
-            Sin descripción
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function CategorySection({
-  title,
-  subtitle,
-  icon: Icon,
-  categories,
-  onEdit,
-  onDelete,
-}: {
-  title: string;
-  subtitle: string;
-  icon: React.ElementType;
-  categories: Category[];
-  onEdit: (c: Category) => void;
-  onDelete: (c: Category) => void;
-}) {
-  if (categories.length === 0) return null;
-
-  return (
-    <section className="space-y-4">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-admin-accent-primary/10 text-admin-accent-primary">
-          <Icon className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-sm sm:text-base font-display font-bold text-admin-text-primary uppercase tracking-[0.1em]">
-            {title}
-          </h3>
-          <p className="text-[10px] sm:text-xs font-serif italic text-admin-text-tertiary mt-0.5">
-            {subtitle}
-          </p>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-        {categories.map((category) => (
-          <CategoryCard
-            category={category}
-            key={category.id}
-            onDelete={onDelete}
-            onEdit={onEdit}
-          />
-        ))}
-      </div>
-    </section>
-  );
+  return {
+    principales: categories.filter((c) => c.sort_order == null || c.sort_order < SORT_ORDER_THRESHOLD),
+    especializadas: categories.filter((c) => c.sort_order != null && c.sort_order >= SORT_ORDER_THRESHOLD),
+  };
 }
 
 export default function CategoriesManagementSection() {
@@ -367,105 +237,15 @@ export default function CategoriesManagementSection() {
         </CardContent>
       </Card>
 
-      <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[450px] p-0 rounded-xl border-2 border-admin-border-primary/20 bg-white">
-          <DialogHeader className="p-8 pb-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10">
-            <DialogTitle className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
-              {editingCategory ? "Editar categoría" : "Nueva categoría"}
-            </DialogTitle>
-            <DialogDescription className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-1">
-              Complete los datos de la categoría
-            </DialogDescription>
-          </DialogHeader>
-
-          <form className="p-8 space-y-6" onSubmit={handleCategorySubmit}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label
-                  className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
-                  htmlFor="category-name"
-                >
-                  Nombre *
-                </Label>
-                <Input
-                  required
-                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-6 text-sm font-display"
-                  id="category-name"
-                  placeholder="Ej: Marcos"
-                  value={categoryFormData.name}
-                  onChange={(e) =>
-                    handleCategoryInputChange("name", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
-                  htmlFor="category-slug"
-                >
-                  Slug
-                </Label>
-                <div className="relative">
-                  <Input
-                    className="rounded-xl border-admin-border-primary/20 bg-admin-bg-tertiary/30 focus:border-epoch-primary focus:ring-0 p-6 pl-10 text-xs font-mono lowercase"
-                    id="category-slug"
-                    placeholder="marcos"
-                    value={categoryFormData.slug}
-                    onChange={(e) =>
-                      handleCategoryInputChange("slug", e.target.value)
-                    }
-                  />
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-30" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
-                  htmlFor="category-description"
-                >
-                  Descripción
-                </Label>
-                <Textarea
-                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-4 text-xs font-serif italic resize-none"
-                  id="category-description"
-                  placeholder="Descripción opcional..."
-                  rows={3}
-                  value={categoryFormData.description}
-                  onChange={(e) =>
-                    handleCategoryInputChange("description", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border-primary/10">
-              <Button
-                className="rounded-xl text-[10px] font-display font-bold tracking-widest uppercase hover:bg-admin-bg-tertiary"
-                disabled={categoryFormLoading}
-                type="button"
-                variant="ghost"
-                onClick={() => setCategoryDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-8 border-none shadow-premium-sm"
-                disabled={categoryFormLoading}
-                type="submit"
-              >
-                {categoryFormLoading ? (
-                  <Package className="h-3 w-3 mr-2 animate-spin" />
-                ) : (
-                  <CheckCircle className="h-3 w-3 mr-2" />
-                )}
-                {editingCategory ? "Actualizar" : "Crear"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CategoryDialog
+        editingCategory={editingCategory}
+        formData={categoryFormData}
+        loading={categoryFormLoading}
+        open={categoryDialogOpen}
+        onFormChange={handleCategoryInputChange}
+        onOpenChange={setCategoryDialogOpen}
+        onSubmit={handleCategorySubmit}
+      />
     </>
   );
 }

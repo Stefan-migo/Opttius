@@ -1,14 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Download,
-  Edit,
-  RefreshCw,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { ArrowLeft, Download, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -16,30 +9,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import type { Product } from "@/lib/api/services";
 import { productService } from "@/lib/api/services";
 
-import { BulkOperationForm } from "./BulkOperationForm";
+import { BulkActionDialog } from "./_components/BulkActionDialog";
+import { BulkFiltersBar } from "./_components/BulkFiltersBar";
 import { ImportProductsDialog } from "./ImportProductsDialog";
 import { ProductsTable } from "./ProductsTable";
 
@@ -253,11 +229,11 @@ export default function BulkOperationsContent() {
           </Button>
           <ImportProductsDialog
             open={showImportDialog}
-            onOpenChange={setShowImportDialog}
             onImportComplete={() => {
               setShowImportDialog(false);
               fetchProducts();
             }}
+            onOpenChange={setShowImportDialog}
           />
         </div>
       </div>
@@ -293,185 +269,37 @@ export default function BulkOperationsContent() {
                   Eliminar
                 </Button>
 
-                <Dialog
+                <BulkActionDialog
+                  bulkOperation={bulkOperation}
+                  bulkUpdates={bulkUpdates}
+                  categories={categories}
+                  isDeleteDialog={isDeleteDialog}
                   open={showBulkDialog}
-                  onOpenChange={(open) => {
-                    setShowBulkDialog(open);
-                    if (!open) {
-                      setIsDeleteDialog(false);
-                      setBulkOperation("");
-                      setBulkUpdates({});
-                    }
-                  }}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        setIsDeleteDialog(false);
-                        setBulkOperation("");
-                        setBulkUpdates({});
-                      }}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Operaciones Masivas
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {bulkOperation === "delete"
-                          ? "Archivar Productos"
-                          : bulkOperation === "hard_delete"
-                            ? "⚠️ Eliminar Permanentemente"
-                            : "Operación Masiva"}
-                      </DialogTitle>
-                      <DialogDescription>
-                        {bulkOperation === "delete"
-                          ? `Archivar ${selectedProducts.length} productos seleccionados`
-                          : bulkOperation === "hard_delete"
-                            ? `ELIMINAR PERMANENTEMENTE ${selectedProducts.length} productos seleccionados`
-                            : `Aplicar cambios a ${selectedProducts.length} productos seleccionados`}
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                      {!isDeleteDialog && (
-                        <div>
-                          <Label htmlFor="operation">Operación</Label>
-                          <Select
-                            value={bulkOperation}
-                            onValueChange={setBulkOperation}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar operación" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="update_status">
-                                Cambiar Estado
-                              </SelectItem>
-                              <SelectItem value="update_category">
-                                Cambiar Categoría
-                              </SelectItem>
-                              <SelectItem value="update_pricing">
-                                Ajustar Precios
-                              </SelectItem>
-                              <SelectItem value="update_inventory">
-                                Ajustar Inventario
-                              </SelectItem>
-                              <SelectItem value="duplicate">
-                                Duplicar Productos
-                              </SelectItem>
-                              <SelectItem value="delete">
-                                Archivar Productos (Eliminación Suave)
-                              </SelectItem>
-                              <SelectItem
-                                className="text-red-600 font-medium"
-                                value="hard_delete"
-                              >
-                                ⚠️ Eliminar Permanentemente
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {bulkOperation && (
-                        <BulkOperationForm
-                          bulkOperation={bulkOperation}
-                          selectedProducts={selectedProducts}
-                          categories={categories}
-                          bulkUpdates={bulkUpdates}
-                          onBulkUpdatesChange={setBulkUpdates}
-                        />
-                      )}
-                    </div>
-
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setShowBulkDialog(false);
-                          setIsDeleteDialog(false);
-                          setBulkOperation("");
-                          setBulkUpdates({});
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        disabled={processing || !bulkOperation}
-                        variant={
-                          bulkOperation === "delete" ||
-                          bulkOperation === "hard_delete"
-                            ? "destructive"
-                            : "default"
-                        }
-                        onClick={handleBulkOperation}
-                      >
-                        {processing && (
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        )}
-                        {bulkOperation === "delete"
-                          ? "Archivar Productos"
-                          : bulkOperation === "hard_delete"
-                            ? "⚠️ ELIMINAR PERMANENTEMENTE"
-                            : "Aplicar Cambios"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                  processing={processing}
+                  selectedProducts={selectedProducts}
+                  onBulkOperationChange={(op) => { setIsDeleteDialog(false); setBulkOperation(op); }}
+                  onBulkUpdatesChange={setBulkUpdates}
+                  onExecute={handleBulkOperation}
+                  onOpenChange={(open) => { setShowBulkDialog(open); if (!open) { setIsDeleteDialog(false); setBulkOperation(""); setBulkUpdates({}); } }}
+                  onTriggerClick={() => { setIsDeleteDialog(false); setBulkOperation(""); setBulkUpdates({}); }}
+                />
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Buscar productos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="draft">Borrador</SelectItem>
-                <SelectItem value="archived">Archivado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <BulkFiltersBar
+        categories={categories} categoryFilter={categoryFilter} searchTerm={searchTerm}
+        statusFilter={statusFilter}
+        onCategoryChange={setCategoryFilter} onSearchChange={setSearchTerm} onStatusChange={setStatusFilter}
+      />
 
       <ProductsTable
         products={products}
         selectedProducts={selectedProducts}
-        onSelectProduct={handleSelectProduct}
         onSelectAll={handleSelectAll}
+        onSelectProduct={handleSelectProduct}
       />
     </div>
   );
