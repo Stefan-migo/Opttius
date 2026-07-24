@@ -6,12 +6,13 @@ import {
   getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export async function resolveBranchContext(
   request: unknown,
   user: unknown,
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
 ) {
   const branchContext = await getBranchContext(request, user.id, supabase);
   const supabaseServiceRole = createServiceRoleClient();
@@ -44,7 +45,7 @@ export async function resolveBranchContext(
 }
 
 export function buildSearchQuery(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   branchContext: unknown,
   orgBranchIds: string[] | null,
   fieldOperationId: string | null,
@@ -104,7 +105,7 @@ export function buildOrQuery(
 }
 
 export async function searchByRut(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   searchTerm: string,
   normalizedSearchTerm: string,
   rpcBranchId: string | null,

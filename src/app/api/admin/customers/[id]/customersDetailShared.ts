@@ -7,6 +7,7 @@ import { NextRequest } from "next/server";
 import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 export interface AuthContext {
@@ -20,7 +21,7 @@ export interface AuthContext {
 export async function authenticateAndGetContext(
   request: NextRequest,
   operation: string,
-): Promise<{ context: AuthContext; supabase: unknown }> {
+): Promise<{ context: AuthContext; supabase: SupabaseClient<Database> }> {
   logger.info(`Customer Detail API ${operation} called`);
 
   const { client: supabase, getUser } = await createClientFromRequest(request);

@@ -13,10 +13,11 @@ import { sendAppointmentConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { formatRUT } from "@/lib/utils/rut";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: unknown) {
+async function getAdminAuth(supabase: SupabaseClient<Database>) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new AuthenticationError("Unauthorized");
   const { data: isAdmin } = (await supabase.rpc("is_admin", {

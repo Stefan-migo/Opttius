@@ -9,10 +9,11 @@ import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import { createApiErrorResponse, createApiSuccessResponse } from "@/lib/api/response";
 import { sendQuoteSent } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: unknown) {
+async function getAdminAuth(supabase: SupabaseClient<Database>) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new AuthenticationError("No autorizado");
   const { data: isAdmin } = (await supabase.rpc("is_admin", { user_id: user.id } as IsAdminParams)) as { data: IsAdminResult | null };

@@ -18,6 +18,7 @@ import { sendOrderConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { getLocalDateBoundsUTC } from "@/lib/utils/date-timezone";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
@@ -125,7 +126,7 @@ export async function listOrders(request: NextRequest) {
 }
 
 async function getOrderStats(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   userOrganizationId: string | undefined,
   branchContext: Awaited<ReturnType<typeof getBranchContext>>,
 ) {
@@ -204,7 +205,7 @@ async function getOrderStats(
 }
 
 async function createManualOrder(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   user: { id: string },
   body: { orderData?: Record<string, unknown> },
 ): Promise<{ success: boolean; order: unknown }> {
