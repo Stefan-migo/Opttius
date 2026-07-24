@@ -1,6 +1,7 @@
+import type { Database, SupabaseClient } from "@/types/supabase";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
-export async function handleSystemStatus(supabase: unknown, userOrganizationId?: string, branchId?: string) {
+export async function handleSystemStatus(supabase: SupabaseClient<Database>, userOrganizationId?: string, branchId?: string) {
   const serviceSupabase = createServiceRoleClient();
   let totalUsers = 0, activeAdmins = 0, totalProducts = 0, totalOrders = 0, totalCustomers = 0;
 

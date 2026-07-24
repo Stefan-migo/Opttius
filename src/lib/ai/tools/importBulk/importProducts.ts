@@ -1,7 +1,9 @@
+import type { Database, SupabaseClient } from "@/types/supabase";
+
 import type { ToolResult } from "../types";
 
 export async function executeProductImport(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   organizationId: string,
   branchId: string | null,
   headers: string[],

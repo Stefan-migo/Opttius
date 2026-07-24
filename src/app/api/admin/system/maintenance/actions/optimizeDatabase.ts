@@ -1,6 +1,7 @@
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 
-export async function handleOptimizeDatabase(supabase: unknown) {
+export async function handleOptimizeDatabase(supabase: SupabaseClient<Database>) {
   const { data: optimizeResult, error: optimizeError } = await supabase.rpc("optimize_database");
   if (optimizeError) {
     logger.error("Error optimizing database", { error: optimizeError });

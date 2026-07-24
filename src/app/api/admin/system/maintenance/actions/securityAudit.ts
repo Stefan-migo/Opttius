@@ -1,5 +1,6 @@
+import type { Database, SupabaseClient } from "@/types/supabase";
 
-export async function handleSecurityAudit(supabase: unknown) {
+export async function handleSecurityAudit(supabase: SupabaseClient<Database>) {
   const { count: inactiveAdmins } = await supabase.from("admin_users").select("*", { count: "exact", head: true }).eq("is_active", false);
   const { count: totalAdmins } = await supabase.from("admin_users").select("*", { count: "exact", head: true });
 

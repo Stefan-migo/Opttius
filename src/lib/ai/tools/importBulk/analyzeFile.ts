@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { Database, SupabaseClient } from "@/types/supabase";
+
 import { parseImportFile } from "../../utils/file-parser";
 import type { ToolDefinition, ToolResult } from "../types";
 
@@ -14,7 +16,7 @@ const analyzeImportFileSchema = z.object({
 
 export async function downloadFile(
   fileId: string,
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
 ): Promise<ArrayBuffer> {
   const { data, error } = await supabase.storage
     .from("import-temp")

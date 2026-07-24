@@ -100,7 +100,8 @@
       "files": [
         "src/lib/supabase/*.ts",
         "src/utils/supabase/*.ts",
-        "src/middleware.ts"
+        "src/middleware.ts",
+        "src/types/supabase.ts"
       ],
       "rules": {
         "no-restricted-imports": "off"

@@ -1,4 +1,5 @@
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 
 /**
  * Tax configuration utilities
@@ -60,7 +61,7 @@ export async function getTaxPercentage(
  * @returns Tax percentage as a number
  */
 export async function getTaxPercentageServer(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   fallback: number = 19.0,
 ): Promise<number> {
   try {

@@ -1,6 +1,7 @@
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 
-export async function handleCleanLogs(supabase: unknown) {
+export async function handleCleanLogs(supabase: SupabaseClient<Database>) {
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
   const { count: deletedCount, error: deleteError } = await supabase
     .from("admin_activity_log").delete({ count: "exact" }).lt("created_at", ninetyDaysAgo);
