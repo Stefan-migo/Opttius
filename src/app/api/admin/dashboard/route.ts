@@ -6,6 +6,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import { createApiErrorResponse, createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 import { buildApplyBranchFilter, buildLegacyScope, buildOrgBranchIdsQuery, computeStatusDistribution, getLocalDateString, processTopProducts } from "./_helpers/dashboardHelpers";
@@ -97,14 +98,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function computeAppointments(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
+async function computeAppointments(supabase: SupabaseClient<Database>, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   const q = buildApptQuery(supabase, bc, orgBranchIds, todayStr, applyFilter);
   const { data: appointments } = await q;
   const a = appointments || [];
   return { today: a.length, scheduled: a.filter((x: unknown) => x.status === "scheduled").length, confirmed: a.filter((x: unknown) => x.status === "confirmed").length, pending: a.filter((x: unknown) => x.status === "scheduled" || x.status === "pending").length };
 }
 
-async function computeTodayAppointmentsList(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
+async function computeTodayAppointmentsList(supabase: SupabaseClient<Database>, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   const q = buildApptQuery(supabase, bc, orgBranchIds, todayStr, applyFilter).order("appointment_time", { ascending: true }).limit(10);
   const { data: todayData } = await q;
   const customerIds = [...new Set((todayData || []).map((a: unknown) => a.customer_id).filter(Boolean))];
@@ -115,7 +116,7 @@ async function computeTodayAppointmentsList(supabase: unknown, bc: unknown, orgB
   });
 }
 
-function buildApptQuery(supabase: unknown, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
+function buildApptQuery(supabase: SupabaseClient<Database>, bc: unknown, orgBranchIds: string[], todayStr: string, applyFilter: unknown) {
   if (bc.isSuperAdmin && !bc.branchId && bc.organizationId && orgBranchIds.length > 0) {
     return supabase.from("appointments").select("*").eq("appointment_date", todayStr).or(`organization_id.eq.${bc.organizationId},branch_id.in.(${orgBranchIds.join(",")})`);
   }

@@ -1,6 +1,7 @@
 import { createAgent } from "@/lib/ai/agent/core";
+import type { Database, SupabaseClient } from "@/types/supabase";
 
-export async function buildAgentContext(supabase: unknown, userId: string, adminUser: unknown, currentBranchId: string | null) {
+export async function buildAgentContext(supabase: SupabaseClient<Database>, userId: string, adminUser: unknown, currentBranchId: string | null) {
   const { data: orgData } = await supabase.from("organizations").select("name").eq("id", adminUser?.organization_id).single();
   const orgName = orgData?.name || "tu óptica";
 
@@ -32,7 +33,7 @@ export function buildEnhancedPrompt(orgName: string, userName: string, isSuperAd
   return `${specializedIdentity}\n\n${dateContext}${sectionContext}\n${branchContext}${branchInstruction}\n${systemPrompt}`;
 }
 
-export async function resolveOrgId(supabase: unknown, adminUser: unknown, currentBranchId: string | null): Promise<string | null> {
+export async function resolveOrgId(supabase: SupabaseClient<Database>, adminUser: unknown, currentBranchId: string | null): Promise<string | null> {
   let resolvedOrgId = adminUser?.organization_id;
   if (!resolvedOrgId && currentBranchId && currentBranchId !== "global") {
     const { data: branchRow } = await supabase.from("branches").select("organization_id").eq("id", currentBranchId).single();
@@ -41,7 +42,7 @@ export async function resolveOrgId(supabase: unknown, adminUser: unknown, curren
   return resolvedOrgId;
 }
 
-export async function createAndStreamAgent(supabase: unknown, userId: string, provider: string | undefined, model: string | undefined, sessionId: string | null, organizationId: string | null, context: string | undefined, baseConfig: unknown, enhancedPrompt: string, currentBranchId: string | null, userData: unknown, isSuperAdmin: boolean, userName: string, message: string, controller: ReadableStreamDefaultController, encoder: TextEncoder): Promise<{ content: string; toolCalls: unknown[]; success: boolean }> {
+export async function createAndStreamAgent(supabase: SupabaseClient<Database>, userId: string, provider: string | undefined, model: string | undefined, sessionId: string | null, organizationId: string | null, context: string | undefined, baseConfig: unknown, enhancedPrompt: string, currentBranchId: string | null, userData: unknown, isSuperAdmin: boolean, userName: string, message: string, controller: ReadableStreamDefaultController, encoder: TextEncoder): Promise<{ content: string; toolCalls: unknown[]; success: boolean }> {
   let content = "";
   const toolCalls: unknown[] = [];
 
