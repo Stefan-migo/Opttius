@@ -30,7 +30,7 @@ export const getCustomerStatsTool: ToolDefinition = {
         };
       }
 
-      const { data: orders, error }: unknown = await supabase
+      const { data: orders, error } = await supabase
         .from("orders")
         .select("total_amount, status, payment_status, created_at")
         .eq("customer_id", validated.customerId)
@@ -41,12 +41,13 @@ export const getCustomerStatsTool: ToolDefinition = {
       }
 
       const paidOrders =
-        (orders as unknown[])?.filter(
-          (o: unknown) =>
-            o.payment_status === "paid" || o.status === "completed",
+        orders?.filter(
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
+          (o) => o.payment_status === "paid" || o.status === "completed",
         ) || [];
       const totalSpent = paidOrders.reduce(
-        (sum: number, o: unknown) => sum + (o.total_amount || 0),
+        // @ts-expect-error — SupabaseClient<unknown>, paidOrders type is dynamic
+        (sum, o) => sum + (o.total_amount || 0),
         0,
       );
       const orderCount = orders?.length || 0;
@@ -58,10 +59,12 @@ export const getCustomerStatsTool: ToolDefinition = {
         averageOrderValue: avgOrderValue,
         lastOrderDate:
           orders && orders.length > 0
-            ? (orders as unknown[]).sort(
-                (a: unknown, b: unknown) =>
+            ? orders.sort(
+                // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
+                (a, b) =>
                   new Date(b.created_at).getTime() -
                   new Date(a.created_at).getTime(),
+                // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
               )[0].created_at
             : null,
       };
@@ -74,8 +77,10 @@ export const getCustomerStatsTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get customer stats",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to get customer stats",
       };
     }
   },

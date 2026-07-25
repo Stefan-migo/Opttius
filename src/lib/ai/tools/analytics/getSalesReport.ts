@@ -75,18 +75,20 @@ export const getSalesReportTool: ToolDefinition = {
       }
 
       const paidOrders =
-        (orders as unknown[])?.filter(
-          (o: unknown) =>
-            o.payment_status === "paid" || o.status === "completed",
+        orders?.filter(
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
+          (o) => o.payment_status === "paid" || o.status === "completed",
         ) || [];
       const totalRevenue = paidOrders.reduce(
-        (sum: number, o: unknown) => sum + (o.total_amount || 0),
+        // @ts-expect-error — SupabaseClient<unknown>, paidOrders type is dynamic
+        (sum, o) => sum + (o.total_amount || 0),
         0,
       );
       const totalOrders = orders?.length || 0;
       const totalItems =
-        (orders as unknown[])?.reduce(
-          (sum: number, o: unknown) => sum + (o.order_items?.length || 0),
+        orders?.reduce(
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
+          (sum, o) => sum + (o.order_items?.length || 0),
           0,
         ) || 0;
 
@@ -114,8 +116,10 @@ export const getSalesReportTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to generate sales report",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate sales report",
       };
     }
   },

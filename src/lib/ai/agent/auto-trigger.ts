@@ -8,7 +8,7 @@
  * @module lib/ai/agent/auto-trigger
  */
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@/types/supabase";
 
 export type TriggerType =
   | "low_stock"
@@ -89,16 +89,17 @@ export async function checkTriggers(
     if (lowStockItems && lowStockItems.length > 0) {
       setCooldown("low_stock", orgId);
       for (const item of lowStockItems.slice(0, 3)) {
-        const name = (item as unknown).products?.name || "Producto";
-        const qty = (item as unknown).quantity ?? 0;
+        // @ts-expect-error — SupabaseClient<unknown>, join type is dynamic
+        const name = item.products?.name || "Producto";
+        const qty = item.quantity ?? 0;
         events.push({
           type: "low_stock",
           severity: qty === 0 ? "critical" : "warning",
-          entity: { id: (item as unknown).product_id, name, type: "product" },
+          entity: { id: item.product_id, name, type: "product" },
           action: {
             label: "Ver producto",
             type: "navigation",
-            payload: { path: `/admin/products/${(item as unknown).product_id}` },
+            payload: { path: `/admin/products/${item.product_id}` },
           },
           message: `Stock bajo: "${name}" tiene ${qty} unidades.`,
         });

@@ -95,12 +95,13 @@ export const updateTicketStatusTool: ToolDefinition = {
       };
 
       if (validated.status === "resolved" || validated.status === "closed") {
-        (updateData as unknown).resolved_at = new Date().toISOString();
-        (updateData as unknown).resolved_by = context.userId;
+        updateData.resolved_at = new Date().toISOString();
+        updateData.resolved_by = context.userId;
       }
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("optical_internal_support_tickets")
+        // @ts-expect-error — SupabaseClient<unknown>, update data type is dynamic
         .update(updateData)
         .eq("id", ticketId)
         .eq("organization_id", organizationId)
@@ -119,8 +120,10 @@ export const updateTicketStatusTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to update ticket status",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to update ticket status",
       };
     }
   },

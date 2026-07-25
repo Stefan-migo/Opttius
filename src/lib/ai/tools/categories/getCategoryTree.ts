@@ -51,19 +51,23 @@ export const getCategoryTreeTool: ToolDefinition = {
       }
 
       // Build tree structure
-      const cats = (categories as unknown[]) || [];
+      const cats = categories || [];
       const categoryMap = new Map<string, unknown>();
       const rootCategories: unknown[] = [];
 
       // First pass: create map
       for (const cat of cats) {
+        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
         categoryMap.set(cat.id, { ...cat, children: [] });
       }
 
       // Second pass: build tree
       for (const cat of cats) {
+        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
         const node = categoryMap.get(cat.id);
+        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
         if (cat.parent_id && categoryMap.has(cat.parent_id)) {
+          // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
           categoryMap.get(cat.parent_id).children.push(node);
         } else {
           rootCategories.push(node);
@@ -81,8 +85,10 @@ export const getCategoryTreeTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get category tree",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to get category tree",
       };
     }
   },

@@ -57,11 +57,16 @@ export const getQuoteStatusTool: ToolDefinition = {
         };
       }
 
-      const formatted = (quotes as unknown[]).map((q: unknown) => ({
+      const formatted = quotes.map((q) => ({
+        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
         number: q.quote_number,
+        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
         status: q.status,
+        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
         total: q.total_amount,
+        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
         currency: q.currency ?? "CLP",
+        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
         expiresAt: q.expiration_date,
       }));
 

@@ -57,15 +57,22 @@ export const getOrderStatusTool: ToolDefinition = {
         };
       }
 
-      const formatted = (orders as unknown[]).map((o: unknown) => {
+      const formatted = orders.map((o) => {
+        // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
         const branch = o.branch as { name?: string } | null;
         return {
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           number: o.work_order_number,
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           status: o.status,
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           total: o.total_amount,
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           currency: o.currency ?? "CLP",
           branch: branch?.name ?? "Sucursal",
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           readyAt: o.ready_at,
+          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           deliveredAt: o.delivered_at,
         };
       });

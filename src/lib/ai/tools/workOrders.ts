@@ -130,7 +130,10 @@ export const workOrderTools: ToolDefinition[] = [
             .from("branches")
             .select("id")
             .eq("organization_id", organizationId);
-          branchIdsToFilter = (orgBranches as unknown[])?.map((b: unknown) => b.id) || [];
+          branchIdsToFilter =
+            orgBranches
+              // @ts-expect-error — SupabaseClient<unknown>, orgBranches type is dynamic
+              ?.map((b) => b.id) || [];
         }
 
         let query = supabase

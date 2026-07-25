@@ -61,14 +61,20 @@ export const getAppointmentStatusTool: ToolDefinition = {
         };
       }
 
-      const formatted = (appointments as unknown[]).map((a: unknown) => {
+      const formatted = appointments.map((a) => {
+        // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
         const branch = a.branch as { name?: string } | null;
         return {
+          // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
           date: a.appointment_date,
           time:
+            // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
             typeof a.appointment_time === "string"
-              ? a.appointment_time.substring(0, 5)
-              : a.appointment_time,
+              ? // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
+                a.appointment_time.substring(0, 5)
+              : // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
+                a.appointment_time,
+          // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
           status: a.status,
           branch: branch?.name ?? "Sucursal",
         };

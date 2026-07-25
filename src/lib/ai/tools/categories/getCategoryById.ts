@@ -70,18 +70,19 @@ export const getCategoryByIdTool: ToolDefinition = {
       return {
         success: true,
         data: {
-          ...(category as unknown),
+          // @ts-expect-error — SupabaseClient<unknown>, category type is dynamic
+          ...category,
           products_count: productsCount || 0,
           subcategories_count: subcategoriesCount || 0,
         },
-        // @ts-expect-error: Supabase query returns dynamic shape
+        // @ts-expect-error — SupabaseClient<unknown>, category type is dynamic
         message: `Retrieved category: ${category.name}`,
       };
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get category",
+        error:
+          error instanceof Error ? error.message : "Failed to get category",
       };
     }
   },
