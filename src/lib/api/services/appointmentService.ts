@@ -135,10 +135,8 @@ export async function getAppointments(
     const errorMessage =
       response.success === false && response.error?.message
         ? response.error.message
-        : ((response as unknown as { details?: string; error?: string })
-            ?.details ??
-          (response as unknown as { details?: string; error?: string })
-            ?.error ??
+        : ((response as Record<string, unknown>)?.details as string | undefined ??
+          (response as Record<string, unknown>)?.error as string | undefined ??
           "An unknown error occurred");
     throw new Error(errorMessage);
   } catch (error) {

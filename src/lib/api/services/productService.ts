@@ -50,7 +50,7 @@ export async function deleteProduct(id: string): Promise<void> {
   try {
     const response = await client.delete(`/api/admin/products/${id}`);
     if (isSuccess(response)) return;
-    if (response && typeof response === "object" && "error" in response) throw new Error((response as unknown).error?.message || "Failed to delete product");
+    if (response && typeof response === "object" && "error" in response) throw new Error((response as Record<string, unknown>).error?.message || "Failed to delete product");
   } catch (error) { handleApiError(error, "deleteProduct"); throw error; }
 }
 
@@ -93,7 +93,7 @@ export async function exportProducts(format: "csv" | "json" = "csv", filters?: {
 export async function importProductsFile(file: File, mode: "create" | "update" | "skip" = "create"): Promise<{ success: boolean; summary: { total_processed: number; created: number; updated: number; skipped: number; errors_count: number } }> {
   const formData = new FormData(); formData.append("file", file); formData.append("mode", mode);
   const response = await fetch("/api/admin/products/import", { method: "POST", body: formData });
-  if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error((err as unknown).error || "Failed to import products"); }
+  if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error((err as { error?: string }).error || "Failed to import products"); }
   return response.json();
 }
 

@@ -103,10 +103,10 @@ export async function updateQuote(request: NextRequest, id: string) {
   const branchContext = await getBranchContext(request, user.id);
 
   // Verify access
-  const applyBranchFilter = (query: unknown) => addBranchFilter(query, branchContext.branchId, branchContext.isSuperAdmin, branchContext.organizationId);
+  const applyBranchFilter = (query: any) => addBranchFilter(query, branchContext.branchId, branchContext.isSuperAdmin, branchContext.organizationId);
   const { data: existingQuote, error: fetchError } = await applyBranchFilter(
-    supabase.from("quotes").select("id, branch_id, customer_id") as unknown,
-  ).eq("id", id).single() as unknown;
+    supabase.from("quotes").select("id, branch_id, customer_id"),
+  ).eq("id", id).single();
 
   if (fetchError || !existingQuote) {
     return NextResponse.json({ error: "Presupuesto no encontrado o sin acceso" }, { status: 404 });
@@ -231,7 +231,7 @@ export async function listQuotes(request: NextRequest) {
   const forCustomerQuotesOnly = Boolean(customerId || customerRut || customerEmail);
 
   // Build branch filter
-  const applyBranchFilter = (query: unknown) => {
+  const applyBranchFilter = (query: any) => {
     if (userOrganizationId && !branchContext.isSuperAdmin) {
       if (forCustomerQuotesOnly) {
         query = query.or(`organization_id.eq.${userOrganizationId},organization_id.is.null`);

@@ -26,7 +26,7 @@ function buildProductData(body: Record<string, unknown>, slug: string): Record<s
     category_id: (body.category_id as string | undefined) ?? null,
     status: (body.status as string) || "draft",
     featured_image: (body.featured_image as string | undefined) ?? null,
-    gallery: (body.gallery as unknown[]) || [],
+    gallery: body.gallery || [],
     tags: (body.tags as string[]) || [],
     product_type: (body.product_type as string) || "frame",
     optical_category: (body.optical_category as string | undefined) ?? null,

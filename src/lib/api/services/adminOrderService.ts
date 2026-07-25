@@ -303,7 +303,7 @@ async function createManualOrder(
 }
 
 export async function handleOrderPost(request: NextRequest): Promise<NextResponse> {
-  return (withRateLimit(rateLimitConfigs.modification) as unknown)(
+  return withRateLimit(rateLimitConfigs.modification)(
     request,
     async () => {
   const { client: supabaseRaw, getUser } = await createClientFromRequest(request);

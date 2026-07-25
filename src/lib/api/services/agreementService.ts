@@ -168,7 +168,7 @@ export async function getAgreements(
       };
     }
     throw new Error(
-      (response as unknown).error?.message || "Error al obtener convenios",
+      (response as { error?: { message?: string } }).error?.message || "Error al obtener convenios",
     );
   } catch (error) {
     handleApiError(error, "getAgreements");

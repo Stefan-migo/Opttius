@@ -75,9 +75,9 @@ export async function getBranchFromRequest(
 export async function getBranchContext(
   request: NextRequest,
   userId: string,
-  supabaseClient?: SupabaseClient<unknown>,
+  supabaseClient?: SupabaseClient<any>,
 ): Promise<BranchContext> {
-  let supabase: SupabaseClient<unknown>;
+  let supabase: SupabaseClient<any>;
   try {
     supabase = supabaseClient || (await createClient());
   } catch (clientError: unknown) {
@@ -267,11 +267,11 @@ export async function validateBranchAccess(
  * never shows data from other organizations.
  */
 export function addBranchFilter(
-  query: unknown,
+  query: any,
   branchId: string | null,
   isSuperAdmin: boolean,
   organizationId?: string | null,
-) {
+): any {
   if (isSuperAdmin && branchId === null) {
     // Vision Global: only show data from the user's organization
     if (organizationId) {
@@ -294,9 +294,9 @@ export function addBranchFilter(
  * When in global view, fetches branch IDs for the org and filters by .in("branch_id", ids).
  */
 export async function addBranchFilterForBranchScopedTable(
-  query: unknown,
+  query: any,
   branchContext: BranchContext,
-  supabase: SupabaseClient<unknown>,
+  supabase: SupabaseClient<any>,
 ) {
   const { branchId, isSuperAdmin, organizationId, accessibleBranches } =
     branchContext;
