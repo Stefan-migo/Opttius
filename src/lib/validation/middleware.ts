@@ -255,7 +255,7 @@ export function withValidation<
     context?: { params: Record<string, string | string[]> },
   ): Promise<NextResponse> => {
     try {
-      const validatedData: unknown = {};
+      const validatedData: Record<string, unknown> = {};
 
       // Validate body if schema provided
       if (schemas.body) {
