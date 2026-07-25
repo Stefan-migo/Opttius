@@ -13,77 +13,77 @@ function generateSlug(name: string): string {
   return slug || `product-${Date.now()}`;
 }
 
-function buildProductData(body: unknown, slug: string): Record<string, unknown> {
+function buildProductData(body: Record<string, unknown>, slug: string): Record<string, unknown> {
   return {
-    name: body.name.trim(),
+    name: (body.name as string).trim(),
     slug,
-    description: body.description || null,
-    short_description: body.short_description || null,
-    price: parseFloat(body.price),
+    description: (body.description as string | undefined) ?? null,
+    short_description: (body.short_description as string | undefined) ?? null,
+    price: parseFloat(body.price as string),
     price_includes_tax: body.price_includes_tax === true || body.price_includes_tax === "true",
-    compare_at_price: body.compare_at_price ? parseFloat(body.compare_at_price) : null,
-    cost_price: body.cost_price ? parseFloat(body.cost_price) : null,
-    category_id: body.category_id || null,
-    status: body.status || "draft",
-    featured_image: body.featured_image || null,
-    gallery: body.gallery || [],
-    tags: body.tags || [],
-    product_type: body.product_type || "frame",
-    optical_category: body.optical_category || null,
-    sku: body.sku || null,
-    barcode: body.barcode || null,
-    brand: body.brand || null,
-    manufacturer: body.manufacturer || null,
-    model_number: body.model_number || null,
-    frame_type: body.frame_type || null,
-    frame_material: body.frame_material || null,
-    frame_shape: body.frame_shape || null,
-    frame_color: body.frame_color || null,
-    frame_colors: body.frame_colors || [],
-    frame_brand: body.frame_brand || null,
-    frame_model: body.frame_model || null,
-    frame_sku: body.frame_sku || null,
-    frame_gender: body.frame_gender || null,
-    frame_age_group: body.frame_age_group || null,
-    frame_size: body.frame_size || null,
-    frame_features: body.frame_features || [],
-    frame_measurements: body.frame_measurements || null,
-    lens_type: body.lens_type || null,
-    lens_material: body.lens_material || null,
-    lens_index: body.lens_index ? parseFloat(body.lens_index) : null,
-    lens_coatings: body.lens_coatings || [],
-    lens_tint_options: body.lens_tint_options || [],
-    uv_protection: body.uv_protection || null,
-    blue_light_filter: body.blue_light_filter || false,
-    blue_light_filter_percentage: body.blue_light_filter_percentage ? parseInt(body.blue_light_filter_percentage) : null,
-    photochromic: body.photochromic || false,
-    prescription_available: body.prescription_available || false,
-    prescription_range: body.prescription_range || null,
-    requires_prescription: body.requires_prescription || false,
-    is_customizable: body.is_customizable || false,
-    warranty_months: body.warranty_months ? parseInt(body.warranty_months) : null,
-    warranty_details: body.warranty_details || null,
-    is_featured: body.is_featured || false,
+    compare_at_price: body.compare_at_price ? parseFloat(body.compare_at_price as string) : null,
+    cost_price: body.cost_price ? parseFloat(body.cost_price as string) : null,
+    category_id: (body.category_id as string | undefined) ?? null,
+    status: (body.status as string) || "draft",
+    featured_image: (body.featured_image as string | undefined) ?? null,
+    gallery: (body.gallery as unknown[]) || [],
+    tags: (body.tags as string[]) || [],
+    product_type: (body.product_type as string) || "frame",
+    optical_category: (body.optical_category as string | undefined) ?? null,
+    sku: (body.sku as string | undefined) ?? null,
+    barcode: (body.barcode as string | undefined) ?? null,
+    brand: (body.brand as string | undefined) ?? null,
+    manufacturer: (body.manufacturer as string | undefined) ?? null,
+    model_number: (body.model_number as string | undefined) ?? null,
+    frame_type: (body.frame_type as string | undefined) ?? null,
+    frame_material: (body.frame_material as string | undefined) ?? null,
+    frame_shape: (body.frame_shape as string | undefined) ?? null,
+    frame_color: (body.frame_color as string | undefined) ?? null,
+    frame_colors: (body.frame_colors as string[]) || [],
+    frame_brand: (body.frame_brand as string | undefined) ?? null,
+    frame_model: (body.frame_model as string | undefined) ?? null,
+    frame_sku: (body.frame_sku as string | undefined) ?? null,
+    frame_gender: (body.frame_gender as string | undefined) ?? null,
+    frame_age_group: (body.frame_age_group as string | undefined) ?? null,
+    frame_size: (body.frame_size as string | undefined) ?? null,
+    frame_features: (body.frame_features as string[]) || [],
+    frame_measurements: (body.frame_measurements as string | undefined) ?? null,
+    lens_type: (body.lens_type as string | undefined) ?? null,
+    lens_material: (body.lens_material as string | undefined) ?? null,
+    lens_index: body.lens_index ? parseFloat(body.lens_index as string) : null,
+    lens_coatings: (body.lens_coatings as string[]) || [],
+    lens_tint_options: (body.lens_tint_options as string[]) || [],
+    uv_protection: (body.uv_protection as string | undefined) ?? null,
+    blue_light_filter: (body.blue_light_filter as boolean) || false,
+    blue_light_filter_percentage: body.blue_light_filter_percentage ? parseInt(body.blue_light_filter_percentage as string) : null,
+    photochromic: (body.photochromic as boolean) || false,
+    prescription_available: (body.prescription_available as boolean) || false,
+    prescription_range: (body.prescription_range as string | undefined) ?? null,
+    requires_prescription: (body.requires_prescription as boolean) || false,
+    is_customizable: (body.is_customizable as boolean) || false,
+    warranty_months: body.warranty_months ? parseInt(body.warranty_months as string) : null,
+    warranty_details: (body.warranty_details as string | undefined) ?? null,
+    is_featured: (body.is_featured as boolean) || false,
     updated_at: new Date().toISOString(),
-    weight: body.weight !== undefined && body.weight !== null && body.weight !== "" ? parseFloat(body.weight) || undefined : undefined,
-    dimensions: body.dimensions !== undefined && body.dimensions !== null && typeof body.dimensions === "object" ? body.dimensions : undefined,
-    package_characteristics: body.package_characteristics || undefined,
-    usage_instructions: body.usage_instructions || undefined,
-    precautions: body.precautions || undefined,
-    certifications: body.certifications || undefined,
-    published_at: body.published_at !== undefined ? body.published_at : undefined,
+    weight: body.weight !== undefined && body.weight !== null && body.weight !== "" ? parseFloat(body.weight as string) || undefined : undefined,
+    dimensions: body.dimensions !== undefined && body.dimensions !== null && typeof body.dimensions === "object" ? body.dimensions as Record<string, unknown> : undefined,
+    package_characteristics: (body.package_characteristics as Record<string, unknown> | undefined) ?? undefined,
+    usage_instructions: (body.usage_instructions as string | undefined) ?? undefined,
+    precautions: (body.precautions as string | undefined) ?? undefined,
+    certifications: (body.certifications as string | undefined) ?? undefined,
+    published_at: body.published_at !== undefined ? body.published_at as string : undefined,
   };
 }
 
 export async function getProduct(request: NextRequest, id: string) {
   const { client: supabase, getUser } = await createClientFromRequest(request);
-  const authResult = await getUser() as unknown;
-  const user = authResult?.data?.user ?? null;
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { data, error: userError } = await getUser();
+  const user = data?.user as { id: string } | null;
+  if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single();
   const userOrganizationId = adminUserRes.data?.organization_id;
-  const branchContext = await getBranchContext(request, user.id, supabase as unknown);
+  const branchContext = await getBranchContext(request, user.id, supabase as never);
   const includeArchived = new URL(request.url).searchParams.get("include_archived") === "true";
   const currentBranchId = branchContext?.branchId;
 
@@ -102,6 +102,7 @@ export async function getProduct(request: NextRequest, id: string) {
   }
 
   // Multi-tenancy safety check
+  // ponytail: ParserError from complex join select; keep as unknown until select is fixed
   const p = product as unknown;
   if (userOrganizationId && !branchContext.isSuperAdmin && p.organization_id !== userOrganizationId) {
     return NextResponse.json({ error: "Forbidden: You don't have access to this product" }, { status: 403 });
@@ -134,10 +135,10 @@ export async function updateProduct(request: NextRequest, id: string) {
   const user = data?.user as { id: string } | null;
   if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as unknown);
+  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id });
   if (!isAdmin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single();
   const userOrganizationId = adminUserRes.data?.organization_id;
   const body = await request.json();
 
@@ -165,12 +166,12 @@ export async function updateProduct(request: NextRequest, id: string) {
   const productData = buildProductData(body, slug);
 
   // Verify access
-  let checkQuery: unknown = supabase.from("products").select("id, organization_id").eq("id", id).single();
+  let checkQuery = supabase.from("products").select("id, organization_id").eq("id", id);
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id });
     if (!isSuperAdmin) checkQuery = checkQuery.eq("organization_id", userOrganizationId);
   }
-  const { data: existingProduct, error: checkError } = await checkQuery as unknown;
+  const { data: existingProduct, error: checkError } = await checkQuery.single();
   if (checkError || !existingProduct) {
     return NextResponse.json({ error: checkError?.code === "PGRST116" ? "Product not found" : "Forbidden: You don't have access to this product" }, { status: checkError?.code === "PGRST116" ? 404 : 403 });
   }
@@ -178,21 +179,21 @@ export async function updateProduct(request: NextRequest, id: string) {
   // Update
   let updateQuery = supabase.from("products").update(productData).eq("id", id);
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id });
     if (!isSuperAdmin) updateQuery = updateQuery.eq("organization_id", userOrganizationId);
   }
-  let { data: updatedProduct, error } = await updateQuery.select().single() as unknown;
+  let { data: updatedProduct, error } = await updateQuery.select().single();
 
   if (error && error.code === "42501") {
     const serviceSupabase = createServiceRoleClient();
     let serviceQuery = serviceSupabase.from("products").update(productData).eq("id", id);
     if (userOrganizationId) {
-      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
+      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id });
       if (!isSuperAdmin) serviceQuery = serviceQuery.eq("organization_id", userOrganizationId);
     }
-    const serviceResult = await serviceQuery.select().single() as unknown;
-    updatedProduct = serviceResult.data;
-    error = serviceResult.error;
+    const { data: srData, error: srError } = await serviceQuery.select().single();
+    updatedProduct = srData;
+    error = srError;
   }
   if (error) return NextResponse.json({ error: error.message || "Failed to update product" }, { status: 500 });
 
@@ -237,22 +238,22 @@ export async function deleteProduct(request: NextRequest, id: string) {
   const user = data?.user as { id: string } | null;
   if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id } as unknown);
+  const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user.id });
   if (!isAdmin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
-  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single() as unknown;
+  const adminUserRes = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single();
   const userOrganizationId = adminUserRes.data?.organization_id;
 
   let deleteQuery = supabase.from("products").delete().eq("id", id);
   if (userOrganizationId) {
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id }) as unknown;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: user.id });
     if (!isSuperAdmin) deleteQuery = deleteQuery.eq("organization_id", userOrganizationId);
   }
-  let { error } = await deleteQuery as unknown;
+  let { error } = await deleteQuery;
 
   if (error && error.code === "42501") {
     const serviceSupabase = createServiceRoleClient();
-    ({ error } = await serviceSupabase.from("products").delete().eq("id", id) as unknown);
+    ({ error } = await serviceSupabase.from("products").delete().eq("id", id));
   }
   if (error) return NextResponse.json({ error: error.message || "Failed to delete product" }, { status: 500 });
 

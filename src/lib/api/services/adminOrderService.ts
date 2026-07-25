@@ -104,7 +104,7 @@ export async function listOrders(request: NextRequest) {
   const transformedOrders = (orders || []).map((order) => ({
     id: order.id,
     order_number: order.order_number,
-    customer_name: (order as unknown as Record<string, unknown>).customer_name || "Cliente",
+    customer_name: order.customer_name || "Cliente",
     customer_email: order.email,
     total_amount: order.total_amount,
     status: order.status,
@@ -115,7 +115,7 @@ export async function listOrders(request: NextRequest) {
     mp_payment_method: order.mp_payment_method,
     mp_payment_type: order.mp_payment_type,
     order_items: order.order_items || [],
-    order_payments: (order as unknown as Record<string, unknown>).order_payments || [],
+    order_payments: order.order_payments || [],
   }));
 
   return createPaginatedResponse(
@@ -220,7 +220,7 @@ async function createManualOrder(
   let dbStatus = (orderData.status as string) || "pending";
   if (dbStatus === "completed") dbStatus = "delivered";
 
-  const { data: newOrder, error: orderError } = await (supabase as unknown)
+  const { data: newOrder, error: orderError } = await supabase
     .from("orders")
     .insert({
       order_number: orderNumber,
@@ -263,18 +263,18 @@ async function createManualOrder(
   // Non-blocking notification
   const { NotificationService } = await import("@/lib/notifications/notification-service");
   NotificationService.notifyNewSale(
-    (newOrder as unknown as Record<string, unknown>).id as string,
+    newOrder.id,
     newOrder.order_number,
     newOrder.email,
     newOrder.total_amount,
-    (newOrder as unknown as Record<string, unknown>).branch_id as string ?? undefined,
+    (newOrder.branch_id as string) ?? undefined,
   ).catch((err) => logger.error("Error creating notification", err));
 
   // Non-blocking email
   if (newOrder.email) {
     (async () => {
       try {
-        const no = newOrder as unknown as Record<string, unknown>;
+        const no = newOrder;
         await sendOrderConfirmation({
           ...no,
           user_email: newOrder.email,
@@ -307,11 +307,11 @@ export async function handleOrderPost(request: NextRequest): Promise<NextRespons
     request,
     async () => {
   const { client: supabaseRaw, getUser } = await createClientFromRequest(request);
-  const supabase = supabaseRaw as unknown;
+  const supabase = supabaseRaw;
 
-      const authResult2 = await getUser() as unknown;
-      const user2 = authResult2?.data?.user ?? null;
-      if (!user2) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const { data: authData2, error: userError2 } = await getUser();
+      const user2 = authData2?.user as { id: string } | null;
+      if (userError2 || !user2) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
       const { data: isAdmin } = await supabase.rpc("is_admin", { user_id: user2.id });
       if (!isAdmin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -363,11 +363,11 @@ export async function deleteAllOrders(request: NextRequest): Promise<NextRespons
   logger.warn("Admin Orders API DELETE called - Deleting all orders");
 
   const { client: supabaseRaw, getUser } = await createClientFromRequest(request);
-  const supabase = supabaseRaw as unknown;
+  const supabase = supabaseRaw;
 
-  const authResult3 = await getUser() as unknown;
-  const user3 = authResult3?.data?.user ?? null;
-  if (!user3) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { data: authData3, error: userError3 } = await getUser();
+  const user3 = authData3?.user as { id: string } | null;
+  if (userError3 || !user3) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: isAdmin } = (await supabase.rpc("is_admin", {
     user_id: user3.id,

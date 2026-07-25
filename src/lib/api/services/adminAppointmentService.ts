@@ -13,7 +13,7 @@ import { sendAppointmentConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { formatRUT } from "@/lib/utils/rut";
-import type { Database, SupabaseClient } from "@/types/supabase";
+import type { Database, SupabaseClient, Tables } from "@/types/supabase";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -79,18 +79,18 @@ export async function listAppointments(request: NextRequest) {
   const orderIds = [...new Set(appointments.map((a: unknown) => a.order_id).filter(Boolean))];
 
   const [{ data: customers }, { data: staff }, { data: prescriptions }, { data: orders }] = await Promise.all([
-    customerIds.length > 0 ? supabase.from("customers").select("id, first_name, last_name, email, phone").in("id", customerIds) : Promise.resolve({ data: [] }),
-    staffIds.length > 0 ? supabase.from("profiles").select("id, first_name, last_name").in("id", staffIds) : Promise.resolve({ data: [] }),
-    prescriptionIds.length > 0 ? supabase.from("prescriptions").select("id, prescription_date, prescription_type").in("id", prescriptionIds) : Promise.resolve({ data: [] }),
-    orderIds.length > 0 ? supabase.from("orders").select("id, order_number").in("id", orderIds) : Promise.resolve({ data: [] }),
+    customerIds.length > 0 ? supabase.from("customers").select("id, first_name, last_name, email, phone").in("id", customerIds) : Promise.resolve({ data: null }),
+    staffIds.length > 0 ? supabase.from("profiles").select("id, first_name, last_name").in("id", staffIds) : Promise.resolve({ data: null }),
+    prescriptionIds.length > 0 ? supabase.from("prescriptions").select("id, prescription_date, prescription_type").in("id", prescriptionIds) : Promise.resolve({ data: null }),
+    orderIds.length > 0 ? supabase.from("orders").select("id, order_number").in("id", orderIds) : Promise.resolve({ data: null }),
   ]);
 
-  const appointmentsWithRelations = (appointments as unknown[]).map((appointment) => ({
+  const appointmentsWithRelations = (appointments as Array<Tables<"appointments">>).map((appointment) => ({
     ...appointment,
-    customer: (customers as unknown[])?.find((c) => c.id === appointment.customer_id) || null,
-    assigned_staff: (staff as unknown[])?.find((s) => s.id === appointment.assigned_to) || null,
-    prescription: (prescriptions as unknown[])?.find((p) => p.id === appointment.prescription_id) || null,
-    order: (orders as unknown[])?.find((o) => o.id === appointment.order_id) || null,
+    customer: customers?.find((c: { id: string }) => c.id === appointment.customer_id) || null,
+    assigned_staff: staff?.find((s: { id: string }) => s.id === appointment.assigned_to) || null,
+    prescription: prescriptions?.find((p: { id: string }) => p.id === appointment.prescription_id) || null,
+    order: orders?.find((o: { id: string }) => o.id === appointment.order_id) || null,
   }));
 
   return createApiSuccessResponse(appointmentsWithRelations, { requestId });
@@ -135,12 +135,12 @@ export async function createAppointment(request: NextRequest) {
   // Check availability
   if (!forceCreate) {
     const durationMinutes = body.duration_minutes || validatedBody.duration_minutes || 30;
-    const { data: slots, error: slotsError } = (await supabaseServiceRole.rpc("get_available_time_slots", {
+    const { data: slots, error: slotsError } = await supabaseServiceRole.rpc("get_available_time_slots", {
       p_date: validatedBody.appointment_date,
       p_duration_minutes: durationMinutes,
       p_staff_id: body.assigned_to || null,
       p_branch_id: finalBranchId,
-    })) as unknown;
+    });
 
     if (slotsError) {
       return NextResponse.json({ error: "Error checking availability", details: slotsError.message }, { status: 500 });
@@ -159,7 +159,7 @@ export async function createAppointment(request: NextRequest) {
     });
 
     const isAvailable = matchingSlot
-      ? (matchingSlot.available === true || matchingSlot.available === "t" || matchingSlot.available === "true")
+      ? matchingSlot.available === true || String(matchingSlot.available) === "t" || String(matchingSlot.available) === "true"
       : false;
 
     if (!isAvailable) {
