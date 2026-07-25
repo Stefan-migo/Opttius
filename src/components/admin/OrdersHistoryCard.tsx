@@ -233,7 +233,7 @@ export function OrdersHistoryCard({
                 <TableBody>
                   {customer.orders.map((order: unknown) => {
                     const o = order as Record<string, unknown>;
-                    const orderItems = o.order_items as unknown[] | undefined;
+                    const orderItems: unknown[] = Array.isArray(o.order_items) ? o.order_items : [];
                     return (
                       <>
                         <TableRow

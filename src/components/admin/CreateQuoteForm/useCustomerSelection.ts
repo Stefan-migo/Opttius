@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
 import { appLogger } from '@/lib/logger';
+import type { Customer } from "@/lib/api/services/customerTypes";
 
 export function useCustomerSelection(
   effectiveBranchId: string | undefined,
@@ -12,8 +13,8 @@ export function useCustomerSelection(
 ) {
   // Customer selection
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerResults, setCustomerResults] = useState<unknown[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<unknown>(null);
+  const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
 
   // Load initial customer
@@ -21,7 +22,7 @@ export function useCustomerSelection(
     if (
       initialCustomerId &&
       (!selectedCustomer ||
-        (selectedCustomer as unknown).id !== initialCustomerId)
+        selectedCustomer.id !== initialCustomerId)
     ) {
       fetchCustomer(initialCustomerId);
     }

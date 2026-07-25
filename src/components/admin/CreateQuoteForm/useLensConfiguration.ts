@@ -23,9 +23,10 @@ import {
 
 import { MATERIAL_INDICES } from "./CreateQuoteForm.constants";
 import type { QuoteFormData } from "./CreateQuoteForm.types";
+import type { Prescription } from "@/lib/api/services/customerTypes";
 
 export function useLensConfiguration(
-  selectedPrescription: unknown,
+  selectedPrescription: Prescription | null,
   formData: QuoteFormData,
   setFormData: React.Dispatch<React.SetStateAction<QuoteFormData>>,
 ) {
@@ -115,11 +116,11 @@ export function useLensConfiguration(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(formData.lens_family_id)) return;
 
-    const farSphere = getFarSphere(selectedPrescription as unknown);
-    const cylinder = getCylinder(selectedPrescription as unknown);
+    const farSphere = getFarSphere(selectedPrescription);
+    const cylinder = getCylinder(selectedPrescription);
     let addition: number | undefined;
     if (["progressive", "bifocal", "trifocal"].includes(presbyopiaSolution)) {
-      addition = getMaxAddition(selectedPrescription as unknown);
+      addition = getMaxAddition(selectedPrescription);
     }
 
     try {
@@ -149,10 +150,10 @@ export function useLensConfiguration(
 
     try {
       setCalculatingContactLensPrice(true);
-      const sphereOD = (selectedPrescription as unknown).od_sphere || 0;
-      const cylinderOD = (selectedPrescription as unknown).od_cylinder || 0;
-      const axisOD = (selectedPrescription as unknown).od_axis || null;
-      const additionOD = (selectedPrescription as unknown).od_add || null;
+      const sphereOD = selectedPrescription.od_sphere || 0;
+      const cylinderOD = selectedPrescription.od_cylinder || 0;
+      const axisOD = selectedPrescription.od_axis || null;
+      const additionOD = selectedPrescription.od_add || null;
 
       const calculation = await contactLensMatrixService.calculate(
         formData.contact_lens_family_id,
@@ -179,10 +180,10 @@ export function useLensConfiguration(
   // Detect presbyopia and set default solution
   useEffect(() => {
     if (selectedPrescription) {
-      const hasAdd = hasAddition(selectedPrescription as unknown);
+      const hasAdd = hasAddition(selectedPrescription);
       if (hasAdd && presbyopiaSolution === "none") {
         const defaultSolution = getDefaultPresbyopiaSolution(
-          selectedPrescription as unknown,
+          selectedPrescription,
         );
         setPresbyopiaSolution(defaultSolution);
         setFormData((prev) => ({
@@ -211,7 +212,7 @@ export function useLensConfiguration(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     formData.lens_family_id,
-    (selectedPrescription as unknown)?.id,
+    selectedPrescription?.id,
     presbyopiaSolution,
   ]);
 
@@ -231,7 +232,7 @@ export function useLensConfiguration(
   }, [
     formData.contact_lens_family_id,
     formData.contact_lens_quantity,
-    (selectedPrescription as unknown)?.id,
+    selectedPrescription?.id,
     lensType,
   ]);
 
@@ -243,8 +244,8 @@ export function useLensConfiguration(
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
         if (farLensFamilyId && uuidRegex.test(farLensFamilyId)) {
-          const farSphere = getFarSphere(selectedPrescription as unknown);
-          const cylinder = getCylinder(selectedPrescription as unknown);
+          const farSphere = getFarSphere(selectedPrescription);
+          const cylinder = getCylinder(selectedPrescription);
           try {
             const result = await calculateLensPrice({
               lens_family_id: farLensFamilyId,
@@ -261,8 +262,8 @@ export function useLensConfiguration(
         }
 
         if (nearLensFamilyId && uuidRegex.test(nearLensFamilyId)) {
-          const nearSphere = getNearSphere(selectedPrescription as unknown);
-          const cylinder = getCylinder(selectedPrescription as unknown);
+          const nearSphere = getNearSphere(selectedPrescription);
+          const cylinder = getCylinder(selectedPrescription);
           try {
             const result = await calculateLensPrice({
               lens_family_id: nearLensFamilyId,

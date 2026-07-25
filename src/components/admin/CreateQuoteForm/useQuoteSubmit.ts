@@ -5,17 +5,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { quoteService } from "@/lib/api/services";
+import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
+import type { Product } from "@/lib/api/services/products/client-types";
 import { appLogger } from '@/lib/logger';
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 import type { QuoteFormData } from "./CreateQuoteForm.types";
 
 export function useQuoteSubmit(
-  selectedCustomer: unknown,
-  selectedPrescription: unknown,
+  selectedCustomer: Customer | null,
+  selectedPrescription: Prescription | null,
   formData: QuoteFormData,
-  selectedFrame: unknown,
-  selectedNearFrame: unknown,
+  selectedFrame: Product | null,
+  selectedNearFrame: Product | null,
   lensType: "optical" | "contact",
   presbyopiaSolution: string,
   customerOwnFrame: boolean,
@@ -89,42 +91,42 @@ export function useQuoteSubmit(
         presbyopiaSolution === "two_separate"
           ? {
               near_frame_product_id:
-                (selectedNearFrame as unknown)?.id || null,
+                selectedNearFrame?.id || null,
               near_frame_name:
                 formData.near_frame_name ||
-                (selectedNearFrame as unknown)?.name ||
+                selectedNearFrame?.name ||
                 null,
               near_frame_brand:
                 formData.near_frame_brand ||
-                (selectedNearFrame as unknown)?.frame_brand ||
+                selectedNearFrame?.frame_brand ||
                 null,
               near_frame_model:
                 formData.near_frame_model ||
-                (selectedNearFrame as unknown)?.frame_model ||
+                selectedNearFrame?.frame_model ||
                 null,
               near_frame_color:
                 formData.near_frame_color ||
-                (selectedNearFrame as unknown)?.frame_color ||
+                selectedNearFrame?.frame_color ||
                 null,
               near_frame_size:
                 formData.near_frame_size ||
-                (selectedNearFrame as unknown)?.frame_size ||
+                selectedNearFrame?.frame_size ||
                 null,
               near_frame_sku:
                 formData.near_frame_sku ||
-                (selectedNearFrame as unknown)?.sku ||
+                selectedNearFrame?.sku ||
                 null,
               near_frame_price:
                 formData.near_frame_price ||
-                (selectedNearFrame as unknown)?.price ||
+                selectedNearFrame?.price ||
                 0,
               near_frame_price_includes_tax:
                 formData.near_frame_price_includes_tax ??
-                (selectedNearFrame as unknown)?.price_includes_tax ??
+                selectedNearFrame?.price_includes_tax ??
                 false,
               near_frame_cost:
                 formData.near_frame_cost ||
-                (selectedNearFrame as unknown)?.price ||
+                selectedNearFrame?.price ||
                 0,
               customer_own_near_frame: customerOwnNearFrame || false,
             }
@@ -143,7 +145,7 @@ export function useQuoteSubmit(
             };
 
       await quoteService.createQuote({
-        customer_id: (selectedCustomer as unknown).id,
+        customer_id: selectedCustomer.id,
         status: "draft",
         subtotal: formData.subtotal,
         tax_amount: formData.tax_amount,
@@ -153,8 +155,8 @@ export function useQuoteSubmit(
         notes: formData.notes,
         branch_id: effectiveBranchId || undefined,
         field_operation_id: initialFieldOperationId || undefined,
-        prescription_id: (selectedPrescription as unknown).id,
-        frame_product_id: (selectedFrame as unknown)?.id,
+        prescription_id: selectedPrescription.id,
+        frame_product_id: selectedFrame?.id,
         customer_own_frame: customerOwnFrame,
         frame_name: formData.frame_name,
         frame_brand: formData.frame_brand,
@@ -202,19 +204,19 @@ export function useQuoteSubmit(
             : null,
         contact_lens_rx_sphere_od:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).od_sphere ?? null)
+            ? (selectedPrescription.od_sphere ?? null)
             : null,
         contact_lens_rx_cylinder_od:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).od_cylinder ?? null)
+            ? (selectedPrescription.od_cylinder ?? null)
             : null,
         contact_lens_rx_axis_od:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).od_axis ?? null)
+            ? (selectedPrescription.od_axis ?? null)
             : null,
         contact_lens_rx_add_od:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).od_add ?? null)
+            ? (selectedPrescription.od_add ?? null)
             : null,
         contact_lens_rx_base_curve_od:
           lensType === "contact"
@@ -224,19 +226,19 @@ export function useQuoteSubmit(
           lensType === "contact" ? formData.contact_lens_rx_diameter_od : null,
         contact_lens_rx_sphere_os:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).os_sphere ?? null)
+            ? (selectedPrescription.os_sphere ?? null)
             : null,
         contact_lens_rx_cylinder_os:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).os_cylinder ?? null)
+            ? (selectedPrescription.os_cylinder ?? null)
             : null,
         contact_lens_rx_axis_os:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).os_axis ?? null)
+            ? (selectedPrescription.os_axis ?? null)
             : null,
         contact_lens_rx_add_os:
           lensType === "contact" && selectedPrescription
-            ? ((selectedPrescription as unknown).os_add ?? null)
+            ? (selectedPrescription.os_add ?? null)
             : null,
         contact_lens_rx_base_curve_os:
           lensType === "contact"

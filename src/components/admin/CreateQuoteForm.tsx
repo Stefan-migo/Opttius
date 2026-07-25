@@ -193,19 +193,18 @@ export default function CreateQuoteForm(props: CreateQuoteFormProps) {
         onFrameSearchChange={setFrameSearch}
         onFrameSelect={(frame) => {
           setSelectedFrame(frame);
-          const f = frame as unknown;
           setFormData((prev) => ({
             ...prev,
-            frame_product_id: f.id,
-            frame_name: f.name,
-            frame_brand: f.frame_brand || "",
-            frame_model: f.frame_model || "",
-            frame_color: f.frame_color || "",
-            frame_size: f.frame_size || "",
-            frame_sku: f.sku || "",
-            frame_price: f.price || 0,
-            frame_price_includes_tax: f.price_includes_tax || false,
-            frame_cost: f.price || 0,
+            frame_product_id: frame.id,
+            frame_name: frame.name,
+            frame_brand: frame.frame_brand || "",
+            frame_model: frame.frame_model || "",
+            frame_color: frame.frame_color || "",
+            frame_size: frame.frame_size || "",
+            frame_sku: frame.sku || "",
+            frame_price: frame.price || 0,
+            frame_price_includes_tax: frame.price_includes_tax || false,
+            frame_cost: frame.price || 0,
           }));
           setFrameSearch("");
           setFrameResults([]);
@@ -231,17 +230,16 @@ export default function CreateQuoteForm(props: CreateQuoteFormProps) {
         onNearFrameSearchChange={setNearFrameSearch}
         onNearFrameSelect={(frame) => {
           setSelectedNearFrame(frame);
-          const f = frame as unknown;
           setFormData((prev) => ({
             ...prev,
-            near_frame_product_id: f.id,
-            near_frame_name: f.name,
-            near_frame_brand: f.frame_brand || "",
-            near_frame_model: f.frame_model || "",
-            near_frame_color: f.frame_color || "",
-            near_frame_size: f.frame_size || "",
-            near_frame_sku: f.sku || "",
-            near_frame_price: f.price || 0,
+            near_frame_product_id: frame.id,
+            near_frame_name: frame.name,
+            near_frame_brand: frame.frame_brand || "",
+            near_frame_model: frame.frame_model || "",
+            near_frame_color: frame.frame_color || "",
+            near_frame_size: frame.frame_size || "",
+            near_frame_sku: frame.sku || "",
+            near_frame_price: frame.price || 0,
             near_frame_price_includes_tax: f.price_includes_tax || false,
             near_frame_cost: f.price || 0,
           }));

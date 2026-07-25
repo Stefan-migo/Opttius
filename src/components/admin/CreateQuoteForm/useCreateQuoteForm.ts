@@ -11,6 +11,8 @@ import { toast } from "sonner";
 
 import { useBranch } from "@/hooks/useBranch";
 import { quoteSettingsService } from "@/lib/api/services";
+import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
+import type { Product } from "@/lib/api/services/products/client-types";
 import { appLogger } from '@/lib/logger';
 import { type PresbyopiaSolution } from "@/lib/presbyopia-helpers";
 
@@ -36,20 +38,20 @@ export interface UseCreateQuoteFormReturn {
   quoteSettings: unknown;
   loadingSettings: boolean;
   customerSearch: string;
-  customerResults: unknown[];
-  selectedCustomer: unknown;
+  customerResults: Customer[];
+  selectedCustomer: Customer | null;
   searchingCustomers: boolean;
-  prescriptions: unknown[];
-  selectedPrescription: unknown;
+  prescriptions: Prescription[];
+  selectedPrescription: Prescription | null;
   loadingPrescriptions: boolean;
   showCreatePrescription: boolean;
   frameSearch: string;
-  frameResults: unknown[];
-  selectedFrame: unknown;
+  frameResults: Product[];
+  selectedFrame: Product | null;
   searchingFrames: boolean;
   nearFrameSearch: string;
-  nearFrameResults: unknown[];
-  selectedNearFrame: unknown;
+  nearFrameResults: Product[];
+  selectedNearFrame: Product | null;
   searchingNearFrames: boolean;
   taxPercentage: number;
   customerOwnFrame: boolean;
@@ -226,7 +228,7 @@ export function useCreateQuoteForm(
     try {
       setLoadingSettings(true);
       const settings = await quoteSettingsService.get();
-      const newSettings = settings ? ({ ...settings } as unknown) : null;
+      const newSettings = settings ? { ...settings } : null;
       setQuoteSettings(newSettings);
       if (newSettings) {
         formPricing.setFormData((prev) => ({

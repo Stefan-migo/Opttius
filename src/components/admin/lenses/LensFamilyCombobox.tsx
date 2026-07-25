@@ -33,6 +33,9 @@ export interface LensFamilyOption {
   brand?: string | null;
   lens_type?: string;
   lens_material?: string;
+  categories?: unknown;
+  category?: unknown;
+  category_id?: unknown;
 }
 
 /** prescription_type values that map 1:1 to lens_type for filtering when presbyopiaSolution is "none" */
@@ -166,12 +169,12 @@ export function LensFamilyCombobox({
     baseList.length > 0 &&
     (lensTypes.length > 0 || slugs.length > 0 || recommendedTypes.length > 0)
       ? baseList.filter((f) => {
-          const familyType = (f as unknown).lens_type || "";
+          const familyType = (f).lens_type || "";
           const cat =
-            (f as unknown).categories ??
-            (f as unknown).category ??
-            (typeof (f as unknown).category_id === "object"
-              ? (f as unknown).category_id
+            (f).categories ??
+            (f).category ??
+            (typeof (f).category_id === "object"
+              ? (f).category_id
               : null);
           const catSlug =
             typeof cat === "object" && cat?.slug ? cat.slug : null;

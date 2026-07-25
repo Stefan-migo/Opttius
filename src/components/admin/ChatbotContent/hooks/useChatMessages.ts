@@ -120,7 +120,7 @@ export function useChatMessages(currentSection: string | null) {
             provider,
             model.trim(),
             undefined,
-            apiConfig as unknown,
+            apiConfig,
           );
           if (!sessionToUse) {
             appLogger.error("Failed to create session - no session returned");

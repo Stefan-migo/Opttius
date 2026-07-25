@@ -32,22 +32,23 @@ import {
   hasAddition,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
+import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
 
 export interface CreateQuoteFormCustomerSectionProps {
   loadingSettings: boolean;
   customerSearch: string;
-  customerResults: unknown[];
-  selectedCustomer: unknown;
+  customerResults: Customer[];
+  selectedCustomer: Customer | null;
   searchingCustomers: boolean;
-  prescriptions: unknown[];
-  selectedPrescription: unknown;
+  prescriptions: Prescription[];
+  selectedPrescription: Prescription | null;
   loadingPrescriptions: boolean;
   presbyopiaSolution: PresbyopiaSolution;
   onCustomerSearchChange: (v: string) => void;
-  onCustomerSelect: (customer: unknown) => void;
+  onCustomerSelect: (customer: Customer) => void;
   onCustomerClear: () => void;
-  onPrescriptionSelect: (prescription: unknown) => void;
+  onPrescriptionSelect: (prescription: Prescription) => void;
   onPresbyopiaSolutionChange: (v: PresbyopiaSolution) => void;
   onOpenCreatePrescription: () => void;
   onCloseCreatePrescription: () => void;
@@ -98,11 +99,11 @@ export function CreateQuoteFormCustomerSection({
             >
               <div>
                 <div className="font-medium">
-                  {(selectedCustomer as unknown).first_name}{" "}
-                  {(selectedCustomer as unknown).last_name}
+                  {selectedCustomer.first_name}{" "}
+                  {selectedCustomer.last_name}
                 </div>
                 <div className="text-sm text-admin-text-tertiary">
-                  {(selectedCustomer as unknown).email}
+                  {selectedCustomer.email}
                 </div>
               </div>
               <Button
@@ -130,7 +131,7 @@ export function CreateQuoteFormCustomerSection({
                       <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                     </div>
                   ) : (customerResults || []).length > 0 ? (
-                    customerResults.map((customer: unknown) => (
+                    customerResults.map((customer: Customer) => (
                       <div
                         className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                         key={customer.id}
@@ -189,10 +190,10 @@ export function CreateQuoteFormCustomerSection({
               </div>
             ) : (
               <Select
-                value={(selectedPrescription as unknown)?.id || ""}
+                value={selectedPrescription?.id || ""}
                 onValueChange={(value) => {
                   const prescription = prescriptions.find(
-                    (p: unknown) => p.id === value,
+                    (p: Prescription) => p.id === value,
                   );
                   if (prescription) onPrescriptionSelect(prescription);
                 }}
@@ -201,7 +202,7 @@ export function CreateQuoteFormCustomerSection({
                   <SelectValue placeholder="Selecciona una receta" />
                 </SelectTrigger>
                 <SelectContent>
-                  {prescriptions.map((prescription: unknown) => (
+                    {prescriptions.map((prescription: Prescription) => (
                     <SelectItem key={prescription.id} value={prescription.id}>
                       {prescription.prescription_date} -{" "}
                       {translatePrescriptionType(
@@ -225,23 +226,23 @@ export function CreateQuoteFormCustomerSection({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
               <div>
                 <span className="font-semibold">OD:</span> Esf{" "}
-                {(selectedPrescription as unknown).od_sphere ?? "—"} / Cil{" "}
-                {(selectedPrescription as unknown).od_cylinder ?? "—"}
-                {(selectedPrescription as unknown).od_add &&
-                  (selectedPrescription as unknown).od_add > 0 && (
+                {selectedPrescription.od_sphere ?? "—"} / Cil{" "}
+                {selectedPrescription.od_cylinder ?? "—"}
+                {selectedPrescription.od_add &&
+                  selectedPrescription.od_add > 0 && (
                     <span className="ml-2 text-orange-600">
-                      Add: +{(selectedPrescription as unknown).od_add}
+                      Add: +{selectedPrescription.od_add}
                     </span>
                   )}
               </div>
               <div>
                 <span className="font-semibold">OS:</span> Esf{" "}
-                {(selectedPrescription as unknown).os_sphere ?? "—"} / Cil{" "}
-                {(selectedPrescription as unknown).os_cylinder ?? "—"}
-                {(selectedPrescription as unknown).os_add &&
-                  (selectedPrescription as unknown).os_add > 0 && (
+                {selectedPrescription.os_sphere ?? "—"} / Cil{" "}
+                {selectedPrescription.os_cylinder ?? "—"}
+                {selectedPrescription.os_add &&
+                  selectedPrescription.os_add > 0 && (
                     <span className="ml-2 text-orange-600">
-                      Add: +{(selectedPrescription as unknown).os_add}
+                      Add: +{selectedPrescription.os_add}
                     </span>
                   )}
               </div>
@@ -249,7 +250,7 @@ export function CreateQuoteFormCustomerSection({
           </div>
 
           {/* Presbyopia Solution Selector */}
-          {hasAddition(selectedPrescription as unknown) && (
+          {hasAddition(selectedPrescription) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-sm">
@@ -261,7 +262,7 @@ export function CreateQuoteFormCustomerSection({
                 <Alert className="mb-4">
                   <AlertDescription>
                     Esta receta tiene adición (+
-                    {getMaxAddition(selectedPrescription as unknown)} D). Selecciona
+                    {getMaxAddition(selectedPrescription)} D). Selecciona
                     cómo deseas manejar la presbicia.
                   </AlertDescription>
                 </Alert>
@@ -314,16 +315,16 @@ export function CreateQuoteFormCustomerSection({
               <DialogTitle>Nueva Receta</DialogTitle>
               <DialogDescription>
                 Crea una nueva receta oftalmológica para{" "}
-                {(selectedCustomer as unknown).first_name}{" "}
-                {(selectedCustomer as unknown).last_name}
+                {selectedCustomer.first_name}{" "}
+                {selectedCustomer.last_name}
               </DialogDescription>
             </DialogHeader>
             <CreatePrescriptionForm
-              customerId={(selectedCustomer as unknown).id}
+              customerId={selectedCustomer.id}
               onCancel={onCloseCreatePrescription}
               onSuccess={() => {
                 onCloseCreatePrescription();
-                onPrescriptionCreated((selectedCustomer as unknown).id);
+                onPrescriptionCreated(selectedCustomer.id);
               }}
             />
           </DialogContent>

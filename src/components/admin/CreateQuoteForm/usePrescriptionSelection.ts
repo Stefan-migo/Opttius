@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
 import { appLogger } from '@/lib/logger';
+import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
 
 export function usePrescriptionSelection(
-  selectedCustomer: unknown,
+  selectedCustomer: Customer | null,
   initialPrescriptionId?: string,
 ) {
   // Prescription selection
-  const [prescriptions, setPrescriptions] = useState<unknown[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [selectedPrescription, setSelectedPrescription] =
-    useState<unknown>(null);
+    useState<Prescription | null>(null);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [showCreatePrescription, setShowCreatePrescription] = useState(false);
 
@@ -30,8 +31,8 @@ export function usePrescriptionSelection(
   };
 
   useEffect(() => {
-    if ((selectedCustomer as unknown)?.id) {
-      fetchPrescriptionsAction((selectedCustomer as unknown).id);
+    if (selectedCustomer?.id) {
+      fetchPrescriptionsAction(selectedCustomer.id);
     }
   }, [selectedCustomer]);
 

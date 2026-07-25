@@ -4,6 +4,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 
 import { productService } from "@/lib/api/services";
+import type { Product } from "@/lib/api/services/products/client-types";
 import { appLogger } from '@/lib/logger';
 
 import type { QuoteFormData } from "./CreateQuoteForm.types";
@@ -15,14 +16,14 @@ export function useFrameSelection(
 ) {
   // Frame selection
   const [frameSearch, setFrameSearch] = useState("");
-  const [frameResults, setFrameResults] = useState<unknown[]>([]);
-  const [selectedFrame, setSelectedFrame] = useState<unknown>(null);
+  const [frameResults, setFrameResults] = useState<Product[]>([]);
+  const [selectedFrame, setSelectedFrame] = useState<Product | null>(null);
   const [searchingFrames, setSearchingFrames] = useState(false);
 
   // Second frame for two separate lenses (near vision)
   const [nearFrameSearch, setNearFrameSearch] = useState("");
-  const [nearFrameResults, setNearFrameResults] = useState<unknown[]>([]);
-  const [selectedNearFrame, setSelectedNearFrame] = useState<unknown>(null);
+  const [nearFrameResults, setNearFrameResults] = useState<Product[]>([]);
+  const [selectedNearFrame, setSelectedNearFrame] = useState<Product | null>(null);
   const [searchingNearFrames, setSearchingNearFrames] = useState(false);
   const [customerOwnFrame, setCustomerOwnFrame] = useState<boolean>(false);
   const [customerOwnNearFrame, setCustomerOwnNearFrame] =
@@ -80,7 +81,7 @@ export function useFrameSelection(
     return () => clearTimeout(debounce);
   }, [nearFrameSearch, effectiveBranchId, initialFieldOperationId]);
 
-  const handleFrameSelect = (frame: unknown) => {
+  const handleFrameSelect = (frame: Product) => {
     setSelectedFrame(frame);
     setFormData((prev) => ({
       ...prev,
@@ -100,7 +101,7 @@ export function useFrameSelection(
     setFrameResults([]);
   };
 
-  const handleNearFrameSelect = (frame: unknown) => {
+  const handleNearFrameSelect = (frame: Product) => {
     setSelectedNearFrame(frame);
     const nearFrameCost = (frame as Record<string, unknown>).price as number || 0;
     setFormData((prev) => ({

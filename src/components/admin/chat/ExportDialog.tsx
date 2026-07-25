@@ -90,7 +90,7 @@ export function ExportDialog({
 
         <RadioGroup
           value={format}
-          onValueChange={(value) => setFormat(value as unknown)}
+          onValueChange={(value) => setFormat(value as "json" | "markdown" | "txt" | "csv")}
         >
           <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/60 cursor-pointer transition-colors">
             <RadioGroupItem id="json" value="json" />
