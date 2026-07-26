@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "./supabase";
 import type { Database } from "./supabase.generated";
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
@@ -119,6 +120,15 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
+
+type TableName = keyof Database["public"]["Tables"];
+
+export function fromTable<T extends TableName>(
+  supabase: SupabaseClient<Database>,
+  table: T,
+) {
+  return supabase.from(table);
+}
 
 export const Constants = {
   graphql_public: {

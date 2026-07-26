@@ -1,4 +1,6 @@
 import { appLogger as logger } from "@/lib/logger";
+import { fromTable } from "@/types/supabase";
+import type { Database } from "@/types/supabase.generated";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import type { CreateNotificationParams } from "../notification-service";
@@ -52,8 +54,10 @@ export async function createAdminNotification(
           "organization_id",
           ...(mapping.hasBranch ? ["branch_id"] : []),
         ].join(", ");
-        const { data: entity } = await supabase
-          .from(mapping.table)
+        const { data: entity } = await fromTable(
+          supabase,
+          mapping.table as keyof Database["public"]["Tables"],
+        )
           .select(cols)
           .eq("id", params.relatedEntityId)
           .single();
