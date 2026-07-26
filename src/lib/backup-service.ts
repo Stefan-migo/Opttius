@@ -182,6 +182,7 @@ export class BackupService {
 
     for (const config of TABLES_CONFIG) {
       try {
+        // @ts-expect-error — dynamic table iteration, 40+ table union exceeds type depth
         const query = supabaseService.from(config.name).select("*");
 
         if (config.isGlobal) {
@@ -214,10 +215,8 @@ export class BackupService {
 
           let allData: unknown[] = [];
           for (const chunk of chunks) {
-            const { data, error } = await supabaseService
-              .from(config.name)
-              .select("*")
-              .in(config.filter, chunk);
+            // @ts-expect-error — dynamic table iteration, 40+ table union exceeds type depth
+            const { data, error } = await supabaseService.from(config.name).select("*").in(config.filter, chunk);
             if (error) throw error;
             if (data) allData = [...allData, ...data];
           }
@@ -286,10 +285,8 @@ export class BackupService {
     for (const config of [...TABLES_CONFIG].reverse()) {
       if (config.anchor || config.isGlobal) continue;
 
-      const { error: deleteError } = await supabaseService
-        .from(config.name)
-        .delete()
-        .eq(config.filter, organizationId);
+      // @ts-expect-error — dynamic table iteration, 40+ table union exceeds type depth
+      const { error: deleteError } = await supabaseService.from(config.name).delete().eq(config.filter, organizationId);
 
       if (deleteError) {
         logger.warn(`Limpieza fallida o restringida en ${config.name}`, {
@@ -319,9 +316,8 @@ export class BackupService {
             return { ...row, [config.filter]: organizationId };
           });
 
-          const { error: upsertError } = await supabaseService
-            .from(config.name)
-            .upsert(batch, { onConflict: "id" });
+          // @ts-expect-error — dynamic table iteration, 40+ table union exceeds type depth
+          const { error: upsertError } = await supabaseService.from(config.name).upsert(batch, { onConflict: "id" });
 
           if (upsertError) {
             logger.error(`Error en upsert de ${config.name}`, { upsertError });

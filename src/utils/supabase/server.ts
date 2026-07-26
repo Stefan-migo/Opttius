@@ -6,10 +6,10 @@ import type { NextRequest } from "next/server";
 
 import type { Database } from "@/types/supabase";
 
-export async function createClient() {
+export async function createClient<T = Database>() {
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(
+  return createServerClient<T>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     {
@@ -56,7 +56,7 @@ export async function createClientFromRequest<T = Database>(
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
       // Create client with token in global headers for RLS
-      const client = createSupabaseClient<Database>(
+      const client = createSupabaseClient<T>(
         supabaseUrl,
         supabaseAnonKey,
         {
@@ -84,7 +84,7 @@ export async function createClientFromRequest<T = Database>(
   }
 
   // Fallback to cookie-based authentication (normal browser flow)
-  const client = await createClient();
+  const client = await createClient<T>();
   return {
     client,
     getUser: async () => {
