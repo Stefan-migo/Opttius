@@ -60,8 +60,8 @@ export async function prepareInsightData(
     const { data: orders } = await ordersQuery;
 
     const yesterdayOrders =
-      orders?.filter((o: unknown) => {
-        const orderDate = new Date(o.created_at);
+      orders?.filter((o: Record<string, unknown>) => {
+        const orderDate = new Date(o.created_at as string);
         return (
           orderDate >= yesterday &&
           orderDate <= yesterdayEnd &&
@@ -70,13 +70,13 @@ export async function prepareInsightData(
       }) || [];
 
     const yesterdaySales = yesterdayOrders.reduce(
-      (sum: number, o: unknown) => sum + (o.total_amount || 0),
+      (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
       0,
     );
 
     const monthlyOrders =
-      orders?.filter((o: unknown) => {
-        const orderDate = new Date(o.created_at);
+      orders?.filter((o: Record<string, unknown>) => {
+        const orderDate = new Date(o.created_at as string);
         return (
           orderDate >= thirtyDaysAgo &&
           (o.status === "completed" || o.payment_status === "paid")
@@ -84,7 +84,7 @@ export async function prepareInsightData(
       }) || [];
 
     const monthlyRevenue = monthlyOrders.reduce(
-      (sum: number, o: unknown) => sum + (o.total_amount || 0),
+      (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
       0,
     );
     const monthlyAverage = monthlyRevenue / 30;
@@ -106,9 +106,9 @@ export async function prepareInsightData(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const overdueWorkOrders =
-      workOrders?.filter((wo: unknown) => {
+      workOrders?.filter((wo: Record<string, unknown>) => {
         if (!wo.lab_estimated_delivery_date) return false;
-        const deliveryDate = new Date(wo.lab_estimated_delivery_date);
+        const deliveryDate = new Date(wo.lab_estimated_delivery_date as string);
         return deliveryDate < today;
       }).length || 0;
 
@@ -158,9 +158,10 @@ export async function prepareInsightData(
       .limit(1000);
 
     const productLastSales = new Map<string, Date>();
-    orderItems?.forEach((item: unknown) => {
-      const productId = item.product_id;
-      const saleDate = new Date(item.orders?.created_at || item.created_at);
+    orderItems?.forEach((item: Record<string, unknown>) => {
+      const productId = item.product_id as string;
+      const orders = item.orders as Record<string, unknown> | undefined;
+      const saleDate = new Date((orders?.created_at as string) || (item.created_at as string));
       if (
         !productLastSales.has(productId) ||
         saleDate > productLastSales.get(productId)!
@@ -172,44 +173,44 @@ export async function prepareInsightData(
     const now = new Date();
     const zombieProducts =
       products
-        ?.filter((p: unknown) => {
-          const lastSale = productLastSales.get(p.id);
+        ?.filter((p: Record<string, unknown>) => {
+          const lastSale = productLastSales.get(p.id as string);
           if (!lastSale) {
-            const createdDate = new Date(p.created_at);
+            const createdDate = new Date(p.created_at as string);
             const daysSinceCreation =
               (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation > 90 && p.inventory_quantity > 0;
+            return daysSinceCreation > 90 && (p.inventory_quantity as number) > 0;
           }
           const daysSinceLastSale =
             (now.getTime() - lastSale.getTime()) / (1000 * 60 * 60 * 24);
-          return daysSinceLastSale > 180 && p.inventory_quantity > 0;
+          return daysSinceLastSale > 180 && (p.inventory_quantity as number) > 0;
         })
-        .map((p: unknown) => {
-          const lastSale = productLastSales.get(p.id);
+        .map((p: Record<string, unknown>) => {
+          const lastSale = productLastSales.get(p.id as string);
           const daysSinceLastSale = lastSale
             ? Math.floor(
                 (now.getTime() - lastSale.getTime()) / (1000 * 60 * 60 * 24),
               )
             : Math.floor(
-                (now.getTime() - new Date(p.created_at).getTime()) /
+                (now.getTime() - new Date(p.created_at as string).getTime()) /
                   (1000 * 60 * 60 * 24),
               );
 
           return {
-            id: p.id,
-            name: p.name,
-            stock: p.inventory_quantity || 0,
+            id: p.id as string,
+            name: p.name as string,
+            stock: (p.inventory_quantity as number) || 0,
             daysSinceLastSale,
-            cost: p.cost_price || 0,
-            price: p.price || 0,
+            cost: (p.cost_price as number) || 0,
+            price: (p.price as number) || 0,
           };
         })
         .slice(0, 10) || [];
 
     const lowStockProducts =
       products?.filter(
-        (p: unknown) =>
-          (p.inventory_quantity || 0) < 5 && (p.inventory_quantity || 0) > 0,
+        (p: Record<string, unknown>) =>
+          ((p.inventory_quantity as number) || 0) < 5 && ((p.inventory_quantity as number) || 0) > 0,
       ).length || 0;
 
     data.inventory = {
@@ -238,24 +239,24 @@ export async function prepareInsightData(
       .order("appointment_date", { ascending: false });
 
     const customerLastVisits = new Map<string, Date>();
-    appointments?.forEach((apt: unknown) => {
+    appointments?.forEach((apt: Record<string, unknown>) => {
       if (!apt.customer_id) return;
-      const visitDate = new Date(apt.appointment_date);
+      const visitDate = new Date(apt.appointment_date as string);
       if (
-        !customerLastVisits.has(apt.customer_id) ||
-        visitDate > customerLastVisits.get(apt.customer_id)!
+        !customerLastVisits.has(apt.customer_id as string) ||
+        visitDate > customerLastVisits.get(apt.customer_id as string)!
       ) {
-        customerLastVisits.set(apt.customer_id, visitDate);
+        customerLastVisits.set(apt.customer_id as string, visitDate);
       }
     });
 
     const now = new Date();
     const inactiveClients =
       customers
-        ?.filter((c: unknown) => {
-          const lastVisit = customerLastVisits.get(c.id);
+        ?.filter((c: Record<string, unknown>) => {
+          const lastVisit = customerLastVisits.get(c.id as string);
           if (!lastVisit) {
-            const createdDate = new Date(c.created_at);
+            const createdDate = new Date(c.created_at as string);
             const daysSinceCreation =
               (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
             return daysSinceCreation > 180;
@@ -264,19 +265,19 @@ export async function prepareInsightData(
             (now.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24);
           return daysSinceLastVisit > 180;
         })
-        .map((c: unknown) => {
-          const lastVisit = customerLastVisits.get(c.id);
+        .map((c: Record<string, unknown>) => {
+          const lastVisit = customerLastVisits.get(c.id as string);
           const daysSinceLastVisit = lastVisit
             ? Math.floor(
                 (now.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24),
               )
             : Math.floor(
-                (now.getTime() - new Date(c.created_at).getTime()) /
+                (now.getTime() - new Date(c.created_at as string).getTime()) /
                   (1000 * 60 * 60 * 24),
               );
 
           return {
-            id: c.id,
+            id: c.id as string,
             name:
               `${c.first_name || ""} ${c.last_name || ""}`.trim() || "Cliente",
             daysSinceLastVisit,
@@ -323,8 +324,8 @@ export async function prepareInsightData(
     const { data: orders } = await ordersQuery;
 
     const currentPeriodOrders =
-      orders?.filter((o: unknown) => {
-        const orderDate = new Date(o.created_at);
+      orders?.filter((o: Record<string, unknown>) => {
+        const orderDate = new Date(o.created_at as string);
         return (
           orderDate >= currentPeriodStart &&
           (o.status === "completed" || o.payment_status === "paid")
@@ -332,8 +333,8 @@ export async function prepareInsightData(
       }) || [];
 
     const previousPeriodOrders =
-      orders?.filter((o: unknown) => {
-        const orderDate = new Date(o.created_at);
+      orders?.filter((o: Record<string, unknown>) => {
+        const orderDate = new Date(o.created_at as string);
         return (
           orderDate >= previousPeriodStart &&
           orderDate < currentPeriodStart &&
@@ -342,12 +343,12 @@ export async function prepareInsightData(
       }) || [];
 
     const currentPeriod = currentPeriodOrders.reduce(
-      (sum: number, o: unknown) => sum + (o.total_amount || 0),
+      (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
       0,
     );
 
     const previousPeriod = previousPeriodOrders.reduce(
-      (sum: number, o: unknown) => sum + (o.total_amount || 0),
+      (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
       0,
     );
 
@@ -363,20 +364,21 @@ export async function prepareInsightData(
       accessories: 0,
     };
 
-    currentPeriodOrders.forEach((order: unknown) => {
-      order.order_items?.forEach((item: unknown) => {
-        const productName = (item.product_name || "").toLowerCase();
+    currentPeriodOrders.forEach((order: Record<string, unknown>) => {
+      const orderItems = order.order_items as Record<string, unknown>[] | undefined;
+      orderItems?.forEach((item: Record<string, unknown>) => {
+        const productName = ((item.product_name as string) || "").toLowerCase();
         if (productName.includes("marco") || productName.includes("armazon")) {
-          breakdown.frames += item.total_price || 0;
+          breakdown.frames += (item.total_price as number) || 0;
         } else if (
           productName.includes("lente") ||
           productName.includes("cristal")
         ) {
-          breakdown.lenses += item.total_price || 0;
+          breakdown.lenses += (item.total_price as number) || 0;
         } else if (productName.includes("contacto")) {
-          breakdown.contactLenses += item.total_price || 0;
+          breakdown.contactLenses += (item.total_price as number) || 0;
         } else {
-          breakdown.accessories += item.total_price || 0;
+          breakdown.accessories += (item.total_price as number) || 0;
         }
       });
     });

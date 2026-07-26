@@ -84,14 +84,14 @@ export class MemoryIndexer {
 
       result.totalRecords = messages.length;
 
-      const records: import("../types").EmbeddingRecord[] = messages.map((msg: unknown) => ({
+      const records: import("../types").EmbeddingRecord[] = messages.map((msg: Record<string, unknown>) => ({
         sourceType: "chat_message",
-        sourceId: msg.id,
-        content: msg.content || "",
+        sourceId: msg.id as string,
+        content: (msg.content as string) || "",
         embeddingProvider: "google" as const,
         userId: this.context.userId,
         metadata: {
-          role: msg.role,
+          role: msg.role as string,
           sessionId,
         },
       }));
@@ -101,12 +101,12 @@ export class MemoryIndexer {
         result.indexed = indexed;
       } catch (err: unknown) {
         result.failed = records.length;
-        result.errors.push(`Indexing failed: ${err.message}`);
+        result.errors.push(`Indexing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
 
       return result;
     } catch (error: unknown) {
-      result.errors.push(`Indexing failed: ${error.message}`);
+      result.errors.push(`Indexing failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       return result;
     }
   }

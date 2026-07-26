@@ -61,21 +61,15 @@ export const getAppointmentStatusTool: ToolDefinition = {
         };
       }
 
-      const formatted = appointments.map((a) => {
-        // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
+      const formatted = appointments.map((a: Record<string, unknown>) => {
         const branch = a.branch as { name?: string } | null;
         return {
-          // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
-          date: a.appointment_date,
+          date: a.appointment_date as string,
           time:
-            // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
             typeof a.appointment_time === "string"
-              ? // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
-                a.appointment_time.substring(0, 5)
-              : // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
-                a.appointment_time,
-          // @ts-expect-error — SupabaseClient<unknown>, appointments type is dynamic
-          status: a.status,
+              ? (a.appointment_time as string).substring(0, 5)
+              : a.appointment_time,
+          status: a.status as string,
           branch: branch?.name ?? "Sucursal",
         };
       });

@@ -15,7 +15,7 @@ import type {
   IndexingResult,
 } from "../types";
 
-export function buildCustomerContent(customer: unknown): string {
+export function buildCustomerContent(customer: Record<string, unknown>): string {
   const name =
     `${customer.first_name || ""} ${customer.last_name || ""}`.trim();
   const parts = [
@@ -101,7 +101,7 @@ export async function indexCustomers(
           result.indexed += indexed;
         } catch (err: unknown) {
           result.failed += records.length;
-          result.errors.push(`Batch failed: ${err.message}`);
+          result.errors.push(`Batch failed: ${err instanceof Error ? err.message : "Unknown error"}`);
         }
       }
     }
@@ -111,7 +111,7 @@ export async function indexCustomers(
     );
     return result;
   } catch (error: unknown) {
-    result.errors.push(`Indexing failed: ${error.message}`);
+    result.errors.push(`Indexing failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     return result;
   }
 }

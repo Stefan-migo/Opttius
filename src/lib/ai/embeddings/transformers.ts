@@ -75,10 +75,10 @@ async function getEmbeddingPipeline(modelName: string) {
       // Dynamic import to avoid loading at startup
       // Use eval to prevent webpack from trying to bundle this
       const transformers = await eval('import("@xenova/transformers")');
-      pipeline = transformers.pipeline;
+      pipeline = transformers.pipeline as unknown;
 
       appLogger.info(`Loading Transformers.js model: ${modelName}...`);
-      embeddingPipeline = await pipeline("feature-extraction", modelName, {
+      embeddingPipeline = await (pipeline as Function)("feature-extraction", modelName, {
         quantized: true, // Use quantized model for faster inference
       });
       appLogger.info("Transformers.js model loaded successfully");
@@ -86,7 +86,7 @@ async function getEmbeddingPipeline(modelName: string) {
       return embeddingPipeline;
     } catch (error: unknown) {
       appLogger.error("Failed to load Transformers.js:", error);
-      loadError = error;
+      loadError = error instanceof Error ? error : new Error(String(error));
       throw error;
     } finally {
       isLoading = false;
@@ -156,7 +156,7 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
       const pipe = await getEmbeddingPipeline(this.modelName);
 
       // Generate embedding
-      const output = await pipe(text, {
+      const output = await (pipe as any)(text, {
         pooling: "mean",
         normalize: true,
       });
@@ -170,7 +170,8 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
         provider: this.name,
       };
     } catch (error: unknown) {
-      throw new Error(`Transformers.js embedding failed: ${error.message}`);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(`Transformers.js embedding failed: ${msg}`);
     }
   }
 
@@ -191,7 +192,7 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
       const embeddings: EmbeddingResult[] = [];
 
       for (const text of texts) {
-        const output = await pipe(text, {
+        const output = await (pipe as any)(text, {
           pooling: "mean",
           normalize: true,
         });
@@ -210,8 +211,9 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
         provider: this.name,
       };
     } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
-        `Transformers.js batch embedding failed: ${error.message}`,
+        `Transformers.js batch embedding failed: ${msg}`,
       );
     }
   }

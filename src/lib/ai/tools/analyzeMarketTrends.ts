@@ -114,10 +114,10 @@ export const marketTrendsTools: ToolDefinition[] = [
           const brandKey = "Generic"; // Brand column doesn't exist yet
           const categoryKey = categoryName || "Uncategorized";
 
-          const orderObj: unknown = sale.orders;
+          const orderObj = sale.orders as Record<string, unknown> | Record<string, unknown>[];
           const orderDateStr = Array.isArray(orderObj)
-            ? orderObj[0]?.created_at
-            : orderObj?.created_at;
+            ? (orderObj[0] as Record<string, unknown>)?.created_at as string
+            : orderObj?.created_at as string;
           const orderDate = orderDateStr
             ? new Date(orderDateStr)
             : new Date(sale.created_at);
@@ -126,7 +126,7 @@ export const marketTrendsTools: ToolDefinition[] = [
           // Totales por producto
           if (!productsMap.has(productKey)) {
             productsMap.set(productKey, {
-              name: product?.name || "Desconocido",
+              name: (product as Record<string, unknown>)?.name || "Desconocido",
               category: categoryKey,
               brand: brandKey,
               totalSold: 0,
@@ -246,7 +246,7 @@ export const marketTrendsTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
-          error: error.message || "Failed to analyze market trends",
+          error: error instanceof Error ? error.message : "Failed to analyze market trends",
         };
       }
     },

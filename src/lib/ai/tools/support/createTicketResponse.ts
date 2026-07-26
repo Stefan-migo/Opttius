@@ -92,7 +92,7 @@ export const createTicketResponseTool: ToolDefinition = {
         };
       }
 
-      const { data: adminUser }: unknown = await supabase
+      const { data: adminUser } = await supabase
         .from("admin_users")
         .select("email, role")
         .eq("id", context.userId)
@@ -102,7 +102,7 @@ export const createTicketResponseTool: ToolDefinition = {
       const senderEmail = adminUser?.email || "";
       const senderRole = adminUser?.role || "admin";
 
-      const { data: newMessage, error: messageError }: unknown = await supabase
+      const { data: newMessage, error: messageError }: any = await supabase
         .from("optical_internal_support_messages")
         .insert({
           ticket_id: ticketId,

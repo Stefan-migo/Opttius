@@ -57,19 +57,20 @@ export class ToolExecutor {
 
       return result;
     } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Tool execution failed";
       if (!this.context.skipAdminActivityLog) {
         await logAdminActivity(
           this.context.userId,
           `tool_error_${toolName}`,
           "ai_agent",
           undefined,
-          { tool: toolName, params, error: error.message },
+          { tool: toolName, params, error: msg },
         );
       }
 
       return {
         success: false,
-        error: error.message || "Tool execution failed",
+        error: msg,
       };
     }
   }

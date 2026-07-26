@@ -22,7 +22,7 @@ export function sanitizeToolParams(params: unknown): unknown {
     return {};
   }
 
-  const sanitized: unknown = {};
+  const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string") {

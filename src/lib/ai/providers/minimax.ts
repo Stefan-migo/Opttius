@@ -124,19 +124,20 @@ export class MinimaxProvider extends BaseLLMProvider {
 
             if (delta?.tool_calls) {
               const toolCalls: ToolCall[] = delta.tool_calls.map(
-                (tc: unknown) => {
+                (tc: Record<string, unknown>) => {
                   let args = {};
+                  const fn = tc.function as Record<string, unknown> | undefined;
                   try {
-                    args = tc.function?.arguments
-                      ? JSON.parse(tc.function.arguments)
+                    args = fn?.arguments
+                      ? JSON.parse(fn.arguments as string)
                       : {};
                   } catch (e) {
                     // If parsing fails, use empty object
                   }
 
                   return {
-                    id: tc.id || crypto.randomUUID(),
-                    name: tc.function?.name || "",
+                    id: (tc.id as string) || crypto.randomUUID(),
+                    name: (fn?.name as string) || "",
                     arguments: args,
                   };
                 },

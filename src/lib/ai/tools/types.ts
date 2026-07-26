@@ -6,7 +6,7 @@ import type { AgentRole, ToolType } from "../types";
 export interface ToolExecutionContext {
   userId: string;
   organizationId: string;
-  supabase: SupabaseClient<unknown>;
+  supabase: SupabaseClient<any>;
   currency?: string;
 
   // New context for Super Admin awareness

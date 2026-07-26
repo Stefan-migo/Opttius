@@ -15,9 +15,11 @@ import type {
   IndexingResult,
 } from "../types";
 
-export function buildOrderContent(order: unknown): string {
-  const customerName = order.customers
-    ? `${order.customers.first_name || ""} ${order.customers.last_name || ""}`.trim()
+export function buildOrderContent(order: Record<string, unknown>): string {
+  const customers = order.customers as Record<string, unknown> | undefined;
+  const shippingAddress = order.shipping_address as Record<string, unknown> | undefined;
+  const customerName = customers
+    ? `${customers.first_name || ""} ${customers.last_name || ""}`.trim()
     : "Cliente desconocido";
 
   const parts = [
@@ -26,8 +28,8 @@ export function buildOrderContent(order: unknown): string {
     `Estado: ${order.status}`,
     `Pago: ${order.payment_status}`,
     `Total: $${order.total}`,
-    order.shipping_address?.city && `Ciudad: ${order.shipping_address.city}`,
-    `Fecha: ${new Date(order.created_at).toLocaleDateString("es")}`,
+    shippingAddress?.city && `Ciudad: ${shippingAddress.city}`,
+    `Fecha: ${new Date(order.created_at as string).toLocaleDateString("es")}`,
   ].filter(Boolean);
 
   return parts.join(". ");
@@ -106,7 +108,7 @@ export async function indexOrders(
           result.indexed += indexed;
         } catch (err: unknown) {
           result.failed += records.length;
-          result.errors.push(`Batch failed: ${err.message}`);
+          result.errors.push(`Batch failed: ${err instanceof Error ? err.message : "Unknown error"}`);
         }
       }
     }
@@ -114,7 +116,7 @@ export async function indexOrders(
     appLogger.info(`Orders indexed: ${result.indexed}/${result.totalRecords}`);
     return result;
   } catch (error: unknown) {
-    result.errors.push(`Indexing failed: ${error.message}`);
+    result.errors.push(`Indexing failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     return result;
   }
 }

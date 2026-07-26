@@ -59,14 +59,14 @@ export class SemanticMemory {
         throw error;
       }
 
-      return (data || []).map((row: unknown) => ({
-        id: row.id,
-        sourceType: row.source_type,
-        sourceId: row.source_id,
-        content: row.content,
-        similarity: row.similarity,
-        metadata: row.metadata,
-        createdAt: new Date(row.created_at),
+      return (data || []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        sourceType: row.source_type as string,
+        sourceId: row.source_id as string,
+        content: row.content as string,
+        similarity: row.similarity as number,
+        metadata: row.metadata as Record<string, unknown> | undefined,
+        createdAt: new Date(row.created_at as string),
       }));
     } catch (error) {
       appLogger.error("Semantic search failed:", error);
@@ -82,7 +82,7 @@ export class SemanticMemory {
       const factory = getEmbeddingFactory();
       const embeddingResult = await factory.embed(record.content);
 
-      const insertData: unknown = {
+      const insertData: Record<string, unknown> = {
         source_type: record.sourceType,
         source_id: record.sourceId,
         content: record.content,
@@ -129,7 +129,7 @@ export class SemanticMemory {
 
       const insertData = records.map((record, index) => {
         const emb = batchResult.embeddings[index];
-        const data: unknown = {
+        const data: Record<string, unknown> = {
           source_type: record.sourceType,
           source_id: record.sourceId,
           content: record.content,

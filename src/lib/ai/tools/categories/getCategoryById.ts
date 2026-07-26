@@ -70,12 +70,10 @@ export const getCategoryByIdTool: ToolDefinition = {
       return {
         success: true,
         data: {
-          // @ts-expect-error — SupabaseClient<unknown>, category type is dynamic
           ...category,
           products_count: productsCount || 0,
           subcategories_count: subcategoriesCount || 0,
         },
-        // @ts-expect-error — SupabaseClient<unknown>, category type is dynamic
         message: `Retrieved category: ${category.name}`,
       };
     } catch (error: unknown) {

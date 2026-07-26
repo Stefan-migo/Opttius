@@ -175,7 +175,7 @@ export const analyzeImportFileTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to analyze file",
+        error: error instanceof Error ? error.message : "Failed to analyze file",
       };
     }
   },

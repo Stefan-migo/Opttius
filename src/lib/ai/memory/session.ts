@@ -54,12 +54,13 @@ export class SessionMemory {
         return [];
       }
 
-      this.messages = (data || []).map((row: unknown) => ({
+      this.messages = (data || []).map((row: Record<string, unknown>) => ({
         role: row.role as SessionMessage["role"],
-        content: row.content || "",
+        content: (row.content as string) || "",
+        // @ts-expect-error — row.tool_calls and row.metadata shape are dynamic from DB
         toolCalls: row.tool_calls || row.metadata?.toolCalls,
-        metadata: row.metadata,
-        createdAt: new Date(row.created_at),
+        metadata: row.metadata as Record<string, unknown> | undefined,
+        createdAt: new Date(row.created_at as string),
       }));
 
       this.loaded = true;

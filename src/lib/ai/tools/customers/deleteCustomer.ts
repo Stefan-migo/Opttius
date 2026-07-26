@@ -67,8 +67,7 @@ export const deleteCustomerTool: ToolDefinition = {
         );
       }
 
-      // @ts-expect-error: Dynamic LLM response shape
-      const paramsForSchema: unknown = { ...params };
+      const paramsForSchema: Record<string, unknown> = { ...params as Record<string, unknown> };
       if (branchId) paramsForSchema.branch_id = branchId;
       delete paramsForSchema.branchName;
 
@@ -84,7 +83,7 @@ export const deleteCustomerTool: ToolDefinition = {
         };
       }
 
-      const { data: branch }: unknown = await supabase
+      const { data: branch } = await supabase
         .from("branches")
         .select("organization_id")
         .eq("id", finalBranchId)
@@ -130,7 +129,7 @@ export const deleteCustomerTool: ToolDefinition = {
         created_by: context.userId,
       };
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("customers")
         .insert(customerData)
         .select()

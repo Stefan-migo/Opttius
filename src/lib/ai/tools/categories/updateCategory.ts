@@ -76,7 +76,7 @@ export const updateCategoryTool: ToolDefinition = {
         }
       }
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("categories")
         .update({
           ...validated.updates,

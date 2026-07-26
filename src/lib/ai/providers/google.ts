@@ -196,10 +196,7 @@ export class GoogleProvider extends BaseLLMProvider {
             finishReason === "SAFETY")
         ) {
           appLogger.info(
-            "Stream finished with reason:",
-            finishReason,
-            "Final text length:",
-            textContent.length,
+            `Stream finished with reason: ${finishReason} Final text length: ${textContent.length}`,
           );
           return { done: true, text: textContent, toolCalls };
         }

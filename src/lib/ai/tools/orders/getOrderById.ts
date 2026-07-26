@@ -101,7 +101,7 @@ export const getOrderByIdTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to get order",
+        error: error instanceof Error ? error.message : "Failed to get order",
       };
     }
   },

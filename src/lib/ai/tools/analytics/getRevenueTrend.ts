@@ -49,10 +49,10 @@ export const getRevenueTrendTool: ToolDefinition = {
       }
 
       const dailyRevenue: Record<string, number> = {};
-      orders?.forEach((order: unknown) => {
-        const date = new Date(order.created_at).toISOString().split("T")[0];
+      orders?.forEach((order: Record<string, unknown>) => {
+        const date = new Date(order.created_at as string).toISOString().split("T")[0];
         dailyRevenue[date] =
-          (dailyRevenue[date] || 0) + (order.total_amount || 0);
+          (dailyRevenue[date] || 0) + ((order.total_amount as number) || 0);
       });
 
       const trend = Object.entries(dailyRevenue)
@@ -74,8 +74,7 @@ export const getRevenueTrendTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get revenue trend",
+        error: error instanceof Error ? error.message : "Failed to get revenue trend",
       };
     }
   },

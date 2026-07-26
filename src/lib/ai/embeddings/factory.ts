@@ -118,9 +118,10 @@ export class EmbeddingFactory {
         const result = await primary.embed(text);
         return result;
       } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : "Unknown error";
         appLogger.warn(
           `Primary embedding provider (${primary.name}) failed:`,
-          error.message,
+          errMsg,
         );
 
         // Try fallback if available (and it's not the same as primary)
@@ -132,9 +133,10 @@ export class EmbeddingFactory {
               return await fallback.embed(text);
             }
           } catch (fallbackError: unknown) {
+            const fbMsg = fallbackError instanceof Error ? fallbackError.message : "Unknown error";
             appLogger.warn(
               `Fallback provider (${fallback.name}) also failed:`,
-              fallbackError.message,
+              fbMsg,
             );
             // Continue to throw the original error
           }
@@ -154,9 +156,10 @@ export class EmbeddingFactory {
           return await fallback.embed(text);
         }
       } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : "Unknown error";
         appLogger.warn(
           `Fallback provider (${fallback.name}) failed:`,
-          error.message,
+          errMsg,
         );
         throw error;
       }
@@ -186,9 +189,10 @@ export class EmbeddingFactory {
       try {
         return await primary.embedBatch(texts);
       } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : "Unknown error";
         appLogger.warn(
           `Primary embedding provider (${primary.name}) failed:`,
-          error.message,
+          errMsg,
         );
 
         // Try fallback if available (and it's not the same as primary)
@@ -201,9 +205,10 @@ export class EmbeddingFactory {
               return await fallback.embedBatch(texts);
             }
           } catch (fallbackError: unknown) {
+            const fbMsg = fallbackError instanceof Error ? fallbackError.message : "Unknown error";
             appLogger.warn(
               `Fallback provider (${fallback.name}) also failed:`,
-              fallbackError.message,
+              fbMsg,
             );
           }
         }
@@ -222,9 +227,10 @@ export class EmbeddingFactory {
           return await fallback.embedBatch(texts);
         }
       } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : "Unknown error";
         appLogger.warn(
           `Fallback provider (${fallback.name}) failed:`,
-          error.message,
+          errMsg,
         );
         throw error;
       }

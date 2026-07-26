@@ -31,7 +31,7 @@ export class LongTermMemory {
       const factory = getEmbeddingFactory();
       const embeddingResult = await factory.embed(fact.content);
 
-      const insertData: unknown = {
+      const insertData: Record<string, unknown> = {
         user_id: fact.userId,
         fact_type: fact.factType,
         category: fact.category || null,
@@ -97,15 +97,15 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
-        id: row.id,
+      return (data || []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
         userId: this.context.userId,
-        factType: row.fact_type,
-        category: row.category,
-        content: row.content,
-        importance: row.importance,
-        similarity: row.similarity,
-        createdAt: new Date(row.created_at),
+        factType: row.fact_type as string,
+        category: row.category as string | undefined,
+        content: row.content as string,
+        importance: row.importance as number,
+        similarity: row.similarity as number,
+        createdAt: new Date(row.created_at as string),
       }));
     } catch (error) {
       appLogger.error("Search facts failed:", error);
@@ -143,16 +143,16 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
-        id: row.id,
-        userId: row.user_id,
-        factType: row.fact_type,
-        category: row.category,
-        content: row.content,
-        importance: row.importance,
-        sourceSessionId: row.source_session_id,
-        sourceMessageId: row.source_message_id,
-        expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+      return (data || []).map((row: Record<string, unknown>) => ({
+        id: row.id as MemoryFact["id"],
+        userId: row.user_id as string,
+        factType: row.fact_type as MemoryFact["factType"],
+        category: row.category as string | undefined,
+        content: row.content as string,
+        importance: row.importance as number,
+        sourceSessionId: row.source_session_id as string | undefined,
+        sourceMessageId: row.source_message_id as string | undefined,
+        expiresAt: row.expires_at ? new Date(row.expires_at as string) : undefined,
       }));
     } catch (error) {
       appLogger.error("Get all facts failed:", error);
@@ -182,16 +182,16 @@ export class LongTermMemory {
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
-        id: row.id,
-        userId: row.user_id,
-        factType: row.fact_type,
-        category: row.category,
-        content: row.content,
-        importance: row.importance,
-        sourceSessionId: row.source_session_id,
-        sourceMessageId: row.source_message_id,
-        expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+      return (data || []).map((row: Record<string, unknown>) => ({
+        id: row.id as MemoryFact["id"],
+        userId: row.user_id as string,
+        factType: row.fact_type as MemoryFact["factType"],
+        category: row.category as string | undefined,
+        content: row.content as string,
+        importance: row.importance as number,
+        sourceSessionId: row.source_session_id as string | undefined,
+        sourceMessageId: row.source_message_id as string | undefined,
+        expiresAt: row.expires_at ? new Date(row.expires_at as string) : undefined,
       }));
     } catch (error) {
       appLogger.error("Get facts by type failed:", error);

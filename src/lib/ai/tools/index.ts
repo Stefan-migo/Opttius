@@ -101,7 +101,7 @@ export function validateToolCall(
     }
     return { valid: true };
   } catch (error: unknown) {
-    return { valid: false, error: error.message };
+    return { valid: false, error: error instanceof Error ? error.message : "Validation failed" };
   }
 }
 

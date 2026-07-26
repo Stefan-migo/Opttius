@@ -6,8 +6,10 @@ import { LLMFactory } from "../factory";
 import type { MemoryManager } from "../memory";
 import { convertToolsToLLMTools, getAllTools } from "../tools";
 import type {
+  LLMConfig,
   LLMMessage,
   LLMProvider,
+  LLMProviderInterface,
   LLMStreamChunk,
   ToolCall,
 } from "../types";
@@ -74,8 +76,8 @@ export async function* streamChatImpl(
 
     const factory = LLMFactory.getInstance();
 
-    let providerInstance: unknown;
-    let llmConfig: unknown;
+    let providerInstance: LLMProviderInterface | undefined;
+    let llmConfig: LLMConfig | undefined;
 
     try {
       const result = await factory.createProviderWithFallback(params.provider);
@@ -190,11 +192,10 @@ export async function* streamChatImpl(
           }
           if (chunk.toolCalls && chunk.toolCalls.length > 0) {
             appLogger.info(
-              "Agent received tool calls from stream:",
-              chunk.toolCalls.map((tc) => ({ name: tc.name, id: tc.id })),
+              `Agent received tool calls from stream: ${JSON.stringify(chunk.toolCalls?.map((tc: ToolCall) => ({ name: tc.name, id: tc.id })))}`,
             );
             // Accumulate tool calls by ID to handle incremental updates
-            for (const tc of chunk.toolCalls) {
+            for (const tc of chunk.toolCalls as ToolCall[]) {
               if (tc.name && tc.name.trim()) {
                 const toolId =
                   tc.id ||
@@ -206,11 +207,11 @@ export async function* streamChatImpl(
                   if (
                     tc.arguments &&
                     typeof tc.arguments === "object" &&
-                    Object.keys(tc.arguments).length > 0
+                    Object.keys(tc.arguments as Record<string, unknown>).length > 0
                   ) {
                     existing.arguments = {
-                      ...existing.arguments,
-                      ...tc.arguments,
+                      ...(existing.arguments as Record<string, unknown>),
+                      ...(tc.arguments as Record<string, unknown>),
                     };
                   }
                 } else {
@@ -235,8 +236,8 @@ export async function* streamChatImpl(
         ) {
           logAIUsage(params.supabaseForUsageLog, {
             organizationId: params.organizationId,
-            provider: providerInstance.name,
-            model: (llmConfig.model as string) || "unknown",
+            provider: providerInstance?.name ?? "unknown",
+            model: llmConfig?.model ?? "unknown",
             promptTokens: lastChunk.usage.promptTokens,
             completionTokens: lastChunk.usage.completionTokens,
             endpoint: "chat",
@@ -246,22 +247,8 @@ export async function* streamChatImpl(
         // Convert map to array
         const collectedToolCalls = Array.from(collectedToolCallsMap.values());
 
-        appLogger.info(
-          "Agent step",
-          stepCount,
-          "- collected tool calls:",
-          collectedToolCalls.length,
-          collectedToolCalls.map((tc) => ({
-            name: tc.name,
-            args: tc.arguments,
-          })),
-        );
-        appLogger.info(
-          "Agent step",
-          stepCount,
-          "- assistant message length:",
-          assistantMessage.length,
-        );
+        appLogger.info(`Agent step ${stepCount} - collected tool calls: ${collectedToolCalls.length}`, { toolCalls: collectedToolCalls.map((tc) => ({ name: tc.name })) });
+        appLogger.info(`Agent step ${stepCount} - assistant message length: ${assistantMessage.length}`);
 
         fullResponse += assistantMessage;
 

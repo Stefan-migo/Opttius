@@ -40,50 +40,50 @@ export const getDashboardStatsTool: ToolDefinition = {
         ],
       );
 
-      const products: unknown[] = productsResult.data || [];
-      const orders: unknown[] = ordersResult.data || [];
-      const customers: unknown[] = customersResult.data || [];
+      const products = (productsResult.data || []) as Record<string, unknown>[];
+      const orders = (ordersResult.data || []) as Record<string, unknown>[];
+      const customers = (customersResult.data || []) as Record<string, unknown>[];
 
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       const activeProducts = products.filter(
-        (p: unknown) => p.status === "active",
+        (p: Record<string, unknown>) => p.status === "active",
       );
       const lowStockProducts = activeProducts.filter(
-        (p: unknown) =>
-          (p.inventory_quantity || 0) <= (p.low_stock_threshold || 5) &&
-          (p.inventory_quantity || 0) > 0,
+        (p: Record<string, unknown>) =>
+          ((p.inventory_quantity as number) || 0) <= ((p.low_stock_threshold as number) || 5) &&
+          ((p.inventory_quantity as number) || 0) > 0,
       ).length;
       const outOfStockProducts = activeProducts.filter(
-        (p: unknown) => (p.inventory_quantity || 0) === 0,
+        (p: Record<string, unknown>) => (p.inventory_quantity as number || 0) === 0,
       ).length;
 
       const pendingOrders = orders.filter(
-        (o: unknown) => o.status === "pending",
+        (o: Record<string, unknown>) => o.status === "pending",
       ).length;
       const processingOrders = orders.filter(
-        (o: unknown) => o.status === "processing",
+        (o: Record<string, unknown>) => o.status === "processing",
       ).length;
       const completedOrders = orders.filter(
-        (o: unknown) => o.status === "completed",
+        (o: Record<string, unknown>) => o.status === "completed",
       ).length;
 
-      const currentMonthOrders = orders.filter((o: unknown) => {
-        const orderDate = new Date(o.created_at);
+      const currentMonthOrders = orders.filter((o: Record<string, unknown>) => {
+        const orderDate = new Date(o.created_at as string);
         return (
           orderDate >= startOfMonth &&
           (o.status === "completed" || o.payment_status === "paid")
         );
       });
       const currentMonthRevenue = currentMonthOrders.reduce(
-        (sum: number, o: unknown) => sum + (o.total_amount || 0),
+        (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
         0,
       );
 
       const newCustomers = customers.filter(
-        (c: unknown) => new Date(c.created_at) >= thirtyDaysAgo,
+        (c: Record<string, unknown>) => new Date(c.created_at as string) >= thirtyDaysAgo,
       ).length;
 
       const stats = {
@@ -116,8 +116,7 @@ export const getDashboardStatsTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get dashboard stats",
+        error: error instanceof Error ? error.message : "Failed to get dashboard stats",
       };
     }
   },

@@ -57,17 +57,12 @@ export const getQuoteStatusTool: ToolDefinition = {
         };
       }
 
-      const formatted = quotes.map((q) => ({
-        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
-        number: q.quote_number,
-        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
-        status: q.status,
-        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
+      const formatted = quotes.map((q: Record<string, unknown>) => ({
+        number: q.quote_number as string,
+        status: q.status as string,
         total: q.total_amount,
-        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
-        currency: q.currency ?? "CLP",
-        // @ts-expect-error — SupabaseClient<unknown>, quotes type is dynamic
-        expiresAt: q.expiration_date,
+        currency: (q.currency as string) ?? "CLP",
+        expiresAt: q.expiration_date as string | undefined,
       }));
 
       return {

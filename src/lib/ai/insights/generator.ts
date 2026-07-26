@@ -110,7 +110,7 @@ export async function generateInsights(
   } else if (variant === "daily_summary" && variantDate) {
     systemPrompt = getDailySummaryPrompt(
       organizationName,
-      data,
+      data as Parameters<typeof getDailySummaryPrompt>[1],
       variantDate,
       additionalContext,
     );
@@ -201,22 +201,22 @@ export async function generateInsights(
 
       return validated.insights;
     } catch (error: unknown) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       logger.warn(`Insight generation attempt ${attempt + 1} failed`, {
         section,
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
         attempt: attempt + 1,
       });
 
       // If it's a validation error, don't retry
-      if (error.name === "ZodError") {
+      if ((error as any)?.name === "ZodError") {
         logger.error("Schema validation failed for insights", {
           section,
           provider: provider.name,
-          errors: error.errors,
+          errors: (error as any)?.errors,
           contentPreview: lastResponseContent?.slice(0, 2000),
         });
-        throw new Error(`Invalid insight format: ${error.message}`);
+        throw new Error(`Invalid insight format: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
 
       // If it's the last attempt, throw the error

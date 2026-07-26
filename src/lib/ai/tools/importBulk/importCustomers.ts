@@ -42,13 +42,14 @@ export async function executeCustomerImport(
       }
 
       const firstName =
-        mapped.first_name || mapped.name?.split(" ")[0] || "Cliente";
+        (mapped.first_name as string) || ((mapped.name as string)?.split(" ")[0]) || "Cliente";
       const lastName =
-        mapped.last_name ||
-        mapped.name?.split(" ").slice(1).join(" ") ||
+        (mapped.last_name as string) ||
+        ((mapped.name as string)?.split(" ").slice(1).join(" ")) ||
         "Sin apellido";
 
       const { error } = await supabase.from("customers").insert({
+        // @ts-expect-error — Supabase insert shape is dynamic for bulk import
         branch_id: branchId,
         organization_id: organizationId,
         first_name: firstName,
@@ -70,7 +71,7 @@ export async function executeCustomerImport(
     } catch (e: unknown) {
       failed.push({
         row: i + 2,
-        error: e?.message || "Validation error",
+        error: e instanceof Error ? e.message : "Validation error",
       });
     }
   }

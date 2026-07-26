@@ -101,7 +101,6 @@ export const updateTicketStatusTool: ToolDefinition = {
 
       const { data, error } = await supabase
         .from("optical_internal_support_tickets")
-        // @ts-expect-error — SupabaseClient<unknown>, update data type is dynamic
         .update(updateData)
         .eq("id", ticketId)
         .eq("organization_id", organizationId)

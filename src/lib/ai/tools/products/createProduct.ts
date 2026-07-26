@@ -207,7 +207,7 @@ export const createProductTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to create product",
+        error: error instanceof Error ? error.message : "Failed to create product",
       };
     }
   },

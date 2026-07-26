@@ -144,7 +144,7 @@ export const inventoryTools: ToolDefinition[] = [
           .filter((a) => a.status !== "healthy")
           .sort((a, b) => {
             // Prioridad: out_of_stock > critical_low > low_supply > overstock
-            const priorities: unknown = {
+            const priorities: Record<string, number> = {
               out_of_stock: 0,
               critical_low: 1,
               low_supply: 2,
@@ -179,7 +179,7 @@ export const inventoryTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
-          error: error.message || "Failed to optimize inventory",
+          error: error instanceof Error ? error.message : "Failed to optimize inventory",
         };
       }
     },

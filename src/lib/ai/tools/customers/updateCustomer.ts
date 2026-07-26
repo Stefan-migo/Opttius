@@ -67,7 +67,7 @@ export const updateCustomerTool: ToolDefinition = {
         return { success: false, error: "Customer not found" };
       }
 
-      const { data: branch }: unknown = await supabase
+      const { data: branch } = await supabase
         .from("branches")
         .select("organization_id")
         .eq("id", existing.branch_id)
@@ -77,7 +77,7 @@ export const updateCustomerTool: ToolDefinition = {
         return { success: false, error: "Customer not found" };
       }
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("customers")
         .update({
           ...validated.updates,

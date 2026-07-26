@@ -30,7 +30,7 @@ export const getCustomerByIdTool: ToolDefinition = {
         };
       }
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("customers")
         .select("*")
         .eq("id", validated.customerId)
@@ -44,7 +44,7 @@ export const getCustomerByIdTool: ToolDefinition = {
         return { success: false, error: "Customer not found" };
       }
 
-      const { data: branch }: unknown = await supabase
+      const { data: branch } = await supabase
         .from("branches")
         .select("organization_id")
         .eq("id", data.branch_id)

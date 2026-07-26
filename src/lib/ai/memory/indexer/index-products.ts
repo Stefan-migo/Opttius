@@ -15,15 +15,17 @@ import type {
   IndexingResult,
 } from "../types";
 
-export function buildProductContent(product: unknown): string {
+export function buildProductContent(product: Record<string, unknown>): string {
+  const benefits = product.benefits as string[] | undefined;
+  const tags = product.tags as string[] | undefined;
   const parts = [
     `Producto: ${product.name}`,
     product.description && `Descripción: ${product.description}`,
     product.short_description && `Resumen: ${product.short_description}`,
     `Precio: $${product.price}`,
     product.status && `Estado: ${product.status}`,
-    product.benefits?.length && `Beneficios: ${product.benefits.join(", ")}`,
-    product.tags?.length && `Tags: ${product.tags.join(", ")}`,
+    benefits?.length && `Beneficios: ${benefits.join(", ")}`,
+    tags?.length && `Tags: ${tags.join(", ")}`,
   ].filter(Boolean);
 
   return parts.join(". ");
@@ -106,7 +108,7 @@ export async function indexProducts(
         } catch (err: unknown) {
           result.failed += records.length;
           result.errors.push(
-            `Batch ${i / batchSize + 1} failed: ${err.message}`,
+            `Batch ${i / batchSize + 1} failed: ${err instanceof Error ? err.message : "Unknown error"}`,
           );
         }
       }
@@ -115,7 +117,7 @@ export async function indexProducts(
     appLogger.info(`Products indexed: ${result.indexed}/${result.totalRecords}`);
     return result;
   } catch (error: unknown) {
-    result.errors.push(`Indexing failed: ${error.message}`);
+    result.errors.push(`Indexing failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     return result;
   }
 }

@@ -76,19 +76,16 @@ export const getSalesReportTool: ToolDefinition = {
 
       const paidOrders =
         orders?.filter(
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-          (o) => o.payment_status === "paid" || o.status === "completed",
+          (o: Record<string, unknown>) => o.payment_status === "paid" || o.status === "completed",
         ) || [];
       const totalRevenue = paidOrders.reduce(
-        // @ts-expect-error — SupabaseClient<unknown>, paidOrders type is dynamic
-        (sum, o) => sum + (o.total_amount || 0),
+        (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
         0,
       );
       const totalOrders = orders?.length || 0;
       const totalItems =
         orders?.reduce(
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-          (sum, o) => sum + (o.order_items?.length || 0),
+          (sum: number, o: Record<string, unknown>) => sum + ((o.order_items as unknown[])?.length || 0),
           0,
         ) || 0;
 

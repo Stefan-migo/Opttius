@@ -32,7 +32,7 @@ export const getCustomerOrdersTool: ToolDefinition = {
         };
       }
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("orders")
         .select(
           `

@@ -68,13 +68,13 @@ export const getTopProductsTool: ToolDefinition = {
         { name: string; quantity: number; revenue: number }
       > = {};
 
-      orderItems?.forEach((item: unknown) => {
-        const name = item.product_name;
+      orderItems?.forEach((item: Record<string, unknown>) => {
+        const name = item.product_name as string;
         if (!productStats[name]) {
           productStats[name] = { name, quantity: 0, revenue: 0 };
         }
-        productStats[name].quantity += item.quantity || 0;
-        productStats[name].revenue += item.total_price || 0;
+        productStats[name].quantity += (item.quantity as number) || 0;
+        productStats[name].revenue += (item.total_price as number) || 0;
       });
 
       const topProducts = Object.values(productStats)
@@ -92,8 +92,7 @@ export const getTopProductsTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        // @ts-expect-error: Dynamic LLM response shape
-        error: error.message || "Failed to get top products",
+        error: error instanceof Error ? error.message : "Failed to get top products",
       };
     }
   },

@@ -145,7 +145,7 @@ export const recommendationTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
-          error: error.message || "Failed to generate recommendations",
+          error: error instanceof Error ? error.message : "Failed to generate recommendations",
         };
       }
     },

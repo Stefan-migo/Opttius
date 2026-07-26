@@ -36,7 +36,7 @@ export const confirmAppointmentTool: ToolDefinition = {
     try {
       const { supabase, organizationId } = context;
 
-      const { data: appointment, error: fetchError }: unknown = await supabase
+      const { data: appointment, error: fetchError } = await supabase
         .from("appointments")
         .select(
           "id, customer_id, status, appointment_date, appointment_time, branch:branches(name)",

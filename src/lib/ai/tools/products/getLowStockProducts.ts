@@ -64,7 +64,7 @@ export const getLowStockProductsTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to get low stock products",
+        error: error instanceof Error ? error.message : "Failed to get low stock products",
       };
     }
   },

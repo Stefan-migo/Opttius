@@ -52,23 +52,20 @@ export const getCategoryTreeTool: ToolDefinition = {
 
       // Build tree structure
       const cats = categories || [];
-      const categoryMap = new Map<string, unknown>();
+      const categoryMap = new Map<string, any>();
       const rootCategories: unknown[] = [];
 
       // First pass: create map
       for (const cat of cats) {
-        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
-        categoryMap.set(cat.id, { ...cat, children: [] });
+        categoryMap.set((cat as any).id, { ...(cat as any), children: [] });
       }
 
       // Second pass: build tree
       for (const cat of cats) {
-        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
-        const node = categoryMap.get(cat.id);
-        // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
-        if (cat.parent_id && categoryMap.has(cat.parent_id)) {
-          // @ts-expect-error — SupabaseClient<unknown>, categories type is dynamic
-          categoryMap.get(cat.parent_id).children.push(node);
+        const c = cat as any;
+        const node = categoryMap.get(c.id);
+        if (c.parent_id && categoryMap.has(c.parent_id)) {
+          categoryMap.get(c.parent_id).children.push(node);
         } else {
           rootCategories.push(node);
         }

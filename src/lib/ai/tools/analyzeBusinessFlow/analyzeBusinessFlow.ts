@@ -101,18 +101,16 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
 
       // Analizar cada orden para calcular tiempos por etapa
       const orderProcessingTimes = orders
-        .map((order) => {
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-          const created = new Date(order.created_at);
+        .map((order: Record<string, unknown>) => {
+          const created = new Date(order.created_at as string);
           let processingTime = 0;
           let bottleneckStage = null;
 
           // Calcular tiempos por etapa
-          const stages = [];
+          const stages: { name: string; duration: number; timestamp: string }[] = [];
 
           // Tiempo hasta procesamiento (usamos created_at como inicio si no hay más)
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-          const processingTimeFallback = order.shipped_at || order.updated_at;
+          const processingTimeFallback = (order.shipped_at as string) || (order.updated_at as string);
           if (processingTimeFallback) {
             const processing = new Date(processingTimeFallback);
             const timeToProcessing =
@@ -127,17 +125,14 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
           }
 
           // Tiempo hasta envío
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           if (order.shipped_at) {
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-            const shipped = new Date(order.shipped_at);
+            const shipped = new Date(order.shipped_at as string);
             const timeToShipping =
               (shipped.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
             stages.push({
               name: "Producción/Preparación",
               duration: timeToShipping,
-              // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-              timestamp: order.shipped_at,
+              timestamp: order.shipped_at as string,
             });
             processingTime = timeToShipping; // Update cumulative processing time
 
@@ -145,23 +140,18 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
           }
 
           // Tiempo hasta entrega
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           if (order.delivered_at) {
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-            const delivered = new Date(order.delivered_at);
+            const delivered = new Date(order.delivered_at as string);
             const timeToDelivery =
               (delivered.getTime() -
-                // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
                 (order.shipped_at
-                  ? // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-                    new Date(order.shipped_at).getTime()
+                  ? new Date(order.shipped_at as string).getTime()
                   : created.getTime())) /
               (1000 * 60 * 60 * 24);
             stages.push({
               name: "Envío/Entrega",
               duration: timeToDelivery,
-              // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-              timestamp: order.delivered_at,
+              timestamp: order.delivered_at as string,
             });
             processingTime =
               (delivered.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
@@ -170,10 +160,8 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
           }
 
           // Tiempo hasta completación Final
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
           if (order.status === "completed") {
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-            const completed = new Date(order.updated_at);
+            const completed = new Date(order.updated_at as string);
             const timeToCompletion =
               (completed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
             stages.push({
@@ -182,8 +170,7 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
                 timeToCompletion > processingTime
                   ? timeToCompletion - processingTime
                   : 0.1,
-              // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-              timestamp: order.updated_at,
+              timestamp: order.updated_at as string,
             });
 
             if (timeToCompletion > processingTime + 1 && processingTime > 0)
@@ -193,19 +180,14 @@ export const analyzeBusinessFlowTool: ToolDefinition = {
           }
 
           return {
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
             orderNumber: order.order_number,
             totalProcessingTime: processingTime,
             stages,
             bottleneckStage,
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
             status: order.status,
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
             paymentStatus: order.payment_status,
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
             totalAmount: order.total_amount,
-            // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-            itemCount: order.order_items?.length || 0,
+            itemCount: (order.order_items as unknown[])?.length || 0,
           };
         })
         .filter((order) => order.totalProcessingTime > 0);

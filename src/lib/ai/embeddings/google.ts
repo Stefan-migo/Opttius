@@ -78,9 +78,10 @@ export class GoogleEmbeddingProvider implements EmbeddingProvider {
         tokenCount: undefined, // Google doesn't return token count for embeddings
       };
     } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : "";
       if (
-        error.message?.includes("429") ||
-        error.message?.includes("Too Many Requests")
+        errMsg.includes("429") ||
+        errMsg.includes("Too Many Requests")
       ) {
         throw new Error("Google Embeddings: Rate limit exceeded");
       }
@@ -132,7 +133,7 @@ export class GoogleEmbeddingProvider implements EmbeddingProvider {
       }
 
       const embeddings: EmbeddingResult[] = data.embeddings.map(
-        (emb: unknown) => ({
+        (emb: { values: number[]; dimensions?: number }) => ({
           vector: emb.values,
           dimensions: emb.values.length,
           provider: this.name,
@@ -144,9 +145,10 @@ export class GoogleEmbeddingProvider implements EmbeddingProvider {
         provider: this.name,
       };
     } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : "";
       if (
-        error.message?.includes("429") ||
-        error.message?.includes("Too Many Requests")
+        errMsg.includes("429") ||
+        errMsg.includes("Too Many Requests")
       ) {
         throw new Error("Google Embeddings: Rate limit exceeded");
       }

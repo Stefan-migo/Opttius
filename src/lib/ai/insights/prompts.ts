@@ -55,11 +55,11 @@ export function getSectionPrompt(
   additionalContext?: Record<string, unknown>,
 ): string {
   const sectionPrompts: Record<InsightSection, string> = {
-    dashboard: getDashboardPrompt(organizationName, data, additionalContext),
-    inventory: getInventoryPrompt(organizationName, data, additionalContext),
-    clients: getClientsPrompt(organizationName, data, additionalContext),
-    pos: getPOSPrompt(organizationName, data, additionalContext),
-    analytics: getAnalyticsPrompt(organizationName, data, additionalContext),
+    dashboard: getDashboardPrompt(organizationName, data as Parameters<typeof getDashboardPrompt>[1], additionalContext),
+    inventory: getInventoryPrompt(organizationName, data as Parameters<typeof getInventoryPrompt>[1], additionalContext),
+    clients: getClientsPrompt(organizationName, data as Parameters<typeof getClientsPrompt>[1], additionalContext),
+    pos: getPOSPrompt(organizationName, data as Parameters<typeof getPOSPrompt>[1], additionalContext),
+    analytics: getAnalyticsPrompt(organizationName, data as Parameters<typeof getAnalyticsPrompt>[1], additionalContext),
   };
 
   return `${BASE_INSTRUCTIONS}\n\n${sectionPrompts[section]}`;
@@ -80,8 +80,8 @@ export function getDailySummaryPrompt(
   dateStr: string,
   additionalContext?: Record<string, unknown>,
 ): string {
-  const organizationAge = additionalContext?.organizationAge || 0;
-  const totalOrders = additionalContext?.totalOrders || 0;
+  const organizationAge = (additionalContext?.organizationAge as number) || 0;
+  const totalOrders = (additionalContext?.totalOrders as number) || 0;
 
   return `
 Eres el Gerente General de la óptica "${organizationName}".
@@ -123,24 +123,26 @@ function getDashboardPrompt(
   additionalContext?: Record<string, unknown>,
 ): string {
   // Detectar estado de la óptica
-  const isNewOrganization = additionalContext?.isNewOrganization || false;
+  const isNewOrganization = (additionalContext?.isNewOrganization as boolean) || false;
   const hasData =
     (data.yesterdaySales !== undefined && data.yesterdaySales !== null) ||
     (data.monthlyAverage !== undefined && data.monthlyAverage !== null) ||
     (data.overdueWorkOrders !== undefined && data.overdueWorkOrders > 0) ||
     (data.pendingQuotes !== undefined && data.pendingQuotes > 0);
-  const organizationAge = additionalContext?.organizationAge || 0; // días desde creación
-  const totalCustomers = additionalContext?.totalCustomers || 0;
-  const totalProducts = additionalContext?.totalProducts || 0;
-  const totalOrders = additionalContext?.totalOrders || 0;
+  const organizationAge = (additionalContext?.organizationAge as number) || 0; // días desde creación
+  const totalCustomers = (additionalContext?.totalCustomers as number) || 0;
+  const totalProducts = (additionalContext?.totalProducts as number) || 0;
+  const totalOrders = (additionalContext?.totalOrders as number) || 0;
 
   // Determinar fase de la óptica
   let organizationPhase = "new";
-  if (organizationAge > 90 && totalOrders > 50) {
+  const orgAge = (additionalContext?.organizationAge as number) || 0;
+  const totalOrd = (additionalContext?.totalOrders as number) || 0;
+  if (orgAge > 90 && totalOrd > 50) {
     organizationPhase = "established";
-  } else if (organizationAge > 30 && totalOrders > 10) {
+  } else if (orgAge > 30 && totalOrd > 10) {
     organizationPhase = "growing";
-  } else if (organizationAge > 7 || totalOrders > 0) {
+  } else if (orgAge > 7 || totalOrd > 0) {
     organizationPhase = "starting";
   }
 

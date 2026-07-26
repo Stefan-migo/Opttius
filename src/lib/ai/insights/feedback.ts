@@ -63,6 +63,6 @@ export class InsightFeedbackSystem {
 
     // Basic personalization: Filter out stale high-priority insights if they haven't been acted on?
     // For now, simply return the fetched insights.
-    return data || [];
+    return (data as DatabaseInsight[]) || [];
   }
 }

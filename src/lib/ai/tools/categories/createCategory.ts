@@ -94,7 +94,7 @@ export const createCategoryTool: ToolDefinition = {
         // organization_id: organizationId,
       };
 
-      const { data, error }: unknown = await supabase
+      const { data, error } = await supabase
         .from("categories")
         .insert([categoryData])
         .select()

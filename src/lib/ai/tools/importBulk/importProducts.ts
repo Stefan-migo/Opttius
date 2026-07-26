@@ -42,11 +42,11 @@ export async function executeProductImport(
         }
       }
 
-      const name = mapped.name || mapped.nombre || "Producto";
-      const price = parseFloat(mapped.price || mapped.precio || "0") || 0;
+      const name = (mapped.name as string) || (mapped.nombre as string) || "Producto";
+      const price = parseFloat((mapped.price as string) || (mapped.precio as string) || "0") || 0;
 
       const slug =
-        (name as string)
+        name
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
@@ -55,6 +55,7 @@ export async function executeProductImport(
 
       const { data: insertedProduct, error } = await supabase
         .from("products")
+        // @ts-expect-error — Supabase insert shape is dynamic for bulk import
         .insert({
           organization_id: organizationId,
           branch_id: branchId || null,
@@ -65,7 +66,7 @@ export async function executeProductImport(
           slug,
           status: "draft",
           inventory_quantity:
-            parseInt(mapped.inventory_quantity || "0", 10) || 0,
+            parseInt((mapped.inventory_quantity as string) || "0", 10) || 0,
         })
         .select("id")
         .single();
@@ -75,7 +76,7 @@ export async function executeProductImport(
       } else {
         imported++;
         // Create product_branch_stock when branch is specified
-        const qty = parseInt(mapped.inventory_quantity || "0", 10) || 0;
+        const qty = parseInt((mapped.inventory_quantity as string) || "0", 10) || 0;
         if (branchId && insertedProduct?.id) {
           const now = new Date().toISOString();
           await supabase.from("product_branch_stock").upsert(
@@ -95,7 +96,7 @@ export async function executeProductImport(
     } catch (e: unknown) {
       failed.push({
         row: i + 2,
-        error: e?.message || "Validation error",
+        error: e instanceof Error ? e.message : "Validation error",
       });
     }
   }

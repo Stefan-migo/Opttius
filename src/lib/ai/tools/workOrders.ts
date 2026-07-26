@@ -132,7 +132,6 @@ export const workOrderTools: ToolDefinition[] = [
             .eq("organization_id", organizationId);
           branchIdsToFilter =
             orgBranches
-              // @ts-expect-error — SupabaseClient<unknown>, orgBranches type is dynamic
               ?.map((b) => b.id) || [];
         }
 
@@ -294,7 +293,6 @@ export const workOrderTools: ToolDefinition[] = [
         return {
           success: true,
           data,
-          // @ts-expect-error: Supabase query returns dynamic shape
           message: `Orden de trabajo ${data.work_order_number}`,
         };
       } catch (error: unknown) {

@@ -43,7 +43,7 @@ export const saveMemoryTool: ToolDefinition = {
       // Vendedor: read-only for memory writes
       if (
         userData?.role === "vendedor" ||
-        (context as Record<string, unknown>).role === "vendedor"
+        (context as unknown as Record<string, unknown>).role === "vendedor"
       ) {
         return {
           success: false,

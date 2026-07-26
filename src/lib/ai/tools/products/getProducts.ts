@@ -131,7 +131,7 @@ export const getProductsTool: ToolDefinition = {
     } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to get products",
+        error: error instanceof Error ? error.message : "Failed to get products",
       };
     }
   },

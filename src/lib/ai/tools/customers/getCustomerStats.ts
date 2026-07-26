@@ -42,12 +42,10 @@ export const getCustomerStatsTool: ToolDefinition = {
 
       const paidOrders =
         orders?.filter(
-          // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-          (o) => o.payment_status === "paid" || o.status === "completed",
+          (o: Record<string, unknown>) => o.payment_status === "paid" || o.status === "completed",
         ) || [];
       const totalSpent = paidOrders.reduce(
-        // @ts-expect-error — SupabaseClient<unknown>, paidOrders type is dynamic
-        (sum, o) => sum + (o.total_amount || 0),
+        (sum: number, o: Record<string, unknown>) => sum + ((o.total_amount as number) || 0),
         0,
       );
       const orderCount = orders?.length || 0;
@@ -60,11 +58,9 @@ export const getCustomerStatsTool: ToolDefinition = {
         lastOrderDate:
           orders && orders.length > 0
             ? orders.sort(
-                // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
-                (a, b) =>
-                  new Date(b.created_at).getTime() -
-                  new Date(a.created_at).getTime(),
-                // @ts-expect-error — SupabaseClient<unknown>, orders type is dynamic
+                (a: Record<string, unknown>, b: Record<string, unknown>) =>
+                  new Date(b.created_at as string).getTime() -
+                  new Date(a.created_at as string).getTime(),
               )[0].created_at
             : null,
       };

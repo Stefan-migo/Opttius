@@ -99,7 +99,6 @@ export const getTicketByIdTool: ToolDefinition = {
           ticket,
           messages: messages || [],
         },
-        // @ts-expect-error: Supabase query returns dynamic shape
         message: `Ticket ${ticket.ticket_number} obtenido`,
       };
     } catch (error: unknown) {

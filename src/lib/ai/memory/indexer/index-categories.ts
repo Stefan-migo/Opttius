@@ -80,7 +80,7 @@ export async function indexCategories(
         result.indexed += indexed;
       } catch (err: unknown) {
         result.failed = records.length;
-        result.errors.push(`Indexing failed: ${err.message}`);
+        result.errors.push(`Indexing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
     }
 
@@ -88,8 +88,8 @@ export async function indexCategories(
       `Categories indexed: ${result.indexed}/${result.totalRecords}`,
     );
     return result;
-  } catch (error: unknown) {
-    result.errors.push(`Indexing failed: ${error.message}`);
-    return result;
-  }
+    } catch (error: unknown) {
+      result.errors.push(`Indexing failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      return result;
+    }
 }

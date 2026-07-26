@@ -69,7 +69,6 @@ export const deleteCategoryTool: ToolDefinition = {
 
       return {
         success: true,
-        // @ts-expect-error: Supabase query returns dynamic shape
         message: `Category "${category.name}" deleted successfully`,
       };
     } catch (error: unknown) {

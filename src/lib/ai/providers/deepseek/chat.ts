@@ -300,10 +300,7 @@ export async function* streamText(
               ) {
                 const argValue = tc.function.arguments;
                 appLogger.info(
-                  "DeepSeek raw arguments value:",
-                  JSON.stringify(argValue),
-                  "type:",
-                  typeof argValue,
+                  `DeepSeek raw arguments value: ${JSON.stringify(argValue)} type: ${typeof argValue}`,
                 );
 
                 if (typeof argValue === "string") {
