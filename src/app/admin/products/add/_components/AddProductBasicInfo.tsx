@@ -65,7 +65,7 @@ export function AddProductBasicInfo({
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(productTypes as unknown[]).map((type: unknown) => (
+                  {(productTypes as Array<{ value: string; label: string }>).map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
                     </SelectItem>
@@ -85,7 +85,7 @@ export function AddProductBasicInfo({
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(categories as unknown[]).map((category: unknown) => (
+                  {(categories as Array<{ id: string; name: string }>).map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
                     </SelectItem>

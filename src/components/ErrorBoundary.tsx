@@ -18,7 +18,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   // Log error to logger
   React.useEffect(() => {
     const errorObj = error instanceof Error ? error : new Error(String(error));
-    logger.error("Error Boundary caught an error", errorObj as unknown, {
+    logger.error("Error Boundary caught an error", errorObj, {
       errorBoundary: true,
       timestamp: new Date().toISOString(),
     });
@@ -95,7 +95,7 @@ export function ErrorBoundary({ children }: { children: React.ReactNode }) {
         // Additional error logging
         const errorObj =
           error instanceof Error ? error : new Error(String(error));
-        logger.error("Error Boundary onError", errorObj as unknown, {
+        logger.error("Error Boundary onError", errorObj, {
           componentStack: errorInfo.componentStack,
           errorBoundary: true,
         });

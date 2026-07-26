@@ -101,9 +101,9 @@ export function LensMatrixTable({
                   {matrix.cylinder_min} a {matrix.cylinder_max}
                 </TableCell>
                 <TableCell>
-                  {(matrix as unknown).addition_min !== null &&
-                  (matrix as unknown).addition_min !== undefined
-                    ? `${(matrix as unknown).addition_min} a ${(matrix as unknown).addition_max || "4.0"}`
+                  {matrix.addition_min !== null &&
+                  matrix.addition_min !== undefined
+                    ? `${matrix.addition_min} a ${matrix.addition_max || "4.0"}`
                     : "0.00 a 0.00"}
                 </TableCell>
                 <TableCell>{formatCurrency(matrix.base_price)}</TableCell>

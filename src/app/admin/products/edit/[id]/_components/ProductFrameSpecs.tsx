@@ -82,7 +82,7 @@ export function ProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar tipo" />
               </SelectTrigger>
               <SelectContent>
-                {(frameTypes as unknown[]).map((type: unknown) => (
+                {(frameTypes as Array<{ value: string; label: string }>).map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
                   </SelectItem>
@@ -102,7 +102,7 @@ export function ProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar material" />
               </SelectTrigger>
               <SelectContent>
-                {(frameMaterials as unknown[]).map((material: unknown) => (
+                {(frameMaterials as Array<{ value: string; label: string }>).map((material) => (
                   <SelectItem key={material.value} value={material.value}>
                     {material.label}
                   </SelectItem>
@@ -122,7 +122,7 @@ export function ProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar forma" />
               </SelectTrigger>
               <SelectContent>
-                {(frameShapes as unknown[]).map((shape: unknown) => (
+                {(frameShapes as Array<{ value: string; label: string }>).map((shape) => (
                   <SelectItem key={shape.value} value={shape.value}>
                     {shape.label}
                   </SelectItem>
@@ -142,7 +142,7 @@ export function ProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar género" />
               </SelectTrigger>
               <SelectContent>
-                {(frameGenders as unknown[]).map((gender: unknown) => (
+                {(frameGenders as Array<{ value: string; label: string }>).map((gender) => (
                   <SelectItem key={gender.value} value={gender.value}>
                     {gender.label}
                   </SelectItem>
@@ -162,7 +162,7 @@ export function ProductFrameSpecs({
                 <SelectValue placeholder="Seleccionar tamaño" />
               </SelectTrigger>
               <SelectContent>
-                {(frameSizes as unknown[]).map((size: unknown) => (
+                {(frameSizes as Array<{ value: string; label: string }>).map((size) => (
                   <SelectItem key={size.value} value={size.value}>
                     {size.label}
                   </SelectItem>

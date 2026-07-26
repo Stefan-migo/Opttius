@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Send } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -49,8 +49,7 @@ export function CreateTicketDialog({
     formState: { errors },
     reset,
   } = useForm<TicketForm>({
-    // ponytail: cast to any — pre-existing type mismatch in zodResolver output vs form type
-    resolver: zodResolver(createSaasSupportTicketSchema) as unknown,
+    resolver: zodResolver(createSaasSupportTicketSchema) as Resolver,
     defaultValues: {
       priority: "medium",
       category: "technical",

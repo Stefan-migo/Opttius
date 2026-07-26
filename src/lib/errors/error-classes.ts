@@ -5,7 +5,8 @@ export class ApplicationError extends Error {
   constructor(message: string, options: { code: string; statusCode?: number; isOperational?: boolean; details?: Record<string, unknown>; cause?: Error }) {
     super(message);
     this.name = this.constructor.name; this.code = options.code; this.statusCode = options.statusCode || 500; this.isOperational = options.isOperational ?? true; this.details = options.details;
-    if (options.cause) (this as unknown).cause = options.cause;
+    // ponytail: Error.cause not in target lib, use Object.assign to avoid unknown cast
+    if (options.cause) Object.assign(this, { cause: options.cause });
     if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
   }
 }

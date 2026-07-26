@@ -212,7 +212,7 @@ export function SupportTicketForm({ onSuccess }: SupportTicketFormProps) {
                     <Select
                       value={category}
                       onValueChange={(value) =>
-                        setValue("category", value as unknown)
+                        setValue("category", value)
                       }
                     >
                       <SelectTrigger
@@ -244,7 +244,7 @@ export function SupportTicketForm({ onSuccess }: SupportTicketFormProps) {
                     <Select
                       value={priority}
                       onValueChange={(value) =>
-                        setValue("priority", value as unknown)
+                        setValue("priority", value)
                       }
                     >
                       <SelectTrigger

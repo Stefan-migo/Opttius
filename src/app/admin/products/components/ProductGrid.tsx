@@ -87,8 +87,8 @@ function ProductGridComponent({
             p.total_low_stock_threshold ?? p.low_stock_threshold ?? 5;
           const isLowStock = stockQuantity <= threshold;
           const hasImage =
-            (product as unknown).featured_image ||
-            (product as unknown).gallery?.[0];
+            product.featured_image ||
+            product.gallery?.[0];
 
           return (
             <Card
@@ -123,8 +123,8 @@ function ProductGridComponent({
                     alt={product.name || product.title || "Producto"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                     src={
-                      (product as unknown).featured_image ||
-                      (product as unknown).gallery[0]
+                      (product.featured_image as string) ||
+                      product.gallery?.[0]
                     }
                   />
                 ) : (

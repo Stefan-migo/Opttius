@@ -75,7 +75,7 @@ export function LensMatrixFormDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {families
-                    .filter((f) => (f as unknown).is_active !== false)
+                    .filter((f) => (f as LensFamily).is_active !== false)
                     .map((family) => (
                       <SelectItem key={family.id} value={family.id}>
                         {family.name} {family.brand && `(${family.brand})`}

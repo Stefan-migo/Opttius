@@ -170,7 +170,7 @@ export default function ServiceCard({
           </div>
 
           {/* Title */}
-          <Link href={`/servicios/${id}` as unknown}>
+          <Link href={`/servicios/${id}`}>
             <h3 className="text-xl font-semibold text-azul-profundo line-clamp-2 hover:text-azul-profundo/80 transition-colors">
               {title}
             </h3>
@@ -242,7 +242,7 @@ export default function ServiceCard({
               className="flex-1 border-azul-profundo text-azul-profundo hover:bg-azul-profundo hover:text-white"
               variant="outline"
             >
-              <Link href={`/servicios/${id}` as unknown}>Más Info</Link>
+              <Link href={`/servicios/${id}`}>Más Info</Link>
             </Button>
             <Button
               className="flex-1 bg-dorado hover:bg-dorado/90 text-azul-profundo font-semibold"

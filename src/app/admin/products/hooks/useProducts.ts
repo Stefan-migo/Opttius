@@ -30,6 +30,8 @@ export interface Product {
   barcode?: string;
   product_type?: string; // frame, lens, accessory, service, contact_lens
   contact_lens_family_id?: string; // FK to contact_lens_families
+  featured_image?: string;
+  gallery?: string[];
 }
 
 interface ProductsResponse {

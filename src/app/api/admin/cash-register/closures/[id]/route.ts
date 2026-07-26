@@ -224,9 +224,17 @@ export async function PUT(
       body.card_machine_debit_total !== undefined ||
       body.card_machine_credit_total !== undefined
     ) {
+      const c = existingClosure as {
+        opening_cash_amount?: number;
+        cash_sales?: number;
+        card_machine_debit_total?: number;
+        card_machine_credit_total?: number;
+        debit_card_sales?: number;
+        credit_card_sales?: number;
+      };
       const expectedCash =
-        Number((existingClosure as unknown).opening_cash_amount || 0) +
-        Number((existingClosure as unknown).cash_sales || 0);
+        Number(c.opening_cash_amount || 0) +
+        Number(c.cash_sales || 0);
       if (updateData.actual_cash !== undefined) {
         updateData.cash_difference =
           Number(updateData.actual_cash) - expectedCash;
@@ -241,19 +249,19 @@ export async function PUT(
           updateData.card_machine_debit_total !== undefined
             ? Number(updateData.card_machine_debit_total)
             : Number(
-                (existingClosure as unknown).card_machine_debit_total || 0,
+                c.card_machine_debit_total || 0,
               );
         const creditTotal =
           updateData.card_machine_credit_total !== undefined
             ? Number(updateData.card_machine_credit_total)
             : Number(
-                (existingClosure as unknown).card_machine_credit_total || 0,
+                c.card_machine_credit_total || 0,
               );
         const expectedDebit = Number(
-          (existingClosure as unknown).debit_card_sales || 0,
+          c.debit_card_sales || 0,
         );
         const expectedCredit = Number(
-          (existingClosure as unknown).credit_card_sales || 0,
+          c.credit_card_sales || 0,
         );
         updateData.card_machine_difference =
           debitTotal - expectedDebit + (creditTotal - expectedCredit);

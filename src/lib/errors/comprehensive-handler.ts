@@ -44,16 +44,27 @@ export function safeExecute<T>(fn: () => T, options?: { suppressLogs?: boolean; 
   }
 }
 
+interface PostgresErrorShape {
+  message?: string;
+  hint?: string;
+  details?: Record<string, unknown>;
+  code?: string;
+  constraint?: string;
+  column?: string;
+}
+
 export function handleDatabaseError(error: unknown, context: string, details?: Record<string, unknown>): DatabaseError {
-  return new DatabaseError(error.message || "Database operation failed", { context, hint: error.hint, details: error.details, ...details }, error);
+  const pgError = error as PostgresErrorShape;
+  return new DatabaseError(pgError.message || "Database operation failed", { context, hint: pgError.hint, details: pgError.details, ...details }, error instanceof Error ? error : undefined);
 }
 
 export function mapPostgresError(error: unknown): ApplicationError {
-  switch (error.code) {
-    case "23505": return new ConflictError("Resource already exists", { constraint: error.constraint });
-    case "23503": return new BusinessLogicError("Referenced resource does not exist", { constraint: error.constraint });
-    case "23502": return new ValidationError("Required field is missing", { column: error.column });
-    case "23514": return new ValidationError("Data validation failed", { constraint: error.constraint });
+  const pgError = error as PostgresErrorShape;
+  switch (pgError.code) {
+    case "23505": return new ConflictError("Resource already exists", { constraint: pgError.constraint });
+    case "23503": return new BusinessLogicError("Referenced resource does not exist", { constraint: pgError.constraint });
+    case "23502": return new ValidationError("Required field is missing", { column: pgError.column });
+    case "23514": return new ValidationError("Data validation failed", { constraint: pgError.constraint });
     default: return handleDatabaseError(error, "PostgreSQL operation");
   }
 }

@@ -153,7 +153,7 @@ export function withRateLimit(
 
     // Determine identifier: org header > IP
     const orgId = request.headers.get("x-organization-id");
-    const ip = getIPAddress(request as unknown as Request);
+    const ip = getIPAddress(request as Request);
     const identifier = orgId || ip;
     const windowMs = (config.windowMs as number) ?? 60_000;
     const keyPrefix = (config.keyPrefix as string) || "rl";

@@ -352,7 +352,7 @@ export function FormFieldActionsExtended({
           className="px-6 py-2 bg-admin-accent-primary text-[#1A2B23] rounded-lg hover:bg-admin-accent-secondary transition-all disabled:opacity-50 flex items-center gap-2 font-bold text-sm shadow-premium-sm"
           disabled={isSubmitting}
           type="button"
-          onClick={onSubmit as unknown}
+          onClick={() => onSubmit?.()}
         >
           {submitIcon}
           {isSubmitting ? submittingLabel : submitLabel}

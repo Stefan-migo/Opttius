@@ -4,6 +4,7 @@ export interface LensFamily {
   brand: string | null;
   lens_type: string;
   lens_material: string;
+  is_active?: boolean;
 }
 
 export interface LensPriceMatrix {
@@ -13,6 +14,8 @@ export interface LensPriceMatrix {
   sphere_max: number;
   cylinder_min: number;
   cylinder_max: number;
+  addition_min?: number;
+  addition_max?: number;
   base_price: number;
   sourcing_type: string;
   cost: number;

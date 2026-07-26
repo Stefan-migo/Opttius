@@ -32,8 +32,10 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
   const { productResults, searchingProducts, openProductSearch, setOpenProductSearch } = useProductSearch(productSearch);
   useClickOutside(setOpenCustomerSearch, setOpenProductSearch);
 
+  const getForm = () => form.getValues() as OrderFormData;
+
   const handleShippingChange = (field: string, value: string) => {
-    form.setValue("shipping", { ...form.getValues().shipping, [field]: value });
+    form.setValue("shipping", { ...getForm().shipping, [field]: value });
   };
 
   const loadCustomerData = (customer: Record<string, unknown>) => {
@@ -54,16 +56,16 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
   };
 
   const addProductToOrder = (product: Record<string, unknown>) => {
-    form.setValue("items", [...form.getValues().items, { product_id: product.id as string, product_name: product.name as string, quantity: 1, unit_price: product.price as number }]);
+    form.setValue("items", [...getForm().items, { product_id: product.id as string, product_name: product.name as string, quantity: 1, unit_price: product.price as number }]);
     setProductSearch("");
     setOpenProductSearch(false);
-    form.setFieldValues(calculateTotal(form.getValues().items));
+    form.setFieldValues(calculateTotal(getForm().items));
   };
 
-  const items = form.getValues().items;
+  const items = getForm().items;
   const addItem = () => form.setValue("items", [...items, { product_name: "", quantity: 1, unit_price: 0 }]);
-  const removeItem = (index: number) => { form.setValue("items", items.filter((_: unknown, i: number) => i !== index)); form.setFieldValues(calculateTotal(form.getValues().items)); };
-  const updateItem = (index: number, field: string, value: unknown) => { form.setValue("items", items.map((item: Record<string, unknown>, i: number) => i === index ? { ...item, [field]: value } : item)); form.setFieldValues(calculateTotal(form.getValues().items)); };
+  const removeItem = (index: number) => { form.setValue("items", items.filter((_, i: number) => i !== index)); form.setFieldValues(calculateTotal(getForm().items)); };
+  const updateItem = (index: number, field: string, value: unknown) => { form.setValue("items", items.map((item: Record<string, unknown>, i: number) => i === index ? { ...item, [field]: value } : item)); form.setFieldValues(calculateTotal(getForm().items)); };
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit}>

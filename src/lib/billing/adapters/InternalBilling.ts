@@ -30,10 +30,11 @@ export class InternalBilling implements BillingAdapter {
   async emitDocument(order: Order): Promise<BillingResult> {
     try {
       // Determine document type from order
+      const orderExt = order as Order & { sii_invoice_type?: string };
       const documentType =
-        (order as unknown).sii_invoice_type === "factura"
+        orderExt.sii_invoice_type === "factura"
           ? "factura"
-          : (order as unknown).sii_invoice_type === "boleta"
+          : orderExt.sii_invoice_type === "boleta"
             ? "boleta"
             : "internal_ticket";
 
@@ -58,7 +59,7 @@ export class InternalBilling implements BillingAdapter {
           folio: folio,
           order_id: order.id,
           branch_id: order.branch_id,
-          purchase_order_reference: (order as unknown).oc_number ?? null,
+          purchase_order_reference: order.oc_number ?? null,
           customer_id: order.customer_id || null,
           customer_name:
             order.customer?.first_name && order.customer?.last_name

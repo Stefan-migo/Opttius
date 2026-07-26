@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ export function CreateTicketDialog({
     watch,
     setValue,
   } = useForm<TicketForm>({
-    resolver: zodResolver(createOpticalInternalSupportTicketSchema) as unknown,
+    resolver: zodResolver(createOpticalInternalSupportTicketSchema) as Resolver,
     defaultValues: {
       priority: "medium",
       category: "other",

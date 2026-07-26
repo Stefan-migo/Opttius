@@ -120,8 +120,9 @@ export class SaasBackupService {
         durationSeconds: duration,
       };
     } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
       logger.error("Error crítico en SaaS Full Backup", {
-        error: error.message,
+        error: errMsg,
       });
 
       if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
@@ -132,7 +133,7 @@ export class SaasBackupService {
         fileName: "",
         sizeBytes: 0,
         durationSeconds: (Date.now() - startTime) / 1000,
-        error: error.message,
+        error: errMsg,
       };
     }
   }

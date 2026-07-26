@@ -19,7 +19,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to logger
-    logger.error("Global error page triggered", error as unknown, {
+    logger.error("Global error page triggered", error, {
       digest: error.digest,
       globalError: true,
       timestamp: new Date().toISOString(),

@@ -89,8 +89,8 @@ export default function TicketStatusActions({
 
   useEffect(() => {
     if (open) {
-      setUpdateValue("status", ticket.status as unknown);
-      setUpdateValue("priority", ticket.priority as unknown);
+      setUpdateValue("status", ticket.status);
+      setUpdateValue("priority", ticket.priority);
       setUpdateValue("assigned_to", ticket.assigned_to || undefined);
       setUpdateValue("resolution", ticket.resolution || undefined);
       setUpdateValue("resolution_notes", ticket.resolution_notes || undefined);
@@ -118,7 +118,7 @@ export default function TicketStatusActions({
       onOpenChange(false);
       resetUpdate();
       onTicketUpdated();
-    } catch (err) {
+    } catch (err: unknown) {
       toast.error(
         err instanceof Error ? err.message : "Error al actualizar ticket",
       );
@@ -146,7 +146,7 @@ export default function TicketStatusActions({
               <Select
                 value={watchUpdate("status") || ticket.status}
                 onValueChange={(value) =>
-                  setUpdateValue("status", value as unknown)
+                  setUpdateValue("status", value)
                 }
               >
                 <SelectTrigger
@@ -170,7 +170,7 @@ export default function TicketStatusActions({
               <Select
                 value={watchUpdate("priority") || ticket.priority}
                 onValueChange={(value) =>
-                  setUpdateValue("priority", value as unknown)
+                  setUpdateValue("priority", value)
                 }
               >
                 <SelectTrigger

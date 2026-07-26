@@ -127,13 +127,12 @@ export async function handleBusinessLookups(
   }
 
   // Lens family validation
-  const lensInfoRecord = lensInfo as unknown;
   let lensFamily: Record<string, unknown> | null = null;
-  if (lensInfoRecord.lens_family_id) {
+  if (lensInfo.lens_family_id) {
     const { data: family } = await supabase
       .from("lens_families")
       .select("id, name, lens_type, lens_material, is_active")
-      .eq("id", lensInfoRecord.lens_family_id as string)
+      .eq("id", lensInfo.lens_family_id as string)
       .single();
     if (!family) {
       return NextResponse.json({ error: "Familia de lentes no encontrada" }, { status: 400 }) as NextResponse;
@@ -142,20 +141,20 @@ export async function handleBusinessLookups(
     if (!lensFamily.is_active) {
       return NextResponse.json({ error: "La familia de lentes está desactivada" }, { status: 400 }) as NextResponse;
     }
-    if (lensInfoRecord.lens_type && lensInfoRecord.lens_type !== lensFamily.lens_type) {
-      lensInfoRecord.lens_type = lensFamily.lens_type;
+    if (lensInfo.lens_type && lensInfo.lens_type !== lensFamily.lens_type) {
+      lensInfo.lens_type = lensFamily.lens_type;
     }
-    if (lensInfoRecord.lens_material && lensInfoRecord.lens_material !== lensFamily.lens_material) {
-      lensInfoRecord.lens_material = lensFamily.lens_material;
+    if (lensInfo.lens_material && lensInfo.lens_material !== lensFamily.lens_material) {
+      lensInfo.lens_material = lensFamily.lens_material;
     }
   }
 
   // Prescription validation
-  if (lensInfoRecord.prescription_id) {
+  if (lensInfo.prescription_id) {
     const { data: prescription } = await supabase
       .from("prescriptions")
       .select("id, customer_id, od_sphere, od_cylinder, os_sphere, os_cylinder")
-      .eq("id", lensInfoRecord.prescription_id as string)
+      .eq("id", lensInfo.prescription_id as string)
       .single();
     if (!prescription) {
       return NextResponse.json({ error: "Receta no encontrada" }, { status: 400 }) as NextResponse;
@@ -168,7 +167,7 @@ export async function handleBusinessLookups(
       ) as NextResponse;
     }
 
-    if (lensInfoRecord.lens_family_id) {
+    if (lensInfo.lens_family_id) {
       const sphere =
         Math.abs(prescRecord.od_sphere as number || 0) >=
         Math.abs(prescRecord.os_sphere as number || 0)
@@ -182,14 +181,14 @@ export async function handleBusinessLookups(
 
       const { data: priceMatrix } = await supabase.rpc(
         "calculate_lens_price",
-        { p_lens_family_id: lensInfoRecord.lens_family_id, p_sphere: sphere, p_cylinder: cylinder || 0 },
+        { p_lens_family_id: lensInfo.lens_family_id, p_sphere: sphere, p_cylinder: cylinder || 0 },
       );
-      if (priceMatrix && (priceMatrix as Array<unknown>).length > 0 && (lensInfoRecord.lens_cost as number) > 0) {
+      if (priceMatrix && (priceMatrix as Array<unknown>).length > 0 && (lensInfo.lens_cost as number) > 0) {
         const expectedPrice = (priceMatrix as Array<Record<string, unknown>>)[0].price as number;
-        const diff = Math.abs((lensInfoRecord.lens_cost as number) - expectedPrice);
+        const diff = Math.abs((lensInfo.lens_cost as number) - expectedPrice);
         if (diff > expectedPrice * 0.05) {
           const { appLogger } = await import("@/lib/logger");
-          appLogger.warn("Lens price differs significantly from matrix", { expected: expectedPrice, actual: lensInfoRecord.lens_cost });
+          appLogger.warn("Lens price differs significantly from matrix", { expected: expectedPrice, actual: lensInfo.lens_cost });
         }
       }
     }
@@ -266,7 +265,7 @@ export async function handleBusinessLookups(
     institutionalAmount,
     quote,
     lensFamily,
-    lensInfo: lensInfoRecord as Record<string, unknown>,
+    lensInfo: lensInfo as Record<string, unknown>,
     orderNumber,
     orderItems,
     customerName,

@@ -248,14 +248,15 @@ export class BackupService {
               .filter(Boolean);
         }
       } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
         logger.error(`Error en backup de tabla ${config.name}`, {
-          error: err.message,
+          error: errMsg,
           organizationId,
         });
         backupData.tables[config.name] = {
           data: [],
           record_count: 0,
-          error: err.message,
+          error: errMsg,
         };
       }
     }
@@ -335,10 +336,11 @@ export class BackupService {
         totalRestored += inserted;
         totalErrors += insertErrors;
       } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : String(e);
         logger.error(`Excepcion en restauracion de ${config.name}`, {
-          error: e.message,
+          error: errMsg,
         });
-        restoreResults[config.name] = { status: "error", message: e.message };
+        restoreResults[config.name] = { status: "error", message: errMsg };
         totalErrors++;
       }
     }
