@@ -52,7 +52,7 @@ export async function POST(
 
     // Fetch quote with branch access check
     const { data: quote, error: quoteError } = await applyBranchFilter(
-      supabaseServiceRole.from("quotes").select("*") as unknown,
+      supabaseServiceRole.from("quotes").select("*"),
     )
       .eq("id", id)
       .single();

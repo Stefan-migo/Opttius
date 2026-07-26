@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       const { data: createdFamily } = await supabase
         .from("lens_families")
         .select("*")
-        .eq("id", (familyId as unknown).id) // RPC returns object with id
+        .eq("id", familyId.id)
         .single();
 
       return createApiSuccessResponse(createdFamily, { statusCode: 201 });

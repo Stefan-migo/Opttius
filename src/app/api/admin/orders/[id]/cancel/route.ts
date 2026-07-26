@@ -247,7 +247,7 @@ export async function POST(
               credit_note_number: cnNumber,
               order_id: orderId,
               branch_id: order.branch_id,
-              organization_id: (branchRow as unknown)?.organization_id ?? null,
+              organization_id: branchRow?.organization_id ?? null,
               amount: refundAmount,
               reason,
               refund_method,

@@ -38,7 +38,7 @@ export async function resolveBranchContext(
       .select("branch_id")
       .eq("id", fieldOperationId)
       .single();
-    operativoBranchId = (fo as unknown)?.branch_id ?? null;
+    operativoBranchId = fo?.branch_id ?? null;
   }
 
   return { branchContext, orgBranchIds, fieldOperationId, operativoBranchId };

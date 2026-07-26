@@ -12,7 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await (withRateLimit(rateLimitConfigs.payment) as unknown)(
+    return await withRateLimit(rateLimitConfigs.payment)(
       request,
       async () => {
         const { id } = await params;

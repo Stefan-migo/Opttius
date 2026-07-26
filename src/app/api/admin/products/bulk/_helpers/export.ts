@@ -90,7 +90,7 @@ export async function handleExport(
 
     let query = supabase
       .from("products")
-      .select(selectFields as unknown) as Record<string, unknown>;
+      .select(selectFields) as Record<string, unknown>;
 
     if (branchId) {
       query = query.eq("product_branch_stock.branch_id", branchId);

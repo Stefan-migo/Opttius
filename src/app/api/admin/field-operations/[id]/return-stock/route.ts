@@ -103,7 +103,7 @@ export async function POST(
         return validationErrorResponse(err);
       }
       if (err && typeof err === "object" && "errors" in err) {
-        return validationErrorResponse(err as unknown as ValidationError);
+        return validationErrorResponse(err as ValidationError);
       }
       throw err;
     }

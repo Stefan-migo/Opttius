@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
+    return await withRateLimit(rateLimitConfigs.agreements)(
       request,
       async () => {
         const supabase = await createClient();
@@ -100,9 +100,9 @@ export async function POST(request: NextRequest) {
             if (
               balancesWithDetails &&
               balancesWithDetails.length > 0 &&
-              (balancesWithDetails[0] as unknown).agreement_id
+              balancesWithDetails[0].agreement_id
             ) {
-              const first = balancesWithDetails[0] as unknown;
+              const first = balancesWithDetails[0];
               const agreementId = first.agreement_id;
 
               const { data: agreement } = await supabase
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
                   agreement.branch_id ??
                   (first.orders?.branch_id as string | undefined);
                 if (branchId) {
-                  const dates = (balancesWithDetails as unknown[])
+                  const dates = (balancesWithDetails ?? [])
                     .map((b) => b.created_at)
                     .filter(Boolean);
                   const periodFrom = dates.length
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
                         .slice(0, 10)
                     : new Date().toISOString().slice(0, 10);
 
-                  const items = (balancesWithDetails as unknown[]).map((b) => ({
+                  const items = (balancesWithDetails ?? []).map((b) => ({
                     order_number: b.orders?.order_number ?? b.id,
                     oc_number: b.agreement_purchase_orders?.oc_number,
                     description: `Servicios ópticos - Orden ${b.orders?.order_number ?? b.id}`,

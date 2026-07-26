@@ -273,7 +273,7 @@ export default function TicketDetailContent() {
           open={showTemplateDialog}
           templates={templates}
           onOpenChange={setShowTemplateDialog}
-          onSelect={(template) => handleUseTemplate(template as unknown)}
+          onSelect={(template) => handleUseTemplate(template as Record<string, unknown>)}
         />
       </div>
     </div>

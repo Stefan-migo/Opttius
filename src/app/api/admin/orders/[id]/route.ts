@@ -263,7 +263,7 @@ export async function GET(
       .eq("id", user.id)
       .single();
 
-    const userOrganizationId = (adminUser as unknown)?.organization_id;
+    const userOrganizationId = adminUser?.organization_id;
 
     // Get order details
     let query = supabase

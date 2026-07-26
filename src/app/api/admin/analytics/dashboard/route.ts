@@ -26,8 +26,9 @@ export async function GET(request: NextRequest) {
     const { client: supabase, getUser } = await createClientFromRequest(request);
 
     // Auth check
-    const { data: { user } = {}, error: userError } = (await getUser()) as unknown;
-    if (userError || !user) {
+    const { data: userData, error: userError } = await getUser();
+    const user = userData?.user;
+    if (userError || !userData?.user) {
       return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
 

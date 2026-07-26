@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.pos) as unknown)(
+    return await withRateLimit(rateLimitConfigs.pos)(
       request,
       async () => {
         try {

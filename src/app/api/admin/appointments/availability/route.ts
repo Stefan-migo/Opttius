@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           timeSlot = slot.time_slot;
         } else if (slot.time_slot) {
           // If it's a TIME object, convert to string
-          const timeValue = slot.time_slot as unknown;
+          const timeValue = slot.time_slot;
           if (
             typeof timeValue === "object" &&
             timeValue !== null &&

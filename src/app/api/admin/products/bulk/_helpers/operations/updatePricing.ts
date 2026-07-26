@@ -62,5 +62,5 @@ export async function handleUpdatePricing(
   const priceResults = await Promise.all(priceUpdatePromises);
   return priceResults
     .map((result) => result.data?.[0])
-    .filter(Boolean) as unknown[];
+    .filter(Boolean);
 }

@@ -98,13 +98,13 @@ export default function CustomerEditPage() {
         email: customerData.email || "",
         phone: customerData.phone || "",
         rut: normalizedRut,
-        address_line_1: (customerData as unknown).address_line_1 || "",
-        address_line_2: (customerData as unknown).address_line_2 || "",
-        city: (customerData as unknown).city || "",
-        state: (customerData as unknown).state || "",
-        postal_code: (customerData as unknown).postal_code || "",
-        country: (customerData as unknown).country || "Chile",
-        notes: (customerData as unknown).notes || "",
+        address_line_1: customerData.address_line_1 || "",
+        address_line_2: customerData.address_line_2 || "",
+        city: customerData.city || "",
+        state: customerData.state || "",
+        postal_code: customerData.postal_code || "",
+        country: customerData.country || "Chile",
+        notes: (customerData as { notes?: string }).notes || "",
       };
 
       setCustomer(formData);

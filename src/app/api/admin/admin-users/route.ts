@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!currentAdmin) return NextResponse.json({ error: "Failed to verify user permissions" }, { status: 500 });
 
     const isRoot = currentAdmin.role === "root" || currentAdmin.role === "dev";
-    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: auth.user!.id }) as unknown;
+    const { data: isSuperAdmin } = await supabase.rpc("is_super_admin", { user_id: auth.user!.id });
     const { data: userOrgId } = await supabase.rpc("get_user_organization_id", { user_id: auth.user!.id });
     const effectiveOrgId = userOrgId || currentAdmin.organization_id;
 

@@ -41,7 +41,7 @@ export function NewCustomerForm({
             <CustomerPersonalInfoFields
               errors={errors}
               size="large"
-              values={values as unknown}
+              values={values as { first_name: string; last_name: string; email: string; phone: string; rut: string }}
               onRUTBlur={handleRUTBlur}
               onRUTChange={handleRUTChange}
               onValueChange={setValue}
@@ -61,7 +61,7 @@ export function NewCustomerForm({
             <CustomerAddressFields
               errors={errors}
               size="large"
-              values={values as unknown}
+              values={values as { address_line_1: string; address_line_2: string; city: string; state: string; postal_code: string; country: string }}
               onValueChange={setValue}
             />
           </CardContent>

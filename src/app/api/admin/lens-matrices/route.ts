@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ matrix }, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof ValidationError) {
-      return validationErrorResponse(error as unknown);
+      return validationErrorResponse(error);
     } else {
       logger.error("Error in lens matrices API POST", error);
       return NextResponse.json(

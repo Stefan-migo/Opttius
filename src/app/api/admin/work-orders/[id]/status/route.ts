@@ -228,7 +228,7 @@ export async function PUT(
               last_name?: string;
             } | null;
             const hasEmail =
-              customer?.email || (updatedWorkOrder as unknown).email;
+              customer?.email || (updatedWorkOrder as { email?: string }).email;
 
             if (hasEmail) {
               const { data: adminUser } = await supabase
@@ -245,7 +245,7 @@ export async function PUT(
                     `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||
                     "Cliente",
                   customer_email:
-                    customer?.email || (updatedWorkOrder as unknown).email,
+                    customer?.email || (updatedWorkOrder as { email?: string }).email,
                   work_order_number: updatedWorkOrder.work_order_number,
                 },
                 organizationId ?? undefined,

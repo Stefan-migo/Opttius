@@ -16,7 +16,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
-  return await (withRateLimit(rateLimitConfigs.search) as unknown)(
+  return await withRateLimit(rateLimitConfigs.search)(
     request,
     async () => {
       try {

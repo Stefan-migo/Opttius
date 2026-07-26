@@ -81,11 +81,11 @@ export async function GET(request: NextRequest) {
 
         insights = [...insights].sort((a, b) => {
           const aDaily =
-            (a.metadata as unknown)?.type === "daily_summary" &&
-            (a.metadata as unknown)?.date === yesterdayStr;
+            (a.metadata as { type?: string; date?: string })?.type === "daily_summary" &&
+            (a.metadata as { type?: string; date?: string })?.date === yesterdayStr;
           const bDaily =
-            (b.metadata as unknown)?.type === "daily_summary" &&
-            (b.metadata as unknown)?.date === yesterdayStr;
+            (b.metadata as { type?: string; date?: string })?.type === "daily_summary" &&
+            (b.metadata as { type?: string; date?: string })?.date === yesterdayStr;
           if (aDaily && !bDaily) return -1;
           if (!aDaily && bDaily) return 1;
           return 0;

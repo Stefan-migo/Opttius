@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
         ticket.subject,
         body.requester_email,
         Array.isArray(ticket.organization)
-          ? (ticket.organization[0] as unknown)?.name
-          : (ticket.organization as unknown)?.name,
+          ? (ticket.organization[0] as { name?: string })?.name
+          : (ticket.organization as { name?: string })?.name,
       );
     } catch (notifError) {
       logger.warn("Failed to create support notification", notifError);

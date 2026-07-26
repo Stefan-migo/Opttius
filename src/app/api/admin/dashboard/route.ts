@@ -65,13 +65,13 @@ export async function GET(request: NextRequest) {
       legacyScope(supabase.from("orders").select("order_items (product_name, total_price, quantity)").or("status.eq.completed,payment_status.eq.paid").gte("created_at", startOfLastMonth.toISOString())),
     ]);
 
-    const products = (productsResult as unknown)?.data || [];
-    const mvRows = (mvResult as unknown)?.data || [];
-    const customers = (customersResult as unknown)?.data || [];
-    const productBranchStock = (pbsResult as unknown)?.data || [];
-    const ordersLight = (ordersAggResult as unknown)?.data || [];
-    const quotesLight = (quotesAggResult as unknown)?.data || [];
-    const topProductsData = (topProductsResult as unknown)?.data || [];
+    const products = productsResult?.data ?? [];
+    const mvRows = mvResult?.data ?? [];
+    const customers = customersResult?.data ?? [];
+    const productBranchStock = pbsResult?.data ?? [];
+    const ordersLight = ordersAggResult?.data ?? [];
+    const quotesLight = quotesAggResult?.data ?? [];
+    const topProductsData = topProductsResult?.data ?? [];
 
     const activeProducts = products.filter((p: unknown) => p.status === "active");
     const productIds = new Set(activeProducts.map((p: unknown) => p.id));

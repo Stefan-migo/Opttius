@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
       branch_id: branchContext.branchId,
       customer_id: validatedBody.customer_id,
       prescription_id: validatedBody.prescription_id ?? null,
-      quote_id: (validatedBody as unknown).quote_id ?? null,
+      quote_id: validatedBody.quote_id ?? null,
       frame_product_id: validatedBody.frame_product_id ?? null,
       frame_name: validatedBody.frame_name.trim(),
       frame_brand: validatedBody.frame_brand ?? null,
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
       frame_size: validatedBody.frame_size ?? null,
       frame_sku: validatedBody.frame_sku ?? null,
       frame_serial_number:
-        (validatedBody as unknown).frame_serial_number ?? null,
+        validatedBody.frame_serial_number ?? null,
       lens_type: validatedBody.lens_type.trim(),
       lens_material: validatedBody.lens_material.trim(),
       lens_index: validatedBody.lens_index ?? null,

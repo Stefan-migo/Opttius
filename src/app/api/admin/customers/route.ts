@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID();
 
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
+    return await withRateLimit(rateLimitConfigs.modification)(
       request,
       async () => {
         try {

@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
         { count: "exact" },
       )
       .eq("organization_id", organizationId) // Solo tickets de su organización
-      .order((filters.sort_by || "created_at") as unknown, {
+      .order(filters.sort_by || "created_at", {
         ascending: filters.sort_order === "asc",
       });
 

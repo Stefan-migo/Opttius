@@ -58,6 +58,7 @@ export async function PUT(
       countries?: string[];
       states?: string[];
       cities?: string[];
+      postal_codes?: string[];
       is_active?: boolean;
       sort_order?: number;
     } = {
@@ -84,7 +85,7 @@ export async function PUT(
           ? [body.cities]
           : [];
     if (body.postal_codes !== undefined)
-      (updateData as unknown).postal_codes = Array.isArray(body.postal_codes)
+      updateData.postal_codes = Array.isArray(body.postal_codes)
         ? body.postal_codes
         : body.postal_codes
           ? [body.postal_codes]

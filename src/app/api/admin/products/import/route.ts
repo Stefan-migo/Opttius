@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       skipped: 0,
       errors: [...errors],
       warnings: [...warnings],
-      details: [] as unknown[],
+      details: [] as Array<Record<string, unknown>>,
     };
 
     for (const product of products) {

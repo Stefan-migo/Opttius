@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: isAdmin } = (await supabase.rpc("is_admin", {
+    const { data: isAdmin } = await supabase.rpc("is_admin", {
       user_id: user.id,
-    } as unknown)) as unknown;
+    });
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
@@ -53,9 +53,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: isAdmin } = (await supabase.rpc("is_admin", {
+    const { data: isAdmin } = await supabase.rpc("is_admin", {
       user_id: user.id,
-    } as unknown)) as unknown;
+    });
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }

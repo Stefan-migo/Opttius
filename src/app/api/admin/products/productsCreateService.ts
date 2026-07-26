@@ -21,7 +21,7 @@ export async function createProduct(
   organizationId: string,
 ): Promise<NextResponse> {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
+    return await withRateLimit(rateLimitConfigs.modification)(
       request,
       async () => {
         try {

@@ -71,7 +71,7 @@ export async function PUT(
     const { data: existingQuote, error: fetchError } = await applyBranchFilter(
       supabaseServiceRole
         .from("quotes")
-        .select("status, converted_to_work_order_id") as unknown,
+        .select("status, converted_to_work_order_id"),
     )
       .eq("id", id)
       .single();

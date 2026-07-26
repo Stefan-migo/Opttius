@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { data: adminRole } = await supabase.rpc("get_admin_role", { user_id: user.id }) as unknown;
+    const { data: adminRole } = await supabase.rpc("get_admin_role", { user_id: user.id });
     if (!["admin", "super_admin", "root", "dev"].includes(adminRole as string)) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     logger.info("Maintenance action requested", { action, userEmail: user.email });
 
     const { data: adminUser } = await supabase.from("admin_users").select("organization_id").eq("id", user.id).single();
-    const userOrganizationId = (adminUser as unknown)?.organization_id;
+    const userOrganizationId = adminUser?.organization_id;
     if (!userOrganizationId) return NextResponse.json({ error: "Organization not found for user" }, { status: 400 });
 
     switch (action) {

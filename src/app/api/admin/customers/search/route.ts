@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
   try {
-    return await (withRateLimit(rateLimitConfigs.search) as unknown)(request, async () => {
+    return await withRateLimit(rateLimitConfigs.search)(request, async () => {
       try {
         const { client: supabase, getUser } = await createClientFromRequest(request);
         const { data: userData } = await getUser();
@@ -60,16 +60,16 @@ export async function GET(request: NextRequest) {
             const formattedPattern = `%${formattedSearchTerm}%`;
 
             const queries: Promise<unknown>[] = [
-              buildFilteredCustomersQuery().or(`first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`).limit(20) as unknown,
-              buildFilteredCustomersQuery().ilike("email", searchPattern).limit(20) as unknown,
-              buildFilteredCustomersQuery().ilike("phone", searchPattern).limit(20) as unknown,
+              buildFilteredCustomersQuery().or(`first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`).limit(20),
+              buildFilteredCustomersQuery().ilike("email", searchPattern).limit(20),
+              buildFilteredCustomersQuery().ilike("phone", searchPattern).limit(20),
             ];
             if (isRutSearch) {
-              queries.push(buildFilteredCustomersQuery().ilike("rut", searchPattern).limit(20) as unknown);
-              queries.push(buildFilteredCustomersQuery().ilike("rut", normalizedPattern).limit(20) as unknown);
-              queries.push(buildFilteredCustomersQuery().ilike("rut", formattedPattern).limit(20) as unknown);
+              queries.push(buildFilteredCustomersQuery().ilike("rut", searchPattern).limit(20));
+              queries.push(buildFilteredCustomersQuery().ilike("rut", normalizedPattern).limit(20));
+              queries.push(buildFilteredCustomersQuery().ilike("rut", formattedPattern).limit(20));
             } else {
-              queries.push(buildFilteredCustomersQuery().ilike("rut", searchPattern).limit(20) as unknown);
+              queries.push(buildFilteredCustomersQuery().ilike("rut", searchPattern).limit(20));
             }
 
             const results = await Promise.all(queries);

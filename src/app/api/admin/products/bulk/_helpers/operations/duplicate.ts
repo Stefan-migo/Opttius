@@ -41,5 +41,5 @@ export async function handleDuplicate(
   const duplicateResults = await Promise.all(duplicatePromises);
   return duplicateResults
     .map((result) => result.data?.[0])
-    .filter(Boolean) as unknown[];
+    .filter(Boolean);
 }

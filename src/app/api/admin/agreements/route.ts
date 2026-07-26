@@ -20,14 +20,13 @@ import { appLogger as logger } from "@/lib/logger";
 import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { validateFeature } from "@/lib/saas/tier-validator";
 import { normalizeRUT } from "@/lib/utils/rut";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
+    return await withRateLimit(rateLimitConfigs.agreements)(
       request,
       async () => {
         const supabase = await createClient();
@@ -39,9 +38,9 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { data: isAdmin } = (await supabase.rpc("is_admin", {
+        const { data: isAdmin } = await supabase.rpc("is_admin", {
           user_id: user.id,
-        } as IsAdminParams)) as { data: IsAdminResult | null };
+        });
         if (!isAdmin) {
           return NextResponse.json(
             { error: "Admin access required" },
@@ -142,7 +141,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
+    return await withRateLimit(rateLimitConfigs.agreements)(
       request,
       async () => {
         const supabase = await createClient();
@@ -154,9 +153,9 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { data: isAdmin } = (await supabase.rpc("is_admin", {
+        const { data: isAdmin } = await supabase.rpc("is_admin", {
           user_id: user.id,
-        } as IsAdminParams)) as { data: IsAdminResult | null };
+        });
         if (!isAdmin) {
           return NextResponse.json(
             { error: "Admin access required" },

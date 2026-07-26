@@ -303,7 +303,7 @@ export default function BillingSettingsPage() {
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    default_document_type: e.target.value as unknown,
+                    default_document_type: e.target.value as "boleta" | "factura",
                   })
                 }
               >

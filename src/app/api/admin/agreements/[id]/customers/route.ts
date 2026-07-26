@@ -5,7 +5,6 @@ import {
   createPaginatedResponse,
  extractPaginationParams } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +25,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: isAdmin } = (await supabase.rpc("is_admin", {
+    const { data: isAdmin } = await supabase.rpc("is_admin", {
       user_id: user.id,
-    } as IsAdminParams)) as { data: IsAdminResult | null };
+    });
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Admin access required" },
@@ -76,7 +75,7 @@ export async function GET(
       if (countError) {
         logger.warn("agreement_customers query failed (table may not exist)", {
           error: countError,
-          code: (countError as unknown)?.code,
+          code: countError?.code,
         });
         return createPaginatedResponse([], { page, limit, total: 0 });
       }

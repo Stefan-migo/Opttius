@@ -162,6 +162,6 @@ export async function handleProductSubmit(
     return;
   }
 
-  await productService.createProduct(productData as unknown as CreateProductData);
+  await productService.createProduct(productData as CreateProductData);
   toast.success("Producto creado exitosamente");
 }

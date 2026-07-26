@@ -26,7 +26,7 @@ export async function handleDelete(
   if (deleteError) {
     throw deleteError;
   }
-  return (deletedProducts ?? []) as unknown[];
+  return deletedProducts ?? [];
 }
 
 export async function handleHardDelete(
@@ -134,7 +134,7 @@ export async function handleHardDelete(
       );
     }
 
-    return (hardDeletedProducts || productsToDelete || []) as unknown[];
+    return hardDeletedProducts || productsToDelete || [];
   } catch (hardDeleteErr) {
     logger.error("Hard delete operation failed", {
       error: hardDeleteErr,

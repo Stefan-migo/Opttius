@@ -156,5 +156,5 @@ export async function handleUpdateInventory(
   );
 
   const inventoryResults = await Promise.all(inventoryUpdatePromises);
-  return inventoryResults.filter(Boolean) as unknown[];
+  return inventoryResults.filter(Boolean);
 }

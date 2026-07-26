@@ -71,7 +71,7 @@ export async function handleUpdateCustomer(
 
     const { data: updatedCustomer, error: updateError } = await supabase
       .from("customers")
-      .update({ ...updateData, updated_by: context.userId } as unknown)
+      .update({ ...updateData, updated_by: context.userId })
       .eq("id", params.id)
       .select()
       .single();

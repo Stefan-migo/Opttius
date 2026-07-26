@@ -47,7 +47,7 @@ export async function createAndStreamAgent(supabase: SupabaseClient<Database>, u
   const toolCalls: unknown[] = [];
 
   const agent = await createAgent({
-    userId, provider: provider as unknown, model, sessionId: sessionId || undefined, organizationId, context,
+    userId, provider, model, sessionId: sessionId || undefined, organizationId, context,
     config: { ...baseConfig, systemPrompt: enhancedPrompt },
     currentBranchId, supabase,
     userData: { role: userData?.role, isSuperAdmin, name: userName },

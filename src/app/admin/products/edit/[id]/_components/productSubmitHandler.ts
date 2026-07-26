@@ -114,7 +114,7 @@ export async function handleSubmitProduct(
     // mismatch (string vs number fields). Using double cast to document intent.
     await productService.updateProduct(
       productId,
-      productData as unknown as UpdateProductData,
+      productData as UpdateProductData,
       currentBranchId || (isSuperAdmin ? "global" : undefined),
     );
 

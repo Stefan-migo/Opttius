@@ -7,7 +7,6 @@ import {
 } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
 const statusSchema = z.object({
@@ -21,7 +20,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
+    return await withRateLimit(rateLimitConfigs.agreements)(
       request,
       async () => {
         const { id } = await params;
@@ -34,9 +33,9 @@ export async function PATCH(
           return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { data: isAdmin } = (await supabase.rpc("is_admin", {
+        const { data: isAdmin } = await supabase.rpc("is_admin", {
           user_id: user.id,
-        } as IsAdminParams)) as { data: IsAdminResult | null };
+        });
         if (!isAdmin) {
           return NextResponse.json(
             { error: "Admin access required" },

@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
               credit_note_number: cnNumber,
               order_id,
               branch_id: branchId,
-              organization_id: (branchRow as unknown)?.organization_id ?? null,
+              organization_id: branchRow?.organization_id ?? null,
               amount: refundAmount,
               reason,
               refund_method: refund_method ?? "cash",

@@ -17,7 +17,7 @@ export async function handleCustomersAnalytics(
 ) {
   logger.info("Customers Analytics API called");
   const { client: rawClient, getUser } = await createClientFromRequest(request);
-  const supabase = rawClient as unknown;
+  const supabase = rawClient;
   const user = (await getUser()).data?.user as { id: string } | undefined;
   if (!user) throw new AuthenticationError("Unauthorized");
 

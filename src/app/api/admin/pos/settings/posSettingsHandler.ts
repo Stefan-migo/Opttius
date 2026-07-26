@@ -65,10 +65,7 @@ export async function withRateLimitWrapper(
   configName: "general" | "modification",
   handler: () => Promise<NextResponse>,
 ): Promise<NextResponse> {
-  return (await (withRateLimit(rateLimitConfigs[configName]) as unknown)(
-    request,
-    handler,
-  )) as NextResponse;
+  return withRateLimit(rateLimitConfigs[configName])(request, handler);
 }
 
 export function getMergedValue(

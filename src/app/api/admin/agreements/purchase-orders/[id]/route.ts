@@ -22,7 +22,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
+    return await withRateLimit(rateLimitConfigs.agreements)(
       request,
       async () => {
         const { id: purchaseOrderId } = await params;

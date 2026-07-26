@@ -28,7 +28,7 @@ const billingSettingsSchema = z.object({
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.general) as unknown)(
+    return await withRateLimit(rateLimitConfigs.general)(
       request,
       async () => {
         const supabase = await createClient();
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
+    return await withRateLimit(rateLimitConfigs.modification)(
       request,
       async () => {
         const supabase = await createClient();

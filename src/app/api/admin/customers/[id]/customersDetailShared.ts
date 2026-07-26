@@ -56,7 +56,7 @@ export async function authenticateAndGetContext(
   const branchContext = await getBranchContext(
     request,
     user.id,
-    supabase as unknown,
+    supabase,
   );
 
   return {
