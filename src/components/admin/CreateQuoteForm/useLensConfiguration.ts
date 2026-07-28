@@ -10,6 +10,7 @@ import {
   contactLensMatrixService,
   lensFamilyService,
 } from "@/lib/api/services";
+import type { Prescription } from "@/lib/api/services/customerTypes";
 import { appLogger } from '@/lib/logger';
 import {
   getCylinder,
@@ -23,7 +24,6 @@ import {
 
 import { MATERIAL_INDICES } from "./CreateQuoteForm.constants";
 import type { QuoteFormData } from "./CreateQuoteForm.types";
-import type { Prescription } from "@/lib/api/services/customerTypes";
 
 export function useLensConfiguration(
   selectedPrescription: Prescription | null,

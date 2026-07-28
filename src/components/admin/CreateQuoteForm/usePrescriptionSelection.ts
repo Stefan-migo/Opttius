@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
-import { appLogger } from '@/lib/logger';
 import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
+import { appLogger } from '@/lib/logger';
 
 export function usePrescriptionSelection(
   selectedCustomer: Customer | null,

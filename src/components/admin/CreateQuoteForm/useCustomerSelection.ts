@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { customerService } from "@/lib/api/services";
-import { appLogger } from '@/lib/logger';
 import type { Customer } from "@/lib/api/services/customerTypes";
+import { appLogger } from '@/lib/logger';
 
 export function useCustomerSelection(
   effectiveBranchId: string | undefined,

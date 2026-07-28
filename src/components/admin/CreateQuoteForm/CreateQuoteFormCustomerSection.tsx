@@ -27,12 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
 import {
   getMaxAddition,
   hasAddition,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
-import type { Customer, Prescription } from "@/lib/api/services/customerTypes";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
 
 export interface CreateQuoteFormCustomerSectionProps {
