@@ -110,7 +110,7 @@ export async function POST(
           branch_id: quote.branch_id,
           organization_id: quote.organization_id || null,
           frame_product_id: quote.frame_product_id || null,
-          frame_name: quote.frame_name,
+          frame_name: quote.frame_name || "Marco",
           frame_brand: quote.frame_brand,
           frame_model: quote.frame_model,
           frame_color: quote.frame_color,
@@ -118,9 +118,12 @@ export async function POST(
           frame_sku: quote.frame_sku,
           customer_own_frame: quote.customer_own_frame ?? false,
           lens_family_id: quote.lens_family_id || null,
-          lens_type: quote.lens_type,
+          lens_type:
+            quote.lens_type === "Lentes de contacto"
+              ? "single_vision"
+              : quote.lens_type || "single_vision",
           lens_sourcing_type: quote.lens_sourcing_type || "surfaced",
-          lens_material: quote.lens_material,
+          lens_material: quote.lens_material || "cr39",
           lens_index: quote.lens_index,
           lens_treatments: quote.lens_treatments || [],
           lens_tint_color: quote.lens_tint_color,
