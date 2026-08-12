@@ -152,6 +152,9 @@ export async function handleProductStock(
   }
 
   // Super admin global view: create stock for all org branches
+  // ponytail: this branch is now unreachable via product create — the route 400s for
+  // global super admins without a branch (customersCreateService mirror). Keep until
+  // the org-wide contract is revisited or the branch is removed.
   if (!productBranchId && branchContext.isSuperAdmin) {
     const svc = createServiceRoleClient();
     const { data: orgBranches } = await svc.from("branches").select("id").eq("organization_id", organizationId);

@@ -18,7 +18,7 @@ import { buildProductPayload, handleProductStock } from "./productsCreateHelpers
 export async function createProduct(
   request: NextRequest,
   supabase: SupabaseClient,
-  organizationId: string,
+  fallbackOrganizationId: string,
 ): Promise<NextResponse> {
   try {
     return await withRateLimit(rateLimitConfigs.modification)(
@@ -117,6 +117,24 @@ export async function createProduct(
           const productBranchId =
             validatedBody.branch_id || branchContext.branchId || null;
 
+          // Super admin in global view must specify a branch — otherwise the product
+          // would land in the admin's org instead of the branch's org (mirror
+          // customersCreateService.ts:145-152).
+          if (
+            branchContext.isGlobalView &&
+            branchContext.isSuperAdmin &&
+            !productBranchId
+          ) {
+            return NextResponse.json(
+              {
+                error:
+                  "Como super administrador en vista global, debe especificar la sucursal para el producto",
+                field: "branch_id",
+              },
+              { status: 400 },
+            );
+          }
+
           // Validate branch_id is provided (required for product creation, except for super admins)
           if (!productBranchId && !branchContext.isSuperAdmin) {
             logger.warn(
@@ -148,12 +166,25 @@ export async function createProduct(
             }
           }
 
+          // Resolve org from the effective branch first, falling back to the admin's org
+          let resolvedOrg = fallbackOrganizationId;
+          if (productBranchId) {
+            const { data: branch } = await supabase
+              .from("branches")
+              .select("organization_id")
+              .eq("id", productBranchId)
+              .single();
+            resolvedOrg =
+              (branch as { organization_id: string } | null)?.organization_id ??
+              fallbackOrganizationId;
+          }
+
           // Validar límite de productos del tier
           const { validateTierLimit } = await import(
             "@/lib/saas/tier-validator"
           );
           const productLimit = await validateTierLimit(
-            organizationId,
+            resolvedOrg,
             "products",
           );
           if (!productLimit.allowed) {
@@ -194,7 +225,7 @@ export async function createProduct(
           const { data: existingSlug } = await supabase.from("products").select("id").eq("slug", productSlug).limit(1);
           if (existingSlug && existingSlug.length > 0) productSlug = `${productSlug}-${Date.now()}`;
 
-          const filteredProductData = buildProductPayload(validatedBody, body as Record<string, unknown>, productBranchId, organizationId, productSlug);
+          const filteredProductData = buildProductPayload(validatedBody, body as Record<string, unknown>, productBranchId, resolvedOrg, productSlug);
 
           logger.debug("Prepared product data (sample)", {
             name: filteredProductData.name,
@@ -259,7 +290,7 @@ export async function createProduct(
           const createdProduct = data[0];
 
           // Handle stock creation
-          await handleProductStock(createdProduct, body as Record<string, unknown>, productBranchId, branchContext, organizationId);
+          await handleProductStock(createdProduct, body as Record<string, unknown>, productBranchId, branchContext, resolvedOrg);
 
           logger.info("Product created successfully", {
             productId: createdProduct?.id,
