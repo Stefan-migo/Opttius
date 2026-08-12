@@ -27,6 +27,10 @@ test.describe("Quote → Work Order → POS Lifecycle", () => {
   test("API create quote -> convert -> advance status -> UI verify on cash-register", async ({
     page,
   }) => {
+    // Cold dev-server on-demand route compile can exceed the 30s default
+    // testTimeout before the 90s assertion timeouts below ever fire; give the
+    // test a 180s ceiling so the 90s waits are actually reachable.
+    test.setTimeout(180_000);
     const timestamp = Date.now();
     const frameName = `E2E QuoteWO Frame ${timestamp}`;
 
@@ -122,11 +126,17 @@ test.describe("Quote → Work Order → POS Lifecycle", () => {
       `Convert should succeed (${convertRes.status()})`,
     ).toBeTruthy();
     const convertBody: Record<string, unknown> = await convertRes.json();
-    const workOrder = convertBody.workOrder as Record<string, unknown> | undefined;
+    const workOrder = convertBody.workOrder as
+      | Record<string, unknown>
+      | undefined;
     const workOrderId: string | undefined = workOrder?.id as string | undefined;
-    const workOrderNumber: string | undefined =
-      workOrder?.work_order_number as string | undefined;
-    expect(workOrderNumber, "Convert should return work_order_number").toBeDefined();
+    const workOrderNumber: string | undefined = workOrder?.work_order_number as
+      | string
+      | undefined;
+    expect(
+      workOrderNumber,
+      "Convert should return work_order_number",
+    ).toBeDefined();
     if (!workOrderId || !workOrderNumber) {
       throw new Error("Convert succeeded but missing work order id/number");
     }

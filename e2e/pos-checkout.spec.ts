@@ -23,6 +23,10 @@ test.describe("POS Checkout", () => {
   test("API create product → process sale → UI verify order on cash-register", async ({
     page,
   }) => {
+    // Cold dev-server on-demand route compile can exceed the 30s default
+    // testTimeout before the 90s assertion timeouts below ever fire; give the
+    // test a 180s ceiling so the 90s waits are actually reachable.
+    test.setTimeout(180_000);
     const timestamp = Date.now();
     const productName = `E2E Frame ${timestamp}`;
     const customerName = `E2E Cliente ${timestamp}`;

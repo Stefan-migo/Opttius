@@ -28,6 +28,9 @@ function getAdminCredentials() {
 }
 
 setup("authenticate admin", async ({ page }) => {
+  // Cold first load (session splash + on-demand /login compile) can exceed the
+  // 30s default testTimeout; the 90s waitForURL below must be able to fire.
+  setup.setTimeout(180_000);
   const { email, password } = getAdminCredentials();
 
   await page.goto("/login");
