@@ -3068,7 +3068,8 @@ BEGIN
       quantity,
       unit_price,
       total_price,
-      sku
+      sku,
+      organization_id
     ) VALUES (
       v_order_id,
       v_product_id,
@@ -3076,7 +3077,8 @@ BEGIN
       (v_item->>'quantity')::int,
       (v_item->>'unit_price')::decimal,
       (v_item->>'total_price')::decimal,
-      v_item->>'sku'
+      v_item->>'sku',
+      (v_order->>'organization_id')::uuid
     );
   END LOOP;
 
@@ -3090,7 +3092,8 @@ BEGIN
       pos_session_id,
       payment_reference,
       created_by,
-      notes
+      notes,
+      organization_id
     ) VALUES (
       v_order_id,
       (v_payment->>'amount')::decimal,
@@ -3098,7 +3101,8 @@ BEGIN
       v_pos_session_id,
       v_payment->>'payment_reference',
       p_user_id,
-      v_payment->>'notes'
+      v_payment->>'notes',
+      (v_order->>'organization_id')::uuid
     );
   END LOOP;
 
