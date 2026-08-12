@@ -22,6 +22,8 @@ Skill para tareas de testing manual y automatizado del sistema SaaS multi-tenant
 
 - **Guía completa:** `docs/TESTING_GUIDE.md`
 - **Plan de implementación:** `docs/PLAN_TESTING_IMPLEMENTATION.md`
+- **Roadmap E2E Playwright:** `docs/07-testing/PLAYWRIGHT_E2E_ROADMAP.md`
+- **Guía E2E:** `docs/07-testing/E2E_TESTING.md`
 - **Checklists por módulo:**
   - `docs/ADMIN_USERS_TEST_CHECKLIST.md`
   - `docs/PAYMENT_WORKFLOW_TEST_CHECKLIST.md`
@@ -60,13 +62,54 @@ Registro → /onboarding/choice → Probar Demo | Crear Org
 
 ### Ubicación y comandos
 
-| Tipo        | Ruta                             | Comando                    |
-| ----------- | -------------------------------- | -------------------------- |
-| Unit        | `src/__tests__/unit/`            | `npm run test:unit`        |
-| Integration | `src/__tests__/integration/`     | `npm run test:integration` |
-| API         | `src/__tests__/integration/api/` | `npm run test:api`         |
-| Security    | `src/__tests__/security/`        | `npm run test:security`    |
-| E2E         | (pendiente) `src/__tests__/e2e/` | `npm run test:e2e`         |
+| Tipo        | Ruta                                         | Comando                    |
+| ----------- | -------------------------------------------- | -------------------------- |
+| Unit        | `src/__tests__/unit/`                        | `npm run test:unit`        |
+| Integration | `src/__tests__/integration/`                 | `npm run test:integration` |
+| API         | `src/__tests__/integration/api/`             | `npm run test:api`         |
+| Security    | `src/__tests__/security/`                    | `npm run test:security`    |
+| E2E         | `e2e/` (Playwright, NO `src/__tests__/e2e/`) | `npm run test:e2e`         |
+
+**Proyectos Playwright** (`playwright.config.ts`): `setup` (genera storage state admin), `public` (auth + onboarding, sin login), `admin` (resto, depende de setup). Workers=1, solo Chromium.
+
+```bash
+npx playwright test --project=setup      # regenera .playwright/.auth/admin.json
+npx playwright test --project=public     # auth + onboarding (sin credenciales)
+npx playwright test --project=admin      # suite autenticada (depende de setup)
+npx playwright test e2e/auth.spec.ts     # un archivo
+npx playwright test --grep "POS"         # por nombre
+npx playwright test --ui                 # UI interactiva para debug
+```
+
+### E2E Playwright — Data Contract (MANDATORY)
+
+Opttius NO ejecuta E2E contra datos de desarrollo ni producción. Toda corrida arranca de un estado conocido:
+
+1. **Organización E2E dedicada** con admin fijo: credenciales canónicas `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` en `.env.e2e` (no commitear). Los tests NUNCA dependen de `DEMO_ADMIN_*` ni de la sesión del dev.
+2. **Storage state generado**: `global.setup.ts` hace login por UI y escribe `.playwright/.auth/admin.json`. Nunca commitear ni editar a mano.
+3. **Seed/fixture determinístico**: crear datos base con nombres únicos por corrida; no asumir registros existentes.
+4. **Base URL**: `127.0.0.1`/`localhost` local (auto-start del dev server); `PLAYWRIGHT_BASE_URL` explícito para preview/remote.
+
+### Arquitectura de capas E2E
+
+Los specs se construyen en capas apilables. Cada capa debe estar estable antes de crecer; NUNCA saltarse capas:
+
+| Capa                    | Qué cubre                                                                         | Proyecto | Archivo(s)                                                  |
+| ----------------------- | --------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------- |
+| **0. Auth**             | login válido → `/onboarding/choice` → `/admin`; login inválido muestra error      | public   | `e2e/auth.spec.ts`                                          |
+| **1. Data contract**    | org/admin/seed determinísticos (infra, no test)                                   | setup    | `e2e/global.setup.ts`                                       |
+| **2. Public smoke**     | login page carga, `/onboarding/choice` → login si no auth, landing CTA o redirect | public   | `e2e/onboarding.spec.ts`                                    |
+| **3. Navigation smoke** | rutas de `src/config/admin-navigation.ts` cargan sin console/page errors          | admin    | `admin-navigation.spec.ts`                                  |
+| **4. Workflows**        | flujos de negocio con asserts de resultados y estado persistido                   | admin    | `pos-checkout.spec.ts`, `quote-workorder-pos.spec.ts`, etc. |
+| **5+ (futuro)**         | citas, inventario, convenios, pagos, cross-browser, CI                            | admin    | por módulo                                                  |
+
+**Regla clave**: cada sección nueva agrega su **Capa 4** workflow reutilizando la MISMA Capa 1 (misma org E2E, mismo admin, mismo seed). No se crea un Data Contract por módulo.
+
+**Rutas admin reales** (fuente: `src/config/admin-navigation.ts`): `/admin`, `/admin/pos`, `/admin/work-orders`, `/admin/appointments`, `/admin/quotes`, `/admin/customers`, `/admin/products`, `/admin/products/bulk` (import, NO `/admin/products/import`), `/admin/prescriptions`, `/admin/analytics`, `/admin/support`, `/admin/system`, `/admin/admin-users`.
+
+**Contrato de login real**: `/login` → `router.replace("/onboarding/choice")` → si tiene org redirige a `/admin`, si no muestra opciones (demo/crear). Un test que asuma redirect directo a `/admin` está mal modelado.
+
+**Reglas de asserts**: verificar resultados de negocio visibles y estado persistido (totales, estados, identificadores), NO solo URL o ausencia de error. Waits por estado/locator, nunca sleeps arbitrarios.
 
 ### Validación desde backup
 

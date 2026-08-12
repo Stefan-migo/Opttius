@@ -2,6 +2,18 @@
 
 Sistema de agentes para el proyecto Opttius — SaaS multi-tenant para ópticas.
 
+## Regla Global: Graphify Obligatorio (MANDATORY)
+
+Opttius es un proyecto grande (~4,800 nodos en el grafo de conocimiento). El grafo de graphify es la **fuente de verdad estructural** para el análisis. Reglas obligatorias para TODOS los agentes (Opttius, Build, @subagentes, sdd-\*):
+
+1. **Al inicio de sesión/contexto**: leer `graphify-out/GRAPH_REPORT.md` (god nodes, comunidades, conexiones sorprendentes) antes de explorar código.
+2. **Antes de cualquier búsqueda amplia** (grep/glob que toque 4+ archivos, preguntas cross-module): consultar el grafo primero con `graphify query "<pregunta estructural>"` o `graphify path "<A>" "<B>"`.
+3. **Antes de editar código**: correr el graph check del paso 1 del 5-Step Gate.
+4. **Fallback**: si `graphify-out/graph.json` está desactualizado o ausente, correr `graphify --update` (incremental) o rebuild, y avisar en una línea. Si el CLI no está disponible, usar la travesía inline de `graphify-out/graph.json`. NUNCA saltearse el graph check en silencio.
+5. **El grafo es un mapa, no una base de datos**: para contenido exacto de una función, leer el archivo real.
+
+Actualizar el grafo con `graphify --update` después de cambios estructurales significativos.
+
 ## Agentes Principales (Primary)
 
 Cambiá entre ellos con **TAB**:
