@@ -76,8 +76,8 @@ users.md
 # Local AI runtime state
 .atl/
 
-# Graphify cache (auto-generated, repo-agnostic)
-graphify-out/cache/
+# Graphify output (auto-generated knowledge graph)
+/graphify-out/
 
 # Dev/temp scratch files
 test-debug.ts
