@@ -1,3 +1,7 @@
+/* eslint-disable max-lines */
+// ponytail: 318 counted lines vs the 300 max-lines ceiling (skipBlankLines +
+// skipComments). Extract validation or stock-handling helpers into
+// productsCreateHelpers.ts when this file grows further, then drop this directive.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
