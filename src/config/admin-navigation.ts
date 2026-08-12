@@ -115,7 +115,7 @@ export function createNavigationGroups(
           description: "Catálogo e inventario",
         },
         {
-          href: "/admin/products/import",
+          href: "/admin/products/bulk",
           label: "Importar",
           icon: Upload,
           description: "Importar productos desde archivo",

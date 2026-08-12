@@ -11,7 +11,7 @@
  *
  * To run: npm run test:e2e
  */
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const TEST_EMAIL = process.env.E2E_TEST_EMAIL || process.env.DEMO_ADMIN_EMAIL;
 const TEST_PASSWORD =
@@ -54,7 +54,12 @@ test.describe("Import Wizard 4-step flow", () => {
    * when the user uploads a CSV, reviews mapping, cleans data, and clicks import,
    * then products are created and a success toast is shown.
    */
-  test("full 4-step wizard import completes successfully", async ({ page }) => {
+  test.skip("full 4-step wizard import completes successfully", async ({
+    page,
+  }) => {
+    // SKIPPED: el wizard de 4 pasos (ImportStepUpload/Map/Clean/Review) fue reemplazado por
+    // el sistema Bulk en /admin/products/bulk (BulkOperationForm + ImportProductsDialog).
+    // Ruta /admin/products/import NO existe. Reescribir contra bulk antes de activar.
     await page.goto("/admin/products/import");
     await expect(page).toHaveURL(/\/admin\/products\/import/);
 
@@ -109,7 +114,10 @@ test.describe("Import Wizard 4-step flow", () => {
    * The test simulates a no-branch state by navigating to the wizard
    * without a branch cookie/localStorage, or by checking the guard.
    */
-  test("wizard blocks import without branch selection", async ({ page }) => {
+  test.skip("wizard blocks import without branch selection", async ({
+    page,
+  }) => {
+    // SKIPPED: mismo motivo — wizard de 4 pasos eliminado; ver sistema Bulk.
     // Clear branch-related localStorage to simulate no-branch state
     await page.goto("/admin/products/import");
     await page.evaluate(() => {
@@ -154,7 +162,8 @@ test.describe("Import Wizard 4-step flow", () => {
    * when the user progresses through all 4 steps,
    * then each step renders correctly.
    */
-  test("wizard supports step navigation through all 4 steps", async ({
+  test.skip("wizard supports step navigation through all 4 steps", async ({
+    // SKIPPED: mismo motivo — wizard de 4 pasos eliminado; ver sistema Bulk.
     page,
   }) => {
     await page.goto("/admin/products/import");

@@ -19,8 +19,14 @@ import { expect, test } from "@playwright/test";
 test.describe("Agent Bubble (requires auth)", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to admin dashboard — bubble should be present
+    // Timeout alto: primera compilación de /admin en dev es lenta (Next.js + Windows)
     await page.goto("/admin");
-    await page.waitForURL(/\/admin/, { timeout: 15000 });
+    await page.waitForURL(/\/admin(?:\/|$)/, { timeout: 60_000 });
+    await expect(page.getByText(/consultando credenciales/i))
+      .toBeHidden({
+        timeout: 30_000,
+      })
+      .catch(() => {});
   });
 
   test("collapsed bubble is visible on admin page", async ({ page }) => {

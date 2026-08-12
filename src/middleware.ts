@@ -64,9 +64,11 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const isProduction = process.env.NODE_ENV === "production";
 
-  // Apply CSP headers to a NextResponse for HTML routes
+  // Apply CSP headers to a NextResponse for HTML routes.
+  // ponytail: dev only — CSP would block React Fast Refresh (needs eval).
+  // Next.js docs: only apply CSP in production; dev uses inline scripts.
   function applyCsp(resp: NextResponse): NextResponse {
-    if (isHtmlRoute) {
+    if (isHtmlRoute && isProduction) {
       resp.headers.set(
         "Content-Security-Policy",
         buildCspPolicy(nonce, isProduction, supabaseUrl),

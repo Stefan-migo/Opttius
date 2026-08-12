@@ -6,7 +6,7 @@
  * For tests with auth: Create user via scripts/create-demo-super-admin.js
  * and set E2E_TEST_EMAIL, E2E_TEST_PASSWORD in .env.e2e
  */
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Onboarding", () => {
   test("login page loads and has sign in form", async ({ page }) => {
@@ -14,7 +14,7 @@ test.describe("Onboarding", () => {
     await expect(page).toHaveTitle(/opttius|login|iniciar/i);
     await expect(page.getByLabel(/credencial|email/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /sincronizar|acceso/i }),
+      page.getByRole("button", { name: /Acceder|Iniciar sesión/i }),
     ).toBeVisible();
   });
 
@@ -28,15 +28,18 @@ test.describe("Onboarding", () => {
   test("home/landing loads", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\//);
-    // Should show landing or redirect to login
-    const hasLogin = await page
-      .getByRole("link", { name: /iniciar|login|entrar/i })
+    // Landing pública (sin sesión): muestra CTA de demo o redirige a login.
+    // "Solicitar Demo" aparece en el header y en el hero → usar .first() para evitar strict mode.
+    const hasDemo = await page
+      .getByRole("button", { name: /solicitar demo/i })
+      .first()
       .isVisible()
       .catch(() => false);
-    const hasSignUp = await page
-      .getByRole("link", { name: /registr|sign up/i })
+    const hasExplore = await page
+      .getByRole("button", { name: /explorar la plataforma/i })
+      .first()
       .isVisible()
       .catch(() => false);
-    expect(hasLogin || hasSignUp || page.url().includes("login")).toBeTruthy();
+    expect(hasDemo || hasExplore || page.url().includes("login")).toBeTruthy();
   });
 });
