@@ -15,14 +15,12 @@ const TEST_EMAIL = process.env.E2E_TEST_EMAIL || process.env.DEMO_ADMIN_EMAIL;
 test.describe("POS Checkout", () => {
   test.skip(!TEST_EMAIL, "E2E_TEST_EMAIL and E2E_TEST_PASSWORD not set");
 
-  // SKIPPED: bugs reales de la app destapados por este test:
-  // 1. POST /api/admin/products deriva organization_id equivocada para super admin
-  //    global (crea en 00000000-...-000000000001 en vez de la org del usuario).
-  // 2. process_pos_sale RPC no propagaba organization_id a order_items/order_payments
-  //    (FIXED en DB viva + migración 20260701).
-  // 3. product_branch_stock queda en 0 porque update_product_stock falla para la org derivada.
-  // Fix de la app pendiente (SDD).
-  test.skip("API create product → process sale → UI verify order on cash-register", async ({
+  // FIXED (SDD change fix-e2e-revealed-bugs): POST /api/admin/products now derives
+  // organization_id from the effective branch (branches.organization_id) instead of
+  // the admin's org, so product + product_branch_stock land in the branch's org and
+  // the sale stock decrement resolves. process_pos_sale org propagation was fixed
+  // previously (migración 20260701).
+  test("API create product → process sale → UI verify order on cash-register", async ({
     page,
   }) => {
     const timestamp = Date.now();
@@ -67,6 +65,8 @@ test.describe("POS Checkout", () => {
         product_type: "frame",
         status: "active",
         stock_quantity: 10,
+        // Super admin en vista global debe especificar sucursal (Casa Matriz demo)
+        branch_id: "96823c54-347c-4dc9-9abd-51e2c8863618",
       },
     });
     expect(productRes.ok(), "Product creation should succeed").toBeTruthy();
@@ -121,37 +121,55 @@ test.describe("POS Checkout", () => {
       );
     }
 
-    // ── Step 3: UI — Navigate to cash-register page ──────────────────────
-    await page.goto("/admin/cash-register");
-    await page.waitForLoadState("networkidle");
-
-    // ── Step 4: UI — Switch to Ventas / Órdenes tab ──────────────────────
-    await page.getByRole("tab", { name: /ventas|ordenes/i }).click();
-    // Allow time for orders to load via the useCashRegister hook
-    await page.waitForTimeout(2000);
-
-    // ── Step 5: Verify ────────────────────────────────────────────────────
-    if (saleSucceeded && saleOrderNumber) {
-      // Verify unique order number appears in the orders table
-      await expect(
-        page.getByRole("cell", { name: saleOrderNumber, exact: true }),
-      ).toBeVisible({ timeout: 8000 });
-
-      // Verify customer name in the order
-      await expect(
-        page.getByRole("cell", {
-          name: new RegExp(customerName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
-        }),
-      ).toBeVisible({ timeout: 5000 });
-
-      // Verify the total (formatted as $10.000 in es-CL locale)
-      await expect(page.getByText(/10\.000/)).toBeVisible({ timeout: 5000 });
-    } else {
-      // Sale may have failed due to missing Supabase RPCs or db state.
-      // Still verify the page renders correctly and the orders tab is usable.
-      await expect(
-        page.getByRole("heading", { name: /ventas|ordenes/i }),
-      ).toBeVisible({ timeout: 8000 });
+    // Hard assert — the sale must succeed and return an order number
+    // (regression guard for bug 1: product + stock in the branch's org).
+    expect(
+      saleSucceeded,
+      `Sale should succeed (HTTP ${saleRes.status()})`,
+    ).toBeTruthy();
+    if (!saleOrderNumber) {
+      throw new Error("Sale succeeded but returned no order_number");
     }
+
+    // ── Step 3: UI — Navigate to cash-register with the sale branch scoped ──
+    // The E2E admin belongs to another org, so its global view is org-scoped and
+    // the demo branch (96823c54) is not in its selectable branch list. Scope the
+    // orders fetch to the sale branch — exactly what a session of an admin of that
+    // branch would send — so the rendering below verifies the order as that admin
+    // would see it. The API asserts above are the unfiltered regression guard.
+    await page.route("**/api/admin/orders**", async (route) => {
+      const response = await route.fetch({
+        headers: {
+          ...route.request().headers(),
+          "x-branch-id": "96823c54-347c-4dc9-9abd-51e2c8863618",
+        },
+      });
+      await route.fulfill({ response });
+    });
+    await page.goto("/admin/cash-register");
+    // Dev-server rendering can take 30s+ (session splash + on-demand route compile
+    // + orders fetch). Wait for the tabs first, then assert the order row with a
+    // generous timeout; the API asserts above already proved the order exists.
+    await expect(
+      page.getByRole("tab", { name: /ventas|ordenes/i }),
+    ).toBeVisible({ timeout: 90000 });
+    await page.getByRole("tab", { name: /ventas|ordenes/i }).click();
+    await expect(
+      page.getByRole("cell", { name: saleOrderNumber, exact: true }),
+    ).toBeVisible({ timeout: 90000 });
+
+    // Verify customer name in the order
+    await expect(
+      page.getByRole("cell", {
+        name: new RegExp(customerName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      }),
+    ).toBeVisible({ timeout: 15000 });
+
+    // Verify the total (formatted as $10.000 in es-CL locale), scoped to the
+    // order's row — other E2E runs leave $10.000 orders in today's list too.
+    const orderRow = page.getByRole("row", {
+      name: new RegExp(saleOrderNumber),
+    });
+    await expect(orderRow.getByText(/10\.000/)).toBeVisible({ timeout: 15000 });
   });
 });
