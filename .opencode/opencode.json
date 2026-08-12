@@ -185,6 +185,20 @@
     "engram": {
       "command": ["engram", "mcp", "--tools=agent"],
       "type": "local"
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest",
+        "--browser",
+        "msedge",
+        "--cdp-endpoint",
+        "http://127.0.0.1:9222"
+      ],
+      "enabled": true,
+      "timeout": 30000
     }
   },
   "permission": {
