@@ -27,6 +27,7 @@ test.describe("Auth (requires credentials)", () => {
   );
 
   test("login with valid credentials reaches admin area", async ({ page }) => {
+    test.setTimeout(180_000);
     await page.goto("/login");
     await page.locator("#email").fill(TEST_EMAIL!);
     await page.locator("#password").fill(TEST_PASSWORD!);

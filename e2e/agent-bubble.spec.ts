@@ -17,6 +17,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Agent Bubble (requires auth)", () => {
+  test.setTimeout(180_000);
   test.beforeEach(async ({ page }) => {
     // Navigate to admin dashboard — bubble should be present
     // Timeout alto: primera compilación de /admin en dev es lenta (Next.js + Windows)
@@ -31,9 +32,10 @@ test.describe("Agent Bubble (requires auth)", () => {
 
   test("collapsed bubble is visible on admin page", async ({ page }) => {
     // The floating button should be visible (collapsed state)
+    // Timeout alto: el bubble monta después de la compilación fría de /admin
     await expect(
       page.getByRole("button", { name: /abrir agente/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 30_000 });
   });
 
   test("click collapsed bubble → repose state with greeting", async ({
