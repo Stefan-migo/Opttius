@@ -1,20 +1,20 @@
-# 📚 Documentación Opttius - Índice Maestro
+# 📚 Documentación Opttius — Índice Maestro
 
-> **Última actualización:** 2026-03-28
-> **Versión:** 5.0 - Reorganización + Notion Integration
-> **Source of Truth:** [Notion Workspace](https://notion.so/opttius)
+> **Última actualización:** 2026-09-05
+> **Source of truth del repo:** README raíz + este índice + `docs/`
+> **Estado:** Proyecto activo — SaaS multi-tenant para ópticas (Next.js 14 + Supabase)
 
 ---
 
 ## 🎯 Navegación Rápida
 
-| Necesitas...                      | Ve a...                                                                 |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| Entender el proyecto en 5 minutos | [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md)                              |
-| Empezar a desarrollar             | [`SETUP_GUIDE.md`](../SETUP_GUIDE.md)                                   |
-| Revisar estado de features        | [Notion - Feature Tracking](https://notion.so/opttius/feature-tracking) |
-| Revisar bugs y tareas             | [Notion - Sprint Board](https://notion.so/opttius/sprint-board)         |
-| Ver documentación dinámica        | [Notion - Docs Base](https://notion.so/opttius/docs-base)               |
+| Necesitas...                      | Ve a...                                                                          |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| Entender el proyecto en 5 minutos | [`01-getting-started/PROJECT_SUMMARY.md`](01-getting-started/PROJECT_SUMMARY.md) |
+| Empezar a desarrollar             | [`01-getting-started/SETUP_GUIDE.md`](01-getting-started/SETUP_GUIDE.md)         |
+| Stack, módulos y puesta en marcha | [`../README.md`](../README.md) (README raíz)                                     |
+| Convención de migraciones de DB   | [`database/MIGRATION_CONVENTION.md`](database/MIGRATION_CONVENTION.md)           |
+| CI/CD                             | [`../docs/CI-CD.md`](../docs/CI-CD.md)                                           |
 
 ---
 
@@ -22,251 +22,120 @@
 
 ```
 docs/
-├── README.md                          ← Este archivo (Índice Maestro)
-├── PROJECT_SUMMARY.md                ← Resumen ejecutivo del proyecto
-├── SETUP_GUIDE.md                    ← Guía de configuración (en raíz)
-│
-├── 01-getting-started/                ← 🚀 Inicio Rápido
-│   ├── README.md
-│   ├── QUICK_START.md
-│   ├── ENVIRONMENT.md
-│   └── TROUBLESHOOTING.md
-│
-├── 02-architecture/                 ← 🏗️ Arquitectura
-│   ├── README.md
-│   ├── SYSTEM_OVERVIEW.md
-│   ├── DATA_MODEL.md
-│   ├── API_SPEC.md
-│   └── SECURITY.md
-│
-├── 03-modules/                      ← 📦 Módulos del Sistema
-│   ├── README.md
-│   ├── crm/
-│   ├── appointments/
-│   ├── quotes/
-│   ├── pos/
-│   ├── inventory/
-│   ├── work-orders/
-│   ├── payments/
-│   ├── ai/
-│   ├── whatsapp/
-│   ├── agreements/
-│   ├── support/
-│   └── analytics/
-│
-├── 04-integration/                  ← 🔌 Integraciones
-│   ├── README.md
-│   ├── SUPABASE.md
-│   ├── NOTION.md
-│   ├── PAYMENT_GATEWAYS.md
-│   └── AI_PROVIDERS.md
-│
-├── 05-devops/                       ← 🛠️ DevOps
-│   ├── README.md
-│   ├── DEPLOYMENT.md
-│   ├── CI_CD.md
-│   └── MONITORING.md
-│
-├── 06-design/                      ← 🎨 Design System
-│   ├── README.md
-│   ├── EPOCH_DESIGN.md
-│   ├── COMPONENTS.md
-│   └── RESPONSIVE.md
-│
-├── 07-testing/                      ← 🧪 Testing
-│   ├── README.md
-│   ├── E2E_TESTS.md
-│   ├── UNIT_TESTS.md
-│   └── CHECKLISTS/
-│
-├── 08-user-guide/                   ← 👤 Guías de Usuario
-│   ├── README.md
-│   └── flujos/
-│
-├── 09-marketing/                   ← 📢 Marketing
-│   ├── README.md
-│   ├── BRAND.md
-│   ├── SEO.md
-│   ├── CONTENT_PLAN.md
-│   └── SOCIAL_MEDIA.md
-│
-├── archive/                         ← 📦 Archivo (obsoleto)
-│   ├── README.md
-│   └── (archivos descontinuados)
-│
-├── API/                           ← Estado de APIs (generado)
-│   └── SPEC.md
-│
-└── database/                     ← Documentación de DB (legacy)
-    └── SUPABASE_DATABASE_DOCUMENTATION.md
+├── README.md                     ← Este archivo (Índice Maestro)
+├── 01-getting-started/           ← 🚀 Inicio (setup, resumen, demo, videos)
+├── 02-architecture/              ← 🏗️ Arquitectura, auth, SaaS engine
+├── 03-modules/                   ← 📦 Módulos del sistema (crm, pos, ai, ...)
+├── 04-integration/               ← 🔌 Supabase, Notion, NotebookLM, seeds
+├── 05-devops/                    ← ⚙️ DevOps
+├── 06-design/                    ← 🎨 Design system e identidad
+├── 07-testing/                   ← 🧪 Testing (E2E, checklists)
+├── 08-user-guide/                ← 👤 Guías de usuario
+├── 09-marketing/                 ← 📢 Marketing, SEO/AIO, contenido
+├── audits/                       ← 🔍 Auditorías de seguridad y código
+├── database/                     ← 🗄️ Documentación de DB y migraciones
+├── migrations/                   ← Migraciones y planes
+├── plans/                        ← 📋 Planes de implementación
+├── roadmap/                      ← 🗺️ Roadmaps y auditorías de fases
+└── archive/                      ← 🗃️ Histórico (obsoleto, referencia)
 ```
 
 ---
 
-## 🔗 Integración con Notion
+## 🚀 Inicio Rápido (`01-getting-started`)
 
-### Bases de Datos Principales
+| Documento                                                             | Descripción                            |
+| --------------------------------------------------------------------- | -------------------------------------- |
+| [`SETUP_GUIDE.md`](01-getting-started/SETUP_GUIDE.md)                 | Guía de configuración local (completa) |
+| [`PROJECT_SUMMARY.md`](01-getting-started/PROJECT_SUMMARY.md)         | Resumen ejecutivo del proyecto         |
+| [`DEMO_OPTICA_README.md`](01-getting-started/DEMO_OPTICA_README.md)   | Guía de la demo de óptica              |
+| [`VIDEOTUTORIALES_MAP.md`](01-getting-started/VIDEOTUTORIALES_MAP.md) | Mapa de videotutoriales                |
 
-| Base                 | Propósito                                     | Link                                             |
-| -------------------- | --------------------------------------------- | ------------------------------------------------ |
-| **Docs Base**        | Documentación dinámica y referencias cruzadas | [Notion](https://notion.so/opttius/docs-base)    |
-| **Feature Tracking** | Estado de features por módulo                 | [Notion](https://notion.so/opttius/features)     |
-| **Sprint Board**     | Tareas y bugs activos                         | [Notion](https://notion.so/opttius/sprint-board) |
-| **Knowledge Base**   | Resúmenes de investigación                    | [Notion](https://notion.so/opttius/knowledge)    |
-| **Decision Log**     | Decisiones de arquitectura                    | [Notion](https://notion.so/opttius/decisions)    |
+> El setup corto (stack + env + migraciones + scripts) vive en el [`README.md`](../README.md) raíz.
 
-### Flujo de Documentación
+## 🏗️ Arquitectura (`02-architecture`)
 
-```
-Repo (docs/) ──────────────> Notion
-   │                        │
-   │  [Export]            [Import]
-   │                        │
-   ▼                        ▼
-Static Docs             Dynamic Docs
-(Tech Specs)            (Planning, Tracking)
-```
+- [`README.md`](02-architecture/README.md) — índice de arquitectura
+- Auth, SaaS Management Engine, Lead pipeline, System Configuration
 
-**Regla:**
+## 📦 Módulos (`03-modules`)
 
-- Docs técnicos principales siempre en repo (`docs/02-architecture/`, `docs/03-modules/`)
-- Notion para planificación, tracking y documentación dinámica
-- Mantener bidireccionalidad con exports regulares
+Cada módulo tiene su propio README bajo `03-modules/<modulo>/`. Índice: [`03-modules/README.md`](03-modules/README.md)
 
----
+| Módulo             | Descripción                  |
+| ------------------ | ---------------------------- |
+| `crm`              | Clientes, recetas, historial |
+| `appointments`     | Citas y calendario           |
+| `quotes`           | Presupuestos                 |
+| `pos`              | Punto de venta               |
+| `inventory`        | Inventario y stock           |
+| `work-orders`      | Trabajos de laboratorio      |
+| `payments`         | Pasarelas de pago            |
+| `agreements`       | Convenios institucionales    |
+| `field-operations` | Operativos en terreno        |
+| `ai`               | Agente IA, insights, memoria |
+| `whatsapp`         | WhatsApp AI agent            |
+| `support`          | Tickets B2B/B2C              |
+| `analytics`        | Métricas y KPIs              |
+| `admin`            | Panel de administración      |
+| `saas`             | Gestión SaaS multi-tenant    |
+| `user-profile`     | Perfiles de usuario          |
+| `notifications`    | Notificaciones               |
+| `emails`           | Emails transaccionales       |
 
-## 📋 Por Área
+## 🧪 Testing (`07-testing`)
 
-### 🚀 Inicio Rápido
+| Documento                                                                         | Descripción             |
+| --------------------------------------------------------------------------------- | ----------------------- |
+| [`E2E_TESTING.md`](07-testing/E2E_TESTING.md)                                     | Suite E2E Playwright    |
+| [`TESTING_GUIDE.md`](07-testing/TESTING_GUIDE.md)                                 | Guía general de testing |
+| [`MANUAL_TESTING_GUIDE_COMPLETE.md`](07-testing/MANUAL_TESTING_GUIDE_COMPLETE.md) | Testing manual completo |
+| `CHECKLISTS/`                                                                     | Checklists por módulo   |
 
-- [`01-getting-started/QUICK_START.md`](01-getting-started/QUICK_START.md)
-- [`01-getting-started/ENVIRONMENT.md`](01-getting-started/ENVIRONMENT.md)
-- [`01-getting-started/TROUBLESHOOTING.md`](01-getting-started/TROUBLESHOOTING.md)
+> Convenciones de testing y data contract E2E también viven en `.opencode/skills/system/testing-optical-supabase`.
 
-### 🏗️ Arquitectura
+## 🔌 Integraciones (`04-integration`)
 
-- [`02-architecture/SYSTEM_OVERVIEW.md`](02-architecture/SYSTEM_OVERVIEW.md)
-- [`02-architecture/DATA_MODEL.md`](02-architecture/DATA_MODEL.md)
-- [`02-architecture/API_SPEC.md`](02-architecture/API_SPEC.md)
-- [`02-architecture/SECURITY.md`](02-architecture/SECURITY.md)
-- [`02-architecture/SAAS_MANAGEMENT_ENGINE.md`](02-architecture/SAAS_MANAGEMENT_ENGINE.md)
-- [`02-architecture/SAAS_LEAD_MANAGEMENT_PIPELINE.md`](02-architecture/SAAS_LEAD_MANAGEMENT_PIPELINE.md) ← **NUEVO**
+- [`NOTION.md`](04-integration/NOTION.md) — integración con Notion
+- [`NOTEBOOKLM_SYNC.md`](04-integration/NOTEBOOKLM_SYNC.md) — sync NotebookLM
+- Supabase, seeds y constraints de referencia
 
-### 📦 Módulos
+## 🎨 Design (`06-design`)
 
-| Módulo       | Documentación                                                            | Estado    |
-| ------------ | ------------------------------------------------------------------------ | --------- |
-| CRM          | [`03-modules/crm/README.md`](03-modules/crm/README.md)                   | ✅ Activo |
-| Appointments | [`03-modules/appointments/README.md`](03-modules/appointments/README.md) | ✅ Activo |
-| Quotes       | [`03-modules/quotes/README.md`](03-modules/quotes/README.md)             | ✅ Activo |
-| POS          | [`03-modules/pos/README.md`](03-modules/pos/README.md)                   | ✅ Activo |
-| Inventory    | [`03-modules/inventory/README.md`](03-modules/inventory/README.md)       | ✅ Activo |
-| Work Orders  | [`03-modules/work-orders/README.md`](03-modules/work-orders/README.md)   | ✅ Activo |
-| Payments     | [`03-modules/payments/README.md`](03-modules/payments/README.md)         | ✅ Activo |
-| AI           | [`03-modules/ai/README.md`](03-modules/ai/README.md)                     | ✅ Activo |
-| WhatsApp     | [`03-modules/whatsapp/README.md`](03-modules/whatsapp/README.md)         | ✅ Activo |
-| Agreements   | [`03-modules/agreements/README.md`](03-modules/agreements/README.md)     | ✅ Activo |
-| Support      | [`03-modules/support/README.md`](03-modules/support/README.md)           | ✅ Activo |
-| Analytics    | [`03-modules/analytics/README.md`](03-modules/analytics/README.md)       | ✅ Activo |
-
-### 🔌 Integraciones
-
-- [`04-integration/SUPABASE.md`](04-integration/SUPABASE.md)
-- [`04-integration/NOTION.md`](04-integration/NOTION.md)
-- [`04-integration/PAYMENT_GATEWAYS.md`](04-integration/PAYMENT_GATEWAYS.md)
-- [`04-integration/AI_PROVIDERS.md`](04-integration/AI_PROVIDERS.md)
-
-### 🎨 Design System
-
-- [`06-design/EPOCH_DESIGN.md`](06-design/EPOCH_DESIGN.md)
-- [`06-design/COMPONENTS.md`](06-design/COMPONENTS.md)
-- [`06-design/RESPONSIVE.md`](06-design/RESPONSIVE.md)
-
-### 🧪 Testing
-
-- [`07-testing/E2E_TESTS.md`](07-testing/E2E_TESTS.md)
-- [`07-testing/UNIT_TESTS.md`](07-testing/UNIT_TESTS.md)
-- [`07-testing/CHECKLISTS/`](07-testing/CHECKLISTS/)
-
----
-
-## 🎯 Recursos Externos
-
-| Recurso                  | ID/URL                                 |
-| ------------------------ | -------------------------------------- |
-| **NotebookLM Principal** | `e071bebc-ce79-4b32-a040-61a6a9c331a3` |
-| **NotebookLM Extendido** | `17302d9d-7d70-4c8d-a774-49fbfca3c09d` |
-| **Vercel Production**    | https://opttius.vercel.app             |
-| **Supabase Production**  | https://opttius.supabase.co            |
+- [`README.md`](06-design/README.md) — índice de design system
+- Identidad, frontend responsivo (Epoch)
 
 ---
 
 ## 📝 Convenciones de Documentación
 
-### Nomenclatura de Archivos
-
-- **Kebab-case:** `system-overview.md` (no `systemOverview.md`)
-- **Prefijos numéricos:** `01-getting-started/` para control de orden
-- **Mayúsculas solo en英文:** `README.md`, `API.md`
-
-### Frontmatter
-
-Todos los documentos deben incluir:
+- **Nomenclatura:** kebab-case para archivos nuevos.
+- **Prefijos numéricos** (`01-...`, `02-...`) solo en carpetas que requieren orden.
+- **Frontmatter** sugerido en documentos nuevos:
 
 ```markdown
 ---
-title: Título del Documento
+title: Título
 description: Breve descripción (1-2 líneas)
-lastUpdated: 2026-03-28
+lastUpdated: 2026-09-05
 author: Nombre del Autor
 status: draft | reviewed | active | deprecated
-notionId: (opcional) ID de Notion para referencia cruzada
 ---
 ```
 
-### Tags de Estado
-
-| Tag                | Significado                          |
-| ------------------ | ------------------------------------ |
-| `✅ Estable`       | Documento completo y actualizado     |
-| `🔄 En Desarrollo` | Documento en progreso                |
-| `⚠️ Legacy`        | Documento obsoleto pero referenciado |
-| `🗃️ Archivo`       | Documento movido a archive/          |
+- **Archivos históricos** van a `docs/archive/` (no se borran: referencia).
 
 ---
 
-## 🔄 Sincronización con Notion
+## 🔗 Recursos Externos
 
-### Export a Markdown
-
-```bash
-# Exportar página de Notion a Markdown
-notion export <page-id> --format markdown --output docs/
-```
-
-### Import desde Repo
-
-```bash
-# Importar a Notion
-nlm source add --path docs/
-```
-
-**Frecuencia:**
-
-- Docs de arquitectura: export manual después de cambios significativos
-- Sprint boards: sincronización diaria
-- Feature tracking: sincronización en merge de features
+| Recurso                  | URL/ID                                 |
+| ------------------------ | -------------------------------------- |
+| **Vercel Production**    | https://opttius.vercel.app             |
+| **Supabase Production**  | https://opttius.supabase.co            |
+| **NotebookLM Principal** | `e071bebc-ce79-4b32-a040-61a6a9c331a3` |
+| **NotebookLM Extendido** | `17302d9d-7d70-4c8d-a774-49fbfca3c09d` |
 
 ---
 
-## 📞 Soporte
-
-¿Necesitas ayuda con la documentación?
-
-1. **Revisa el índice above** para encontrar lo que buscas
-2. **Consulta Notion** para información dinámica
-3. **Abre un issue** en GitHub si hay errores o sugerencias
-
----
-
-**Nota:** Este índice se actualiza automáticamente en cada release. La versión más reciente está siempre en este archivo.
+> ⚠️ **Estado de docs:** varias carpetas (`archive/`, secciones viejas) aún contienen documentación histórica que puede no reflejar el estado actual del código. El README raíz y este índice se actualizan contra el estado real del repo; si encontrás una doc interna contradictoria, el código manda.
